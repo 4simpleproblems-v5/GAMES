@@ -40,10 +40,8 @@
                     },
                 }
             },
-            // Enable the aspect ratio plugin
-            plugins: [
-                require('@tailwindcss/aspect-ratio'),
-            ],
+            // The aspect-ratio plugin is part of Tailwind core, 
+            // no need to add it via 'plugins' array here, especially with 'require()'.
         }
     </script>
     
@@ -141,6 +139,26 @@
                 bottom: 10px !important;
             }
         }
+
+        /* Polyfill for aspect-ratio for browsers that might not support it in core */
+        /* This is safer than the plugin 'require' */
+        .aspect-w-3 {
+            position: relative;
+            padding-bottom: 66.666667%; /* 2 / 3 * 100 */
+        }
+        .aspect-h-2 {
+            /* This class is just a marker in this polyfill */
+        }
+        .aspect-w-3 > * {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
     </style>
 </head>
 
@@ -184,20 +202,8 @@
 
     <!-- Main Application Logic -->
     <script type="module">
-        // NOTE: This assumes cards-data.js exists in the same directory.
-        // In a real environment, you might need to adjust the path.
-        // Using a placeholder if import fails for demonstration.
-        let games = [];
-        try {
-            games = (await import('./cards-data.js')).default;
-        } catch (e) {
-            console.warn("Could not load cards-data.js. Using placeholder data.");
-            // Create 20 placeholder games if import fails
-            for (let i = 1; i <= 20; i++) {
-                games.push({ id: `game-${i}`, name: `Placeholder Game ${i}`, imgSrc: `game${i}.jpg`, page: 1 });
-            }
-        }
-
+        // --- Restored original game import logic ---
+        import games from "./cards-data.js";
 
         // --- DOM Elements ---
         const allListElement = document.getElementById("allList");
@@ -342,7 +348,7 @@
                 const linkEl = document.createElement("a");
                 linkEl.href = `./play/?id=${id}`;
                 linkEl.className = 'search-item';
-                linkEl.innerHTML = `<img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https::/placehold.co/80x80/111111/888888?text=4SP'"><span>${name}</span>`;
+                linkEl.innerHTML = `<img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${name}</span>`;
                 searchResults.appendChild(linkEl);
             });
             searchResults.style.display = "block";
@@ -350,29 +356,8 @@
 
         // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Check if Tailwind plugin is loaded, if not, add aspect-ratio polyfill
-            if (!tailwind.config.plugins || !tailwind.config.plugins.includes(require('@tailwindcss/aspect-ratio'))) {
-                const style = document.createElement('style');
-                style.innerHTML = `
-                    .aspect-w-3 {
-                        position: relative;
-                        padding-bottom: 66.666667%; /* 2 / 3 * 100 */
-                    }
-                    .aspect-h-2 {
-                        /* This class is just a marker in this polyfill */
-                    }
-                    .aspect-w-3 > * {
-                        position: absolute;
-                        height: 100%;
-                        width: 100%;
-                        top: 0;
-                        right: 0;
-                        bottom: 0;
-                        left: 0;
-                    }
-                `;
-                document.head.appendChild(style);
-            }
+            // Removed the problematic plugin check.
+            // The aspect-ratio classes will work or be polyfilled by the CSS above.
             
             renderGames(games, allListElement);
             renderFavorites();
@@ -391,3 +376,4 @@
     </script>
 </body>
 </html>
+
