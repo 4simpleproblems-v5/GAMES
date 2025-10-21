@@ -4,9 +4,8 @@
     <title>4SP - GAMES</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <link rel="icon" type="image/x-icon" href="../favicon.ico" id="faviconLink" />
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" id="faviconLink" />
 
-    <!-- Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
@@ -14,7 +13,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind CSS Configuration -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -43,7 +41,6 @@
         }
     </script>
     
-    <!-- Custom Styles (Including Marquee and Watermark) -->
     <style>
         /* Base styles */
         body {
@@ -55,32 +52,11 @@
             padding: 0;
             overflow-x: hidden;
             line-height: 1.6;
+            /* Removed visibility: hidden; and now it defaults to visible */
         }
         
-        /* FIX: Set the title font weight to 450 as requested */
-        h1, h2, h3, .font-bold, .font-semibold, strong, .font-geist-450 {
-            font-weight: 450 !important; 
-        }
-
-        /* Loading/Interaction Blocker Overlay */
-        #auth-cover {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #070707;
-            z-index: 100; /* Ensure this is above everything else */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.3s ease;
-            color: #fff;
-            font-size: 1.25rem;
-        }
-        .hidden-cover {
-            opacity: 0;
-            pointer-events: none; /* Crucial fix for interaction bug */
+        h1, h2, h3, .font-bold, .font-semibold, strong {
+            font-weight: 400 !important;
         }
 
         /* Game Container Aspect Ratio (16:9) */
@@ -94,7 +70,6 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
         }
 
-        /* Ensure iframe does not interfere with controls above it */
         .game-container iframe {
             position: absolute;
             top: 0;
@@ -102,13 +77,6 @@
             width: 100%;
             height: 100%;
             border: none;
-            z-index: 10; 
-        }
-
-        /* Ensure the control bar is above the iframe container */
-        .control-bar {
-            z-index: 20; 
-            position: relative; /* Ensure z-index works */
         }
 
         /* Styling for the control buttons */
@@ -125,7 +93,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5); /* Lighter shadow */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
         .control-btn:hover {
@@ -135,160 +103,79 @@
         }
 
         /* Favorite Star coloring */
+        /* Since favorites logic is removed, this CSS is now decorative */
         #favoriteButton.favorited .fa-solid-star {
             color: #facc15; /* yellow-400 */
         }
         
         /* Marquee setup for the game title */
         .marquee-container {
-            max-width: calc(100% - 150px); 
             overflow: hidden;
             white-space: nowrap;
-            position: relative;
-        }
-
-        /* NEW: Fading to grey texture on the sides */
-        .marquee-container:before, .marquee-container:after {
-            content: "";
-            position: absolute;
-            top: 0;
-            height: 100%;
-            width: 30px; /* Width of the fade effect */
-            z-index: 10;
-            /* Match the card-dark background */
-            background-color: #111111; 
-        }
-
-        .marquee-container:before {
-            left: 0;
-            /* Gradient from card-dark to transparent */
-            background: linear-gradient(to right, #111111, rgba(17, 17, 17, 0));
-        }
-
-        .marquee-container:after {
-            right: 0;
-            /* Gradient from transparent to card-dark */
-            background: linear-gradient(to left, #111111, rgba(17, 17, 17, 0));
-        }
-        
-        /* Ensure fade effect only shows when title overflows and animation is active */
-        .marquee-container:not(.animate):before,
-        .marquee-container:not(.animate):after {
-            opacity: 0;
-            width: 0;
+            /* Sets the maximum width the title can occupy before scrolling */
+            max-width: calc(100% - 140px); /* 140px is a conservative estimate for button width + spacing */
         }
         
         @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(var(--marquee-distance)); }
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
 
         .marquee-text {
             display: inline-block;
-            white-space: nowrap;
+            padding-left: 100%; /* Start off-screen */
         }
         
         /* Apply animation only when content overflows (handled by JS) */
         .marquee-container.animate .marquee-text {
-            animation-name: marquee;
-            animation-iteration-count: infinite;
-            animation-timing-function: linear;
-            animation-direction: normal;
-        }
-
-        /* Watermark Styling */
-        .watermark {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            opacity: 0.8;
-            pointer-events: none; 
-            z-index: 50; 
-        }
-        
-        .watermark-img {
-            width: 40px;
-            height: 40px;
-            /* Shadow effect on the white logo */
-            filter: drop-shadow(0 0 2px black) drop-shadow(0 0 1px #4f46e5); 
+            animation: marquee 15s linear infinite;
         }
 
         @media (max-width: 640px) {
+            /* On small screens, reduce overall padding and increase available game width */
             .main-content {
                 padding-left: 0.5rem;
                 padding-right: 0.5rem;
             }
             .marquee-container {
-                max-width: calc(100% - 120px); 
+                max-width: calc(100% - 100px); /* Tighter space for mobile buttons */
             }
             .control-btn {
                 width: 38px;
                 height: 38px;
                 font-size: 18px;
             }
-            .watermark-img {
-                width: 30px;
-                height: 30px;
-            }
         }
     </style>
 </head>
 
 <body class="bg-deep-black text-white min-h-screen">
-    <!-- FIX 1: Interaction Blocker Overlay -->
-    <div id="auth-cover">
-        Loading Game Data...
-    </div>
-
-    <!-- Navbar -->
     <div class="navbar sticky top-0 z-50 bg-black/70 backdrop-blur-lg border-b border-brand-border h-16 flex items-center justify-between px-6 shadow-xl">
-        <a href="https://forsimpleproblems.github.io/" class="text-white font-semibold text-lg font-geist-450">4SP Games</a>
-        <div></div> 
-    </div>
+        <a href="https://forsimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
+        <div></div> </div>
 
     <main class="mx-auto my-8 w-full max-w-[96%] xl:max-w-screen-xl px-2 main-content">
-        <!-- Game Area -->
         <div class="game-area" id="gameArea">
             
-            <!-- Control Bar Above Frame -->
-            <div class="flex justify-between items-center mb-4 p-2 bg-card-dark rounded-xl border border-brand-border control-bar">
+            <div class="flex justify-between items-center mb-4 p-2 bg-card-dark rounded-xl border border-brand-border">
                 
-                <!-- Game Title Top Left (Marquee) -->
                 <div id="gameTitleContainer" class="marquee-container text-white text-xl font-semibold overflow-hidden">
-                    <!-- Default content should not show until loading is complete -->
-                    <span id="gameTitle" class="marquee-text font-geist-450"></span>
+                    <span id="gameTitle" class="marquee-text" style="font-weight: 400;">Loading Game...</span>
                 </div>
 
-                <!-- Control Buttons Top Right (REORDERED: Favorite, Fullscreen, Download) -->
-                <div id="gameOverlayButtons" class="flex items-center space-x-2 flex-shrink-0">
-                    
-                    <!-- Favorite Button -->
+                <div id="gameOverlayButtons" class="flex items-center space-x-3 flex-shrink-0">
                     <button id="favoriteButton" class="control-btn text-white focus:outline-none" title="Favorite Game">
                         <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors hidden"></i>
                         <i class="fa-regular fa-star fa-regular-star text-white transition-colors"></i>
                     </button>
-
-                    <!-- Fullscreen Button -->
                     <button id="fullscreenButton" class="control-btn text-white focus:outline-none" title="Fullscreen">
                         <i class="fa-solid fa-expand"></i>
                     </button>
-
-                    <!-- Download Button -->
-                    <button id="downloadButton" class="control-btn text-white focus:outline-none" title="Download Game">
-                        <i class="fa-solid fa-download"></i>
-                    </button>
                 </div>
             </div>
 
-            <!-- Game Frame Container -->
             <div class="game-container" id="gameContainer">
-                <!-- Iframe will be injected here -->
-                
-                <!-- Watermark -->
-                <div class="watermark hidden" id="watermark">
-                    <img src="../img/favicon.ico" class="watermark-img" alt="4SP Logo Watermark"/>
                 </div>
-            </div>
             
             <p id="fullscreenDisclaimer" class="text-center text-gray-400 mt-4 mb-8 text-sm">
                 Use the fullscreen button for a better experience.
@@ -296,7 +183,6 @@
         </div>
     </main>
     
-    <!-- External Scripts for Firebase and app logic (kept, paths are relative to index(4).html) -->
     <script src="../firebase-config.js"></script>
     <script src="../panic-key.js"></script>
     <script src="../ban-enforcer.js"></script>
@@ -304,123 +190,53 @@
     <script src="../navigation.js"></script>
     <script src="../appscript.js"></script>
     
-    <!-- Firebase/Auth Scripts from index(4).html -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
-    <!-- Main Game Loading and Logic -->
     <script type="module">
         import games from "../cards-data.js";
         import {
             siteMapping
         } from "../site-mapping.js";
 
-        // --- Utility Functions for Marquee (Updated to calculate distance and only animate on overflow) ---
+        // --- Utility Functions for Marquee ---
         function updateMarquee(title) {
             const container = document.getElementById('gameTitleContainer');
             const textElement = document.getElementById('gameTitle');
             
-            // FIX: Set the title text reliably
+            // Set the title text
             textElement.textContent = title;
             textElement.title = title;
-            textElement.style.fontWeight = 450;
             
             // Wait for the DOM to render the text to check its scroll width
-            // Set a slightly longer timeout to account for font loading and rendering
             setTimeout(() => {
-                const textWidth = textElement.scrollWidth;
-                const containerWidth = container.clientWidth;
-                
-                // If the text overflows the container
-                if (textWidth > containerWidth) {
+                // If the text width is greater than the container's max-width, apply marquee class
+                if (textElement.scrollWidth > container.clientWidth) {
                     container.classList.add('animate');
-                    
-                    const scrollDistance = textWidth - containerWidth;
-                    const totalMovement = scrollDistance + 20; 
-                    
-                    container.style.setProperty('--marquee-distance', `-${totalMovement}px`);
-                    
-                    // Calculate animation duration based on distance (e.g., 1s per 50px)
-                    const duration = (totalMovement / 50) + 5; 
-                    textElement.style.animationDuration = `${duration}s`;
-                    
-                    textElement.style.transform = 'translateX(0)';
-                    textElement.style.paddingLeft = '0'; 
-
                 } else {
-                    // Title fits, remove animation and reset styles
                     container.classList.remove('animate');
-                    textElement.style.animation = 'none';
-                    textElement.style.transform = 'translateX(0)';
-                    textElement.style.paddingLeft = '0';
+                    textElement.style.paddingLeft = '0'; // Remove padding for non-scrolling text
                 }
-            }, 300); // Increased delay for title rendering fix
+            }, 50);
         }
 
-        // --- Firebase/Favorites Management (No change needed) ---
+        // --- Firebase/Favorites Management (REMOVED: Keeping minimum variables for script to run) ---
         const favoriteButton = document.getElementById("favoriteButton");
-        let currentUserId = null;
         let currentGameId = null;
 
         function toggleFavoriteUI(isFavorited) {
             favoriteButton.classList.toggle('favorited', isFavorited);
             favoriteButton.title = isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
+            // Simple Font Awesome toggle based on the 'favorited' class
             favoriteButton.querySelector('.fa-solid-star').classList.toggle('hidden', !isFavorited);
             favoriteButton.querySelector('.fa-regular-star').classList.toggle('hidden', isFavorited);
         }
         
-        async function loadFavoriteStatus(userId, gameId) {
-            if (!userId || !gameId) return;
-            currentUserId = userId;
-            currentGameId = gameId;
-
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            const db = firebase.firestore();
-            
-            const favoriteDocRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('favorites').doc(String(gameId));
-            
-            try {
-                const doc = await favoriteDocRef.get();
-                const isFavorited = doc.exists;
-                toggleFavoriteUI(isFavorited);
-            } catch (error) {
-                console.error("Error loading favorite status:", error);
-            }
-        }
-
-        async function toggleFavorite() {
-            if (!currentUserId || !currentGameId) return;
-            
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            const db = firebase.firestore();
-            const favoriteDocRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUserId).collection('favorites').doc(String(currentGameId));
-
-            try {
-                const doc = await favoriteDocRef.get();
-                if (doc.exists) {
-                    await favoriteDocRef.delete();
-                    toggleFavoriteUI(false);
-                    console.log("Favorite removed.");
-                } else {
-                    await favoriteDocRef.set({ 
-                        added: firebase.firestore.FieldValue.serverTimestamp(),
-                        gameId: currentGameId,
-                        gameName: document.getElementById('gameTitle').textContent 
-                    });
-                    toggleFavoriteUI(true);
-                    console.log("Favorite added.");
-                }
-            } catch (error) {
-                console.error("Error toggling favorite:", error);
-            }
-        }
-        
-        favoriteButton.addEventListener("click", toggleFavorite);
+        // Disable the favorite button functionality since authentication is removed
+        favoriteButton.addEventListener("click", () => {
+             console.log("Favorite functionality is disabled as authentication was removed.");
+        });
         // --- END Firebase/Favorites Management ---
 
 
-        // --- Game Loading Logic (Retained from original) ---
+        // --- Game Loading Logic (Updated for new structure) ---
 
         function getCurrentKeyHostOnly() {
             return window.location.host;
@@ -480,8 +296,7 @@
                 });
                 if (response.ok) {
                     const text = await response.text();
-                    // This regex needs to handle titles with quotes inside
-                    const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/); 
+                    const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/);
                     if (match) {
                         const [, , embedPath, , title] = match;
                         const resolvedPath = new URL(embedPath, adjustedHref).href;
@@ -522,7 +337,6 @@
 
         function embedGame(gamePath, title) {
             const iframe = document.createElement("iframe");
-            iframe.id = 'gameIframe'; // Set ID for easier targeting
             iframe.src = gamePath;
             iframe.allowFullscreen = true;
             iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
@@ -530,21 +344,16 @@
             const gameContainer = document.getElementById('gameContainer');
             gameContainer.innerHTML = ''; 
             gameContainer.appendChild(iframe);
-            
-            // Re-append the watermark div element
-            const watermark = document.getElementById('watermark');
-            gameContainer.appendChild(watermark);
-            watermark.classList.add('hidden'); // Ensure it's hidden after embedding
 
-            // FIX: Update title after embedding, which should resolve the loading issue
+            // Update title with marquee logic
             updateMarquee(title);
         }
         
-        // --- Fullscreen Logic (No change needed) ---
+        // --- Fullscreen Logic ---
         const fullscreenButton = document.getElementById("fullscreenButton");
         fullscreenButton.addEventListener("click", () => {
+            const gameIframe = document.querySelector('#gameContainer iframe');
             const gameContainer = document.getElementById('gameContainer');
-            const gameIframe = document.getElementById('gameIframe');
             
             if (gameContainer && gameContainer.requestFullscreen) {
                 // Request fullscreen on the container, which holds the iframe
@@ -561,101 +370,6 @@
             }
         });
 
-        // --- Download Logic (No change needed) ---
-        const downloadButton = document.getElementById("downloadButton");
-        downloadButton.addEventListener("click", () => {
-            const gameIframe = document.getElementById('gameIframe');
-            const title = document.getElementById('gameTitle').textContent;
-
-            if (!gameIframe) return;
-
-            // 1. Show the watermark within the parent frame for a moment
-            const watermark = document.getElementById('watermark');
-            watermark.classList.remove('hidden');
-
-            // 2. Generate the downloadable HTML content
-            const iframeSrc = gameIframe.src;
-            
-            // Create a wrapper HTML document for the game frame with the watermark
-            const downloadHtml = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title} - Downloaded by 4SP</title>
-    <style>
-        body { margin: 0; padding: 0; background-color: #000; overflow: hidden; }
-        .game-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100vw;
-            height: 100vh;
-            max-width: 100%;
-            max-height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
-        .watermark-dl {
-            position: fixed;
-            bottom: 15px;
-            right: 15px;
-            opacity: 0.8;
-            pointer-events: none;
-            z-index: 9999;
-        }
-        .watermark-img-dl {
-            width: 50px;
-            height: 50px;
-            filter: drop-shadow(0 0 4px black) drop-shadow(0 0 2px #4f46e5); 
-        }
-    </style>
-</head>
-<body>
-    <div class="game-wrapper">
-        <!-- Sandboxing for security is less critical in a downloaded file but good practice -->
-        <iframe src="${iframeSrc}" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"></iframe>
-    </div>
-    <!-- Watermark in the downloaded file -->
-    <div class="watermark-dl">
-        <!-- NOTE: The path to favicon.ico is relative to the downloaded location. -->
-        <img src="../img/favicon.ico" class="watermark-img-dl" alt="4SP Logo Watermark"/>
-    </div>
-</body>
-</html>
-            `;
-            
-            // 3. Create a Blob and a download link
-            const blob = new Blob([downloadHtml], { type: 'text/html' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_4SP.html`;
-
-            // 4. Trigger the download
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-
-            // 5. Hide the watermark in the parent frame again
-            setTimeout(() => {
-                watermark.classList.add('hidden');
-            }, 500); 
-
-            console.log("Download link generated for game:", title);
-        });
-
-
         // --- Initialization ---
         document.addEventListener("DOMContentLoaded", async function () {
             const urlParams = new URLSearchParams(window.location.search);
@@ -671,7 +385,6 @@
                 // Not Found Game
                 embedGame("../404.html", "Game Not Found");
                 favoriteButton.style.display = 'none'; // Hide favorite for 404
-                downloadButton.style.display = 'none'; // Hide download for 404
             } else {
                 const page = selectedGame.page;
                 const baseURL = getBaseURLForPage(page);
@@ -684,76 +397,17 @@
             }
         });
         
-        // This is a workaround to call the function after auth is complete
-        document.addEventListener('userAuthenticated', (event) => {
-            const userId = event.detail.uid;
-            if (userId && currentGameId) {
-                loadFavoriteStatus(userId, currentGameId);
-            }
-            // FIX 2: Aggressively hide the overlay after auth is confirmed
-            const authCover = document.getElementById('auth-cover');
-            if (authCover) {
-                authCover.classList.add('hidden-cover');
-                setTimeout(() => authCover.style.display = 'none', 300); // Remove element after fade
-            }
-        });
+        // --- END Game Loading Logic ---
+        
+        // Removed the 'userAuthenticated' event listener as authentication is removed.
     </script>
 
-    <!-- Authentication Gate (The logic has been moved from body visibility to the cover element) -->
     <script>
-        /**
-         * Authentication Gate
-         * This script protects the page by ensuring a user is logged in.
-         * It removes the cover screen and notifies module scripts.
-         */
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check for Firebase availability
-            if (typeof firebase === 'undefined') {
-                const authCover = document.getElementById('auth-cover');
-                authCover.textContent = "Error: Cannot connect to services (Firebase).";
-                return;
+        // Prevent default behavior for directional keys for smoother iframe interaction
+        document.addEventListener("keydown", function (event) {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
+                // event.preventDefault(); 
             }
-            
-            // Set up Firebase Auth and Firestore instances
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-            const app = firebase.initializeApp(firebaseConfig);
-            const auth = firebase.auth();
-            const db = firebase.firestore();
-            db.settings({
-                ignoreUndefinedProperties: true
-            });
-            firebase.firestore.setLogLevel('debug'); // Enable Firestore logging
-
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            
-            const handleAuth = async () => {
-                try {
-                    if (initialAuthToken) {
-                        await auth.signInWithCustomToken(initialAuthToken);
-                    } else {
-                        await auth.signInAnonymously();
-                    }
-                } catch (error) {
-                    console.error("Firebase Auth Error, falling back to anonymous:", error);
-                    await auth.signInAnonymously();
-                }
-            };
-            
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    // User is logged in. Notify modules and hide the cover.
-                    document.dispatchEvent(new CustomEvent('userAuthenticated', { detail: { uid: user.uid } }));
-                    
-                } else {
-                    // Start the authentication process if not already logged in
-                    if (!auth.currentUser) {
-                        handleAuth();
-                    } else {
-                        // If auth state changes to null unexpectedly, redirect to login
-                        window.location.href = 'https://4simpleproblems.github.io/login.html';
-                    }
-                }
-            });
         });
     </script>
 </body>
