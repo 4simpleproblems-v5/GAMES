@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>4SP - GAMES</title>
+    <title>4SP - Game Hub</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
@@ -54,11 +54,14 @@
             font-weight: 400 !important;
         }
         
-        /* New Game Card styles */
-        .zone-item .card-overlay {
-            transition: opacity 0.3s ease-in-out;
+        /* New Game Card styles inspired by dailyphoto.html */
+        .zone-item {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
-
+        .zone-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
+        }
         .favorite-btn.favorited i {
             color: #facc15; /* Tailwind yellow-400 for favorited star */
         }
@@ -105,7 +108,7 @@
         <a href="https://foursimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
     </header>
 
-    <main class="mx-auto my-5 w-full max-w-7xl px-4">
+    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4">
         <!-- Welcome message remains -->
         <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl">
             <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
@@ -118,11 +121,11 @@
         <h2 id="favoritesHeader" class="text-center text-3xl font-bold mt-12 mb-6 text-white" style="display: none;">
             <strong>Favorites</strong>
         </h2>
-        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3" id="favoritesGameList" style="display: none;"></div>
+        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
         <!-- All Games Section -->
         <h2 class="text-center text-3xl font-bold mt-12 mb-6 text-white"><strong>All Games</strong></h2>
-        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3" id="allList">
+        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="allList">
             <!-- Game cards will be injected here -->
         </div>
     </main>
@@ -164,7 +167,6 @@
             }
             saveFavorites(favorites);
 
-            // Update all instances of the button for this game
             document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
             });
@@ -172,48 +174,47 @@
             renderFavorites();
         }
 
-        // --- URL and Path Helpers ---
-        function getAdjustedUrls(imgSrc) {
-            // Simplified for a single-directory structure
+        // --- URL and Path Helpers (FIXED) ---
+        function getAdjustedUrls(imgSrc, page) {
+            // This logic is based on the original site's structure where games were split across folders like 'strongdog2', 'strongdog3', etc.
+            if (page && page > 1) {
+                // Constructs a relative path assuming a sibling directory structure (e.g., ../strongdog2/img/...)
+                return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
+            }
+            // For games on page 1, the path is relative to the current directory.
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
 
         // --- New Game Card Rendering Function ---
         function createGameCard(game) {
-            const { imgSrc, name, id } = game;
-            const { adjustedImgSrc } = getAdjustedUrls(imgSrc);
+            const { imgSrc, name, id, page } = game;
+            const { adjustedImgSrc } = getAdjustedUrls(imgSrc, page);
             const isFavorite = getFavorites().includes(id);
 
             const card = document.createElement("div");
-            card.className = 'zone-item group bg-card-dark rounded-md border border-brand-border cursor-pointer relative overflow-hidden aspect-w-1 aspect-h-1';
+            card.className = 'zone-item bg-card-dark rounded-lg border border-brand-border flex flex-col overflow-hidden';
             card.dataset.gameId = id;
 
             card.innerHTML = `
-                <img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/111111/888888?text=4SP'" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                
-                <div class="card-overlay absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <!-- Blurred Background -->
-                    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-                    
-                    <!-- Content Bar -->
-                    <div class="relative z-10 flex justify-between items-end h-full p-3">
-                        <button class="play-btn bg-accent-indigo text-white font-semibold py-2 px-4 rounded-md text-sm transition hover:bg-indigo-700 focus:outline-none">
+                <div class="relative w-full cursor-pointer" onclick="window.location.href='./play/?id=${id}'">
+                    <div class="aspect-w-1 aspect-h-1">
+                        <img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
+                    </div>
+                </div>
+                <div class="p-3 bg-card-dark flex-grow flex flex-col justify-between border-t border-brand-border">
+                    <h3 class="font-semibold text-white truncate text-sm" title="${name}">${name}</h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <button class="play-btn bg-accent-indigo text-white font-semibold py-1 px-4 rounded-md text-xs transition hover:bg-indigo-700 focus:outline-none">
                             PLAY
                         </button>
-                        <button class="favorite-btn p-2 rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
-                            <i class="fa-solid fa-star text-gray-500 transition-colors"></i>
+                        <button class="favorite-btn p-2 rounded-full text-white text-lg transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                            <i class="fa-solid fa-star text-gray-600 transition-colors"></i>
                         </button>
                     </div>
                 </div>
             `;
             
-            // Add event listeners
-            card.addEventListener('click', (e) => {
-                // Navigate if not clicking a button
-                if (!e.target.closest('button')) {
-                    window.location.href = `./play/?id=${id}`;
-                }
-            });
+            // Add event listeners for buttons
             card.querySelector('.play-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 window.location.href = `./play/?id=${id}`;
@@ -270,8 +271,8 @@
             }
             
             filteredDropdown.forEach(game => {
-                const { id, imgSrc, name } = game;
-                const { adjustedImgSrc } = getAdjustedUrls(imgSrc);
+                const { id, imgSrc, name, page } = game;
+                const { adjustedImgSrc } = getAdjustedUrls(imgSrc, page);
                 const linkEl = document.createElement("a");
                 linkEl.href = `./play/?id=${id}`;
                 linkEl.className = 'search-item';
@@ -300,3 +301,4 @@
     </script>
 </body>
 </html>
+
