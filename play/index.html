@@ -113,8 +113,8 @@
         .marquee-container {
             overflow: hidden;
             white-space: nowrap;
-            /* Sets the maximum width the title can occupy before scrolling */
-            max-width: calc(100% - 140px); /* 140px is a conservative estimate for button width + spacing */
+            /* Marquee Fix: Increased max-width allowance for title */
+            max-width: calc(100% - 100px); /* Tighter fit to the buttons */
         }
         
         @keyframes marquee {
@@ -129,7 +129,8 @@
         
         /* Apply animation only when content overflows (handled by JS) */
         .marquee-container.animate .marquee-text {
-            animation: marquee 15s linear infinite;
+            /* Marquee Fix: Reduced time for less perceived gap between loops */
+            animation: marquee 7.5s linear infinite; 
         }
 
         @media (max-width: 640px) {
@@ -139,7 +140,7 @@
                 padding-right: 0.5rem;
             }
             .marquee-container {
-                max-width: calc(100% - 100px); /* Tighter space for mobile buttons */
+                max-width: calc(100% - 80px); /* Tighter space for mobile buttons */
             }
             .control-btn {
                 width: 38px;
@@ -161,11 +162,11 @@
         <!-- Game Area -->
         <div class="game-area" id="gameArea">
             
-            <!-- NEW: Control Bar Above Frame -->
-            <div class="flex justify-between items-center mb-4 p-2 bg-card-dark rounded-xl border border-brand-border">
+            <!-- NEW: Control Bar Above Frame - Added z-index and relative for clickability fix -->
+            <div class="flex justify-between items-center mb-4 p-2 bg-card-dark rounded-xl border border-brand-border z-20 relative">
                 
-                <!-- Game Title Top Left (Marquee) -->
-                <div id="gameTitleContainer" class="marquee-container text-white text-xl font-semibold overflow-hidden">
+                <!-- Game Title Top Left (Marquee) - Added flex-grow for wider container -->
+                <div id="gameTitleContainer" class="marquee-container text-white text-xl font-semibold overflow-hidden flex-grow">
                     <span id="gameTitle" class="marquee-text" style="font-weight: 400;">Loading Game...</span>
                 </div>
 
@@ -184,8 +185,8 @@
                 </div>
             </div>
 
-            <!-- Game Frame Container -->
-            <div class="game-container" id="gameContainer">
+            <!-- Game Frame Container - Added z-index for clickability fix -->
+            <div class="game-container z-10 relative" id="gameContainer">
                 <!-- Iframe will be injected here -->
             </div>
             
