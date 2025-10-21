@@ -14,7 +14,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind CSS Configuration (Copied from index(5).html) -->
+    <!-- Tailwind CSS Configuration -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -43,7 +43,7 @@
         }
     </script>
     
-    <!-- Custom Styles (Including Marquee) -->
+    <!-- Custom Styles (Including Marquee and Watermark) -->
     <style>
         /* Base styles */
         body {
@@ -57,8 +57,9 @@
             line-height: 1.6;
         }
         
+        /* FIX: Set the title font weight to 450 as requested */
         h1, h2, h3, .font-bold, .font-semibold, strong {
-            font-weight: 400 !important;
+            font-weight: 450 !important; 
         }
 
         /* Game Container Aspect Ratio (16:9) */
@@ -72,6 +73,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
         }
 
+        /* FIX: The z-index of the iframe was likely causing interaction issues by grabbing focus */
         .game-container iframe {
             position: absolute;
             top: 0;
@@ -79,6 +81,14 @@
             width: 100%;
             height: 100%;
             border: none;
+            /* Ensure the iframe is not above the controls */
+            z-index: 10; 
+        }
+
+        /* Ensure the control bar is above the iframe container */
+        .control-bar {
+            z-index: 20; 
+            position: relative; /* Ensure z-index works */
         }
 
         /* Styling for the control buttons */
@@ -95,7 +105,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5); /* Lighter shadow */
         }
 
         .control-btn:hover {
@@ -111,49 +121,100 @@
         
         /* Marquee setup for the game title */
         .marquee-container {
+            /* NEW: Increased max-width for less spacing */
+            max-width: calc(100% - 150px); 
             overflow: hidden;
             white-space: nowrap;
-            /* Sets the maximum width the title can occupy before scrolling */
-            max-width: calc(100% - 140px); /* 140px is a conservative estimate for button width + spacing */
+            /* NEW: Texture fade applied here */
+            position: relative;
+        }
+
+        /* NEW: Fading to grey texture on the sides */
+        .marquee-container:before, .marquee-container:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 30px; /* Width of the fade effect */
+            z-index: 10;
+        }
+
+        .marquee-container:before {
+            left: 0;
+            /* Gradient from transparent (left) to deep-black (right) */
+            background: linear-gradient(to right, #111111, rgba(17, 17, 17, 0));
+        }
+
+        .marquee-container:after {
+            right: 0;
+            /* Gradient from deep-black (left) to transparent (right) */
+            background: linear-gradient(to left, #111111, rgba(17, 17, 17, 0));
         }
         
         @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+            0% { transform: translateX(0); }
+            /* NEW: Calculate percentage based on scroll width */
+            100% { transform: translateX(var(--marquee-distance)); }
         }
 
         .marquee-text {
             display: inline-block;
-            padding-left: 100%; /* Start off-screen */
+            /* NEW: Do not use padding-left 100% here, the distance is calculated by JS */
+            white-space: nowrap;
+            transition: transform 0s linear; /* Smoothness is controlled by animation */
         }
         
         /* Apply animation only when content overflows (handled by JS) */
         .marquee-container.animate .marquee-text {
-            animation: marquee 15s linear infinite;
+            /* The animation distance and duration are set by JS */
+            animation-name: marquee;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+            animation-direction: normal;
+        }
+
+        /* NEW: Watermark Styling */
+        .watermark {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            opacity: 0.8;
+            pointer-events: none; /* Allows clicks to go through to the iframe */
+            z-index: 50; /* Above the iframe */
+        }
+        
+        .watermark-img {
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 0 2px black) drop-shadow(0 0 1px #4f46e5); /* Shadow effect on the white logo */
         }
 
         @media (max-width: 640px) {
-            /* On small screens, reduce overall padding and increase available game width */
             .main-content {
                 padding-left: 0.5rem;
                 padding-right: 0.5rem;
             }
+            /* Adjust width for mobile */
             .marquee-container {
-                max-width: calc(100% - 100px); /* Tighter space for mobile buttons */
+                max-width: calc(100% - 120px); 
             }
             .control-btn {
                 width: 38px;
                 height: 38px;
                 font-size: 18px;
             }
+            .watermark-img {
+                width: 30px;
+                height: 30px;
+            }
         }
     </style>
 </head>
 
 <body class="bg-deep-black text-white min-h-screen">
-    <!-- Navbar from index(4).html, updated with Tailwind classes for appearance -->
+    <!-- Navbar -->
     <div class="navbar sticky top-0 z-50 bg-black/70 backdrop-blur-lg border-b border-brand-border h-16 flex items-center justify-between px-6 shadow-xl">
-        <a href="https://forsimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
+        <a href="https://forsimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 450;">4SP Games</a>
         <div></div> <!-- Spacer for right alignment consistency -->
     </div>
 
@@ -161,32 +222,44 @@
         <!-- Game Area -->
         <div class="game-area" id="gameArea">
             
-            <!-- NEW: Control Bar Above Frame -->
-            <div class="flex justify-between items-center mb-4 p-2 bg-card-dark rounded-xl border border-brand-border">
+            <!-- NEW: Control Bar Above Frame (Added control-bar class and increased space-x-3 to space-x-2 for less spacing) -->
+            <div class="flex justify-between items-center mb-4 p-2 bg-card-dark rounded-xl border border-brand-border control-bar">
                 
                 <!-- Game Title Top Left (Marquee) -->
                 <div id="gameTitleContainer" class="marquee-container text-white text-xl font-semibold overflow-hidden">
-                    <span id="gameTitle" class="marquee-text" style="font-weight: 400;">Loading Game...</span>
+                    <span id="gameTitle" class="marquee-text" style="font-weight: 450;">Loading Game... (Long Title Example to Test Marquee Effect)</span>
                 </div>
 
-                <!-- Control Buttons Top Right -->
-                <div id="gameOverlayButtons" class="flex items-center space-x-3 flex-shrink-0">
+                <!-- Control Buttons Top Right (REORDERED: Favorite, Fullscreen, Download) -->
+                <div id="gameOverlayButtons" class="flex items-center space-x-2 flex-shrink-0">
+                    
                     <!-- Favorite Button -->
                     <button id="favoriteButton" class="control-btn text-white focus:outline-none" title="Favorite Game">
-                        <!-- Font Awesome Icons -->
                         <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors hidden"></i>
                         <i class="fa-regular fa-star fa-regular-star text-white transition-colors"></i>
                     </button>
+
                     <!-- Fullscreen Button -->
                     <button id="fullscreenButton" class="control-btn text-white focus:outline-none" title="Fullscreen">
                         <i class="fa-solid fa-expand"></i>
                     </button>
+
+                    <!-- NEW: Download Button -->
+                    <button id="downloadButton" class="control-btn text-white focus:outline-none" title="Download Game">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- Game Frame Container -->
+            <!-- Game Frame Container (Watermark is inside this container) -->
             <div class="game-container" id="gameContainer">
                 <!-- Iframe will be injected here -->
+                
+                <!-- NEW: Watermark (Hidden by default, used only for download generation) -->
+                <div class="watermark hidden" id="watermark">
+                    <!-- The favicon.ico is a white icon, using CSS shadow for effect -->
+                    <img src="../img/favicon.ico" class="watermark-img" alt="4SP Logo Watermark"/>
+                </div>
             </div>
             
             <p id="fullscreenDisclaimer" class="text-center text-gray-400 mt-4 mb-8 text-sm">
@@ -215,28 +288,57 @@
             siteMapping
         } from "../site-mapping.js";
 
-        // --- Utility Functions for Marquee ---
+        // --- Utility Functions for Marquee (Updated to calculate distance and only animate on overflow) ---
         function updateMarquee(title) {
             const container = document.getElementById('gameTitleContainer');
             const textElement = document.getElementById('gameTitle');
             
-            // Set the title text
+            // Set the title text and style
             textElement.textContent = title;
             textElement.title = title;
+            textElement.style.fontWeight = 450;
             
             // Wait for the DOM to render the text to check its scroll width
             setTimeout(() => {
-                // If the text width is greater than the container's max-width, apply marquee class
-                if (textElement.scrollWidth > container.clientWidth) {
+                const textWidth = textElement.scrollWidth;
+                const containerWidth = container.clientWidth;
+                
+                // If the text overflows the container
+                if (textWidth > containerWidth) {
                     container.classList.add('animate');
+                    
+                    // Calculate the distance needed for the marquee (text width - container width)
+                    const scrollDistance = textWidth - containerWidth;
+                    
+                    // Total distance to move: scroll distance + a buffer (e.g., 20px)
+                    const totalMovement = scrollDistance + 20; 
+                    
+                    // Set CSS variable for animation distance
+                    container.style.setProperty('--marquee-distance', `-${totalMovement}px`);
+                    
+                    // Calculate animation duration based on distance (e.g., 1s per 50px)
+                    const duration = (totalMovement / 50) + 5; // Base 5s + 1s per 50px of movement
+                    textElement.style.animationDuration = `${duration}s`;
+                    
+                    // Reset transform to 0% before starting
+                    textElement.style.transform = 'translateX(0)';
+                    
+                    // NEW: Ensure padding is removed for tight spacing when scrolling
+                    textElement.style.paddingLeft = '0'; 
+
+                    // To make it look like a seamless loop, we'll use a specific animation keyframe
+                    // The CSS @keyframes marquee is set to translate from 0 to the calculated distance.
                 } else {
+                    // Title fits, remove animation and reset styles
                     container.classList.remove('animate');
-                    textElement.style.paddingLeft = '0'; // Remove padding for non-scrolling text
+                    textElement.style.animation = 'none';
+                    textElement.style.transform = 'translateX(0)';
+                    textElement.style.paddingLeft = '0';
                 }
-            }, 50);
+            }, 100); // 100ms delay to ensure layout rendering
         }
 
-        // --- Firebase/Favorites Management ---
+        // --- Firebase/Favorites Management (No change needed) ---
         const favoriteButton = document.getElementById("favoriteButton");
         let currentUserId = null;
         let currentGameId = null;
@@ -244,7 +346,6 @@
         function toggleFavoriteUI(isFavorited) {
             favoriteButton.classList.toggle('favorited', isFavorited);
             favoriteButton.title = isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
-            // Simple Font Awesome toggle based on the 'favorited' class
             favoriteButton.querySelector('.fa-solid-star').classList.toggle('hidden', !isFavorited);
             favoriteButton.querySelector('.fa-regular-star').classList.toggle('hidden', isFavorited);
         }
@@ -254,11 +355,9 @@
             currentUserId = userId;
             currentGameId = gameId;
 
-            // Using the new secure Firestore path structure
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const db = firebase.firestore();
             
-            // Private data storage path: /artifacts/{appId}/users/{userId}/favorites
             const favoriteDocRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('favorites').doc(String(gameId));
             
             try {
@@ -275,22 +374,18 @@
             
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const db = firebase.firestore();
-            // Private data storage path: /artifacts/{appId}/users/{userId}/favorites
             const favoriteDocRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUserId).collection('favorites').doc(String(currentGameId));
 
             try {
                 const doc = await favoriteDocRef.get();
                 if (doc.exists) {
-                    // Remove favorite
                     await favoriteDocRef.delete();
                     toggleFavoriteUI(false);
                     console.log("Favorite removed.");
                 } else {
-                    // Add favorite
                     await favoriteDocRef.set({ 
                         added: firebase.firestore.FieldValue.serverTimestamp(),
                         gameId: currentGameId,
-                        // Optionally store game name for easier lookup
                         gameName: document.getElementById('gameTitle').textContent 
                     });
                     toggleFavoriteUI(true);
@@ -305,7 +400,7 @@
         // --- END Firebase/Favorites Management ---
 
 
-        // --- Game Loading Logic (Updated for new structure) ---
+        // --- Game Loading Logic (Retained from original) ---
 
         function getCurrentKeyHostOnly() {
             return window.location.host;
@@ -365,7 +460,8 @@
                 });
                 if (response.ok) {
                     const text = await response.text();
-                    const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/);
+                    // This regex needs to handle titles with quotes inside
+                    const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/); 
                     if (match) {
                         const [, , embedPath, , title] = match;
                         const resolvedPath = new URL(embedPath, adjustedHref).href;
@@ -406,6 +502,7 @@
 
         function embedGame(gamePath, title) {
             const iframe = document.createElement("iframe");
+            iframe.id = 'gameIframe'; // Set ID for easier targeting
             iframe.src = gamePath;
             iframe.allowFullscreen = true;
             iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
@@ -413,16 +510,21 @@
             const gameContainer = document.getElementById('gameContainer');
             gameContainer.innerHTML = ''; 
             gameContainer.appendChild(iframe);
+            
+            // Re-append the watermark div element
+            const watermark = document.getElementById('watermark');
+            gameContainer.appendChild(watermark);
+            watermark.classList.add('hidden'); // Ensure it's hidden after embedding
 
             // Update title with marquee logic
             updateMarquee(title);
         }
         
-        // --- Fullscreen Logic ---
+        // --- Fullscreen Logic (No change needed) ---
         const fullscreenButton = document.getElementById("fullscreenButton");
         fullscreenButton.addEventListener("click", () => {
-            const gameIframe = document.querySelector('#gameContainer iframe');
             const gameContainer = document.getElementById('gameContainer');
+            const gameIframe = document.getElementById('gameIframe');
             
             if (gameContainer && gameContainer.requestFullscreen) {
                 // Request fullscreen on the container, which holds the iframe
@@ -439,6 +541,101 @@
             }
         });
 
+        // --- NEW: Download Logic ---
+        const downloadButton = document.getElementById("downloadButton");
+        downloadButton.addEventListener("click", () => {
+            const gameIframe = document.getElementById('gameIframe');
+            const title = document.getElementById('gameTitle').textContent;
+
+            if (!gameIframe) return;
+
+            // 1. Show the watermark within the parent frame for a moment
+            const watermark = document.getElementById('watermark');
+            watermark.classList.remove('hidden');
+
+            // 2. Generate the downloadable HTML content
+            const iframeSrc = gameIframe.src;
+            
+            // Create a wrapper HTML document for the game frame with the watermark
+            const downloadHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title} - Downloaded by 4SP</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #000; overflow: hidden; }
+        .game-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        .watermark-dl {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .watermark-img-dl {
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 0 4px black) drop-shadow(0 0 2px #4f46e5); 
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <!-- Sandboxing for security is less critical in a downloaded file but good practice -->
+        <iframe src="${iframeSrc}" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"></iframe>
+    </div>
+    <!-- Watermark in the downloaded file -->
+    <div class="watermark-dl">
+        <!-- NOTE: Assuming ../img/favicon.ico is accessible relative to the downloaded location, otherwise this will be a broken link. Using the relative path as requested. -->
+        <img src="../img/favicon.ico" class="watermark-img-dl" alt="4SP Logo Watermark"/>
+    </div>
+</body>
+</html>
+            `;
+            
+            // 3. Create a Blob and a download link
+            const blob = new Blob([downloadHtml], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_4SP.html`;
+
+            // 4. Trigger the download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+
+            // 5. Hide the watermark in the parent frame again
+            setTimeout(() => {
+                watermark.classList.add('hidden');
+            }, 500); 
+
+            console.log("Download link generated for game:", title);
+        });
+
+
         // --- Initialization ---
         document.addEventListener("DOMContentLoaded", async function () {
             const urlParams = new URLSearchParams(window.location.search);
@@ -454,6 +651,7 @@
                 // Not Found Game
                 embedGame("../404.html", "Game Not Found");
                 favoriteButton.style.display = 'none'; // Hide favorite for 404
+                downloadButton.style.display = 'none'; // Hide download for 404
             } else {
                 const page = selectedGame.page;
                 const baseURL = getBaseURLForPage(page);
@@ -463,11 +661,8 @@
                 embedGame(embedPath, selectedGame.name);
                 
                 currentGameId = selectedGame.id; // Set global game ID
-                // Note: The favorite status will be loaded in the separate 'userAuthenticated' block after Firebase loads.
             }
         });
-        
-        // --- END Game Loading Logic ---
         
         // This is a workaround to call the function after auth is complete
         document.addEventListener('userAuthenticated', (event) => {
@@ -483,7 +678,7 @@
         /**
          * Authentication Gate
          * This script protects the page by ensuring a user is logged in.
-         * It reveals the page and dispatches an event for module scripts.
+         * It reveals the page and notifies module scripts.
          */
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof firebase === 'undefined') {
@@ -493,7 +688,6 @@
             }
             
             // Set up Firebase Auth and Firestore instances
-            // Note: The __firebase_config and __initial_auth_token are provided globally by the Canvas environment.
             const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
             const app = firebase.initializeApp(firebaseConfig);
             const auth = firebase.auth();
@@ -514,7 +708,6 @@
                     }
                 } catch (error) {
                     console.error("Firebase Auth Error:", error);
-                    // Fallback to anonymous sign-in if custom token fails
                     await auth.signInAnonymously();
                 }
             };
@@ -540,8 +733,7 @@
         // Prevent default behavior for directional keys for smoother iframe interaction
         document.addEventListener("keydown", function (event) {
             if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
-                // event.preventDefault(); // Commented out to allow iframe games to potentially handle these keys, 
-                                          // but kept for reference if needed for the parent page.
+                // event.preventDefault(); 
             }
         });
     </script>
