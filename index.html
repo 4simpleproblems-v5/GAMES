@@ -33,9 +33,17 @@
                         'md': '0.375rem',
                         'lg': '0.5rem',
                         'xl': '1rem',
-                    }
+                    },
+                    // Add aspect ratio plugin for 3:2
+                    aspectRatio: {
+                        '3/2': '3 / 2',
+                    },
                 }
-            }
+            },
+            // Enable the aspect ratio plugin
+            plugins: [
+                require('@tailwindcss/aspect-ratio'),
+            ],
         }
     </script>
     
@@ -62,9 +70,43 @@
             transform: translateY(-4px);
             box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
         }
-        .favorite-btn.favorited i {
-            color: #facc15; /* Tailwind yellow-400 for favorited star */
+
+        /* --- New Star Hover CSS --- */
+        /* Base state: solid icon visible, regular hidden */
+        .favorite-btn .fa-solid-star { 
+            display: inline-block; 
         }
+        .favorite-btn .fa-regular-star { 
+            display: none; 
+        }
+
+        /* Hover state (not favorited): regular icon visible, solid hidden */
+        .favorite-btn:not(.favorited):hover .fa-solid-star { 
+            display: none; 
+        }
+        .favorite-btn:not(.favorited):hover .fa-regular-star { 
+            display: inline-block; 
+            color: white; /* On hover, make it white */
+        }
+
+        /* Favorited state: solid icon visible, yellow */
+        .favorite-btn.favorited .fa-solid-star {
+            display: inline-block;
+            color: #facc15; /* yellow-400 */
+        }
+        .favorite-btn.favorited .fa-regular-star {
+            display: none;
+        }
+
+        /* Favorited hover state: regular icon visible, yellow (to imply unfavorite) */
+        .favorite-btn.favorited:hover .fa-solid-star {
+            display: none;
+        }
+        .favorite-btn.favorited:hover .fa-regular-star {
+            display: inline-block;
+            color: #facc15; /* yellow-400 */
+        }
+        /* --- End New Star Hover CSS --- */
         
         /* Search Bar Results Styling */
         .search-results {
@@ -142,7 +184,20 @@
 
     <!-- Main Application Logic -->
     <script type="module">
-        import games from "./cards-data.js";
+        // NOTE: This assumes cards-data.js exists in the same directory.
+        // In a real environment, you might need to adjust the path.
+        // Using a placeholder if import fails for demonstration.
+        let games = [];
+        try {
+            games = (await import('./cards-data.js')).default;
+        } catch (e) {
+            console.warn("Could not load cards-data.js. Using placeholder data.");
+            // Create 20 placeholder games if import fails
+            for (let i = 1; i <= 20; i++) {
+                games.push({ id: `game-${i}`, name: `Placeholder Game ${i}`, imgSrc: `game${i}.jpg`, page: 1 });
+            }
+        }
+
 
         // --- DOM Elements ---
         const allListElement = document.getElementById("allList");
@@ -167,11 +222,14 @@
             }
             saveFavorites(favorites);
 
+            // Update all matching cards (one in 'All Games', one in 'Favorites')
             document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
+                // Update title
+                btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
             });
             
-            renderFavorites();
+            renderFavorites(); // Re-render the favorites list
         }
 
         // --- URL and Path Helpers (FIXED) ---
@@ -192,23 +250,29 @@
             const isFavorite = getFavorites().includes(id);
 
             const card = document.createElement("div");
-            card.className = 'zone-item bg-card-dark rounded-lg border border-brand-border flex flex-col overflow-hidden';
+            card.className = 'zone-item bg-card-dark rounded-lg border border-brand-border overflow-hidden'; // Removed flex flex-col
             card.dataset.gameId = id;
 
             card.innerHTML = `
-                <div class="relative w-full cursor-pointer" onclick="window.location.href='./play/?id=${id}'">
-                    <div class="aspect-w-1 aspect-h-1">
-                        <img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
+                <div class="relative w-full cursor-pointer group" onclick="window.location.href='./play/?id=${id}'">
+                    <!-- Aspect ratio container 3:2 -->
+                    <!-- Note: The 'group' class on the parent div is used by Tailwind's aspect-ratio plugin -->
+                    <div class="aspect-w-3 aspect-h-2">
+                        <img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
                     </div>
-                </div>
-                <div class="p-3 bg-card-dark flex-grow flex flex-col justify-between border-t border-brand-border">
-                    <h3 class="font-semibold text-white truncate text-sm" title="${name}">${name}</h3>
-                    <div class="flex items-center justify-between mt-2">
-                        <button class="play-btn bg-accent-indigo text-white font-semibold py-1 px-4 rounded-md text-xs transition hover:bg-indigo-700 focus:outline-none">
+                    
+                    <!-- Title Top Right -->
+                    <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${name}">${name}</h3>
+
+                    <!-- Blurred Bottom Bar -->
+                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-black/50 backdrop-blur-md border-t border-white/10 flex items-center justify-between">
+                        <button class="play-btn bg-accent-indigo text-white font-semibold py-1 px-4 rounded-md text-xs transition hover:bg-indigo-700 focus:outline-none shadow-md">
                             PLAY
                         </button>
-                        <button class="favorite-btn p-2 rounded-full text-white text-lg transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
-                            <i class="fa-solid fa-star text-gray-600 transition-colors"></i>
+                        <button class="favorite-btn p-2 rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                            <!-- Icons for hover effect -->
+                            <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                            <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
                         </button>
                     </div>
                 </div>
@@ -216,11 +280,11 @@
             
             // Add event listeners for buttons
             card.querySelector('.play-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent card click
                 window.location.href = `./play/?id=${id}`;
             });
             card.querySelector('.favorite-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent card click
                 toggleFavorite(id);
             });
 
@@ -260,9 +324,11 @@
         const updateSearchResults = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
             
+            // Filter the main game list
             const filteredGames = text ? games.filter(g => g.name.toLowerCase().includes(text)) : games;
             renderGames(filteredGames, allListElement);
 
+            // Update the dropdown
             const filteredDropdown = text ? games.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
             searchResults.innerHTML = "";
             if (filteredDropdown.length === 0 || !text) {
@@ -276,7 +342,7 @@
                 const linkEl = document.createElement("a");
                 linkEl.href = `./play/?id=${id}`;
                 linkEl.className = 'search-item';
-                linkEl.innerHTML = `<img src="${adjustedImgSrc}" alt="${name}"><span>${name}</span>`;
+                linkEl.innerHTML = `<img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https::/placehold.co/80x80/111111/888888?text=4SP'"><span>${name}</span>`;
                 searchResults.appendChild(linkEl);
             });
             searchResults.style.display = "block";
@@ -284,6 +350,30 @@
 
         // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {
+            // Check if Tailwind plugin is loaded, if not, add aspect-ratio polyfill
+            if (!tailwind.config.plugins || !tailwind.config.plugins.includes(require('@tailwindcss/aspect-ratio'))) {
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .aspect-w-3 {
+                        position: relative;
+                        padding-bottom: 66.666667%; /* 2 / 3 * 100 */
+                    }
+                    .aspect-h-2 {
+                        /* This class is just a marker in this polyfill */
+                    }
+                    .aspect-w-3 > * {
+                        position: absolute;
+                        height: 100%;
+                        width: 100%;
+                        top: 0;
+                        right: 0;
+                        bottom: 0;
+                        left: 0;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
             renderGames(games, allListElement);
             renderFavorites();
 
@@ -301,4 +391,3 @@
     </script>
 </body>
 </html>
-
