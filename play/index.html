@@ -1,162 +1,72 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>4SP - STRONGDOG</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="../firebase-config.js"></script>
-    <script src="../panic-key.js"></script>
-    <script src="../ban-enforcer.js"></script>
-    <script src="../url-changer.js"></script>
-    <script src="../navigation.js"></script>
-    <style>
-        /*
-         * STYLES FOR SLEEK BLACK DESIGN WITH GEIST FONT
-         * NOTE: Geist is not officially on Google Fonts. This simulates its inclusion via a generic sans-serif fallback.
-         */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap'); /* Using Inter as a similar, modern Google Font for the "Geist" effect */
-        
-        /* Fallback definition for Geist-like look, favoring system fonts/Inter */
-        :root {
-            --ff: 'Inter', 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            --bg: #111111; /* Deeper, sleeker black background */
-            --fg: #f3f3f3; /* Light foreground text */
-            --purple: #6720BD;
-            --navbar-bg: rgba(18, 18, 18, 0.95); /* Very dark, slightly transparent navbar */
-        }
+    <title>4SP - Game Player</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" id="faviconLink" />
 
-        /* This rule hides the body by default. The auth gate script will make it visible only for logged-in users. */
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-black': '#070707',
+                        'card-dark': '#111111',
+                        'accent-indigo': '#4f46e5', // Unified accent color
+                        'brand-border': '#252525',
+                        'strongdog-orange': '#FFA500', 
+                    },
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'md': '0.375rem',
+                        'lg': '0.5rem',
+                        'xl': '1rem',
+                    },
+                    aspectRatio: {
+                        '3/2': '3 / 2',
+                    },
+                }
+            },
+        }
+    </script>
+    
+    <style>
+        /* Base styles */
         body {
-            visibility: hidden;
-            font-family: var(--ff);
+            font-family: 'Geist', sans-serif;
+            font-weight: 300;
+            background-color: #070707; /* deep-black */
+            color: #f3f3f3;
             margin: 0;
             padding: 0;
-            background-color: var(--bg);
-            color: var(--fg);
             overflow-x: hidden;
             line-height: 1.6;
         }
-
-        .navbar {
-            background-color: var(--navbar-bg);
-            backdrop-filter: blur(8px);
-            color: white;
-            padding: 12px 25px; /* Compact padding */
-            height: 60px; /* Slim height */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        
+        h1, h2, h3, .font-bold, .font-semibold, strong {
+            font-weight: 400 !important;
         }
 
-        .logo {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-weight: 600; /* Sleeker font-weight */
-            font-size: 1.8rem; /* Compact size */
-            letter-spacing: -0.5px; /* Tighter letter-spacing */
-            transition: color 0.3s ease;
-            text-decoration: none;
-            color: var(--fg);
-        }
-
-        .logo .xp {
-            color: var(--purple);
-            text-shadow: 0 0 8px rgba(103, 32, 189, 0.4);
-            font-weight: 700;
-        }
-
-        .menu-icon {
-            font-size: 1.8rem; /* Compact size */
-            cursor: pointer;
-            color: var(--fg);
-            transition: opacity 0.3s ease;
-            line-height: 1;
-        }
-
-        .slide-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 300px; /* Slimmer menu */
-            background-color: rgba(18, 18, 18, 0.98); /* Dark background for sleek look */
-            backdrop-filter: blur(10px);
-            color: white;
-            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.8);
-            z-index: 1003;
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); /* Smoother transition */
-            transform: translateX(-100%);
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-
-        .slide-menu.active {
-            transform: translateX(0);
-        }
-
-        .categories {
-            display: flex;
-            flex-direction: column;
-            gap: 10px; /* Compact gap */
-            padding-top: 20px;
-        }
-
-        .categories>a {
-            padding: 12px 15px; /* Slimmer padding */
-            background-color: #222; /* Darker card background */
-            border-radius: 8px; /* Slightly more modern radius */
-            text-decoration: none;
-            color: var(--fg);
-            transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-            text-align: left;
-            font-size: 1rem; /* Compact font size */
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-            border-left: 3px solid transparent;
-        }
-
-        .categories>a:hover {
-            background-color: #282828;
-            border-left-color: var(--purple); /* Sleek accent on hover */
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
-        }
-
-        /* Removed complex ::after hover effect for a cleaner, faster transition */
-
-        .content-wrapper {
-            display: flex;
-            justify-content: center;
-            padding: 30px 15px; /* Compact padding */
-            gap: 20px; /* Compact gap */
-            align-items: flex-start;
-        }
-
-        .game-area {
-            flex-grow: 1;
-            max-width: 1000px; /* Increased max-width for modern display */
-            width: 100%;
-        }
-
+        /* Game Container Aspect Ratio (16:9) */
         .game-container {
             width: 100%;
-            padding-top: 56.25%;
+            padding-top: 56.25%; /* 9 / 16 * 100% for 16:9 aspect ratio */
             background-color: #000;
             position: relative;
             overflow: hidden;
-            border-radius: 12px; /* Sleeker radius */
+            border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
-            contain: strict;
         }
 
         .game-container iframe {
@@ -168,225 +78,78 @@
             border: none;
         }
 
-        .game-overlay-buttons {
-            position: fixed;
-            bottom: 20px; /* Slight adjustment */
-            left: 20px;
-            z-index: 1004;
-            display: flex;
-            gap: 8px; /* Compact gap */
-        }
-
+        /* Styling for the overlay buttons (replicated sleek button style) */
         .overlay-btn {
-            width: 44px; /* Slimmer button */
-            height: 44px; /* Slimmer button */
-            border-radius: 8px; /* Sleeker radius */
-            background-color: rgba(30, 30, 30, 0.5);
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background-color: rgba(30, 30, 30, 0.5); /* Dark background */
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 20px; /* Compact icon size */
+            font-size: 20px;
             color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
         .overlay-btn:hover {
             transform: scale(1.05);
             background: rgba(0, 0, 0, 0.7);
-            border-color: var(--purple);
+            border-color: #4f46e5; /* accent-indigo */
         }
 
-        #favoriteIcon.favorited {
-            color: #ffc107;
-            text-shadow: 0 0 10px rgba(255, 193, 7, 0.7);
-        }
-
-        #redirectMessage {
-            display: none;
-            text-align: center;
-            margin-top: 50px;
-        }
-
-        #redirectMessage h2,
-        #gameTitle {
-            color: var(--fg);
-        }
-
-        #gameTitle {
-            padding: 15px; /* Compact padding */
-            font-size: 1.2em; /* Compact font size */
-            font-weight: 500; /* Sleek font-weight */
-            text-align: center;
-            margin: 0;
-        }
-        
-        /* --- FAVORITES SCROLLBAR STYLES (Adjusted for sleek look) --- */
-        .favorites-container {
-            width: 95%; /* More compact width */
-            max-width: 1200px;
-            margin: 30px auto 15px auto; /* Compact margin */
-            padding: 15px; /* Compact padding */
-            background-color: #181818; /* Darker background */
-            border-radius: 10px; /* Sleeker radius */
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
-        }
-
-        .favorites-container h2 {
-            margin-top: 0;
-            margin-bottom: 15px; /* Compact margin */
-            color: var(--fg);
-            text-align: center;
-            font-size: 1.4rem; /* Compact size */
-            font-weight: 600;
-        }
-
-        .favorites-scroll {
-            overflow-x: auto;
-            overflow-y: hidden;
-            white-space: nowrap;
-            padding-bottom: 10px; /* Space for scrollbar */
-        }
-
-        /* Custom Scrollbar Styling - Sleek and Purple */
-        .favorites-scroll::-webkit-scrollbar {
-            height: 8px; /* Slimmer scrollbar */
-        }
-        .favorites-scroll::-webkit-scrollbar-track {
-            background: #181818;
-            border-radius: 8px;
-        }
-        .favorites-scroll::-webkit-scrollbar-thumb {
-            background-color: var(--purple);
-            border-radius: 8px;
-            border: 2px solid #181818; /* Slimmer border */
-        }
-        .favorites-scroll::-webkit-scrollbar-thumb:hover {
-            background-color: #8a2be2;
-        }
-
-        .favorite-game-card {
-            display: inline-block;
-            vertical-align: top;
-            width: 180px; /* Slimmer card */
-            margin-right: 15px; /* Compact margin */
-            text-decoration: none;
-            background: #252525;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            position: relative;
-        }
-
-        .favorite-game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(103, 32, 189, 0.5);
-        }
-
-        .favorite-game-card img {
-            width: 100%;
-            height: 101px; /* Maintain 16:9 aspect ratio for 180px width */
-            object-fit: cover;
-            border-bottom: 2px solid var(--purple); /* Slimmer border */
-        }
-
-        .favorite-game-card .card-title {
-            color: var(--fg);
-            padding: 10px; /* Compact padding */
-            font-size: 0.9rem; /* Compact font size */
-            white-space: normal;
-            text-align: center;
-            font-weight: 400;
-        }
-        /* --- END: FAVORITES SCROLLBAR STYLES --- */
-        
-        #fullscreenDisclaimer {
-            text-align: center;
-            color: #888;
-            margin: 10px 0 30px 0; /* Compact margin */
-            font-size: 0.8em; /* Compact font size */
-        }
-
-        @media (max-width: 900px) {
-            .content-wrapper {
-                flex-direction: column-reverse;
-                align-items: center;
-            }
-
-            .game-area {
-                width: 100%;
-                max-width: 100%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .slide-menu {
-                width: 280px;
-            }
+        /* Favorite Star coloring */
+        #favoriteButton.favorited .fa-solid-star {
+            color: #facc15; /* yellow-400 */
         }
     </style>
 </head>
 
-<body>
-    <div class="navbar">
-        <div class="menu-icon" id="menuIcon">☰</div>
-        <a href="../index.html" class="logo">strongdog<span class="xp">XP</span></a>
-        <div></div>
-    </div>
+<body class="bg-deep-black text-white min-h-screen">
+    <div class="navbar sticky top-0 z-50 bg-black/70 backdrop-blur-lg border-b border-brand-border h-16 flex items-center justify-between px-6 shadow-xl">
+        <a href="https://forsimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
+        <div></div> </div>
 
-    <div class="slide-menu" id="slideMenu">
-        <div class="categories">
-            <a href="https://forsimpleproblems.github.io/logged-in/games.html" class="option-link">Explore Games (4SP)</a>
-            <a href="../index.html" class="option-link">StrongdogXP Home</a>
-            <a href="../save/index.html" class="option-link">Save Manager</a>
-            <a href="https://discord.gg/pWjfQ4Sz5c" class="option-link">
-                Discord Server
-            </a>
-        </div>
-    </div>
-
-    <div id="gameTitle"></div>
-
-    <div class="content-wrapper">
+    <main class="mx-auto my-8 w-full max-w-screen-xl px-4">
         <div class="game-area" id="gameArea">
-            <div class="game-container" id="gameContainer">
-            </div>
+            <div class="game-container relative" id="gameContainer">
+                <div id="gameTitle" class="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur-sm rounded-md px-3 py-1 text-white truncate text-base font-semibold shadow-lg max-w-[50%]" style="font-weight: 400;">
+                    </div>
+
+                <div id="gameOverlayButtons" class="absolute top-2 right-2 z-10 flex items-center space-x-3">
+                    <button id="favoriteButton" class="overlay-btn text-white transition duration-200 focus:outline-none" title="Favorite Game">
+                        <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                        <i class="fa-regular fa-star fa-regular-star text-white transition-colors hidden"></i>
+                    </button>
+                    <button id="fullscreenButton" class="overlay-btn text-white transition duration-200 focus:outline-none" title="Fullscreen">
+                        <i class="fa-solid fa-expand"></i>
+                    </button>
+                </div>
+                
+                </div>
+            
+            <p id="fullscreenDisclaimer" class="text-center text-gray-400 mt-4 mb-8 text-sm">
+                Use the fullscreen button for a better experience.
+            </p>
         </div>
-    </div>
+        
+        </main>
     
-    <div class="favorites-container" id="favorites-container" style="display: none;"> 
-        <h2>Your Favorite Games</h2>
-        <div class="favorites-scroll" id="favorites-bar">
-        </div>
-    </div>
-    
-    <p id="fullscreenDisclaimer">
-        Use the fullscreen button for a better experience.
-    </p>
-
-    <div class="game-overlay-buttons" id="gameOverlayButtons">
-        <button id="fullscreenButton" class="overlay-btn" title="Fullscreen">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
-                </path>
-            </svg>
-        </button>
-    </div>
-
-    <div id="redirectMessage">
-        <h2>Redirecting to the game...</h2>
-        <p>
-            If you are not redirected automatically,
-            <a href="#" id="manualRedirectLink">click here</a>.
-        </p>
-    </div>
-
+    <script src="../firebase-config.js"></script>
+    <script src="../panic-key.js"></script>
+    <script src="../ban-enforcer.js"></script>
+    <script src="../url-changer.js"></script>
+    <script src="../navigation.js"></script>
     <script src="../appscript.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <script type="module">
         import games from "../cards-data.js";
@@ -394,174 +157,196 @@
             siteMapping
         } from "../site-mapping.js";
 
-        document.addEventListener("DOMContentLoaded", async function () {
-            
-            // --- NEW: FUNCTION TO LOAD FAVORITE GAMES ---
-            async function loadFavoriteGames(userId) {
-                const db = firebase.firestore();
-                const favoritesContainer = document.getElementById('favorites-container');
-                const favoritesBar = document.getElementById('favorites-bar');
+        // --- Firebase/Favorites Management ---
+        const favoriteButton = document.getElementById("favoriteButton");
+        let currentUserId = null;
+        let currentGameId = null;
 
-                try {
-                    const favoritesSnapshot = await db.collection('users').doc(userId).collection('favorites').get();
-                    if (favoritesSnapshot.empty) {
-                        console.log("User has no favorite games.");
-                        favoritesContainer.style.display = 'none'; // Keep it hidden
-                        return;
-                    }
+        function toggleFavoriteUI(isFavorited) {
+            favoriteButton.classList.toggle('favorited', isFavorited);
+            favoriteButton.title = isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
+            // Simple Font Awesome toggle based on the 'favorited' class
+            favoriteButton.querySelector('.fa-solid-star').classList.toggle('hidden', !isFavorited);
+            favoriteButton.querySelector('.fa-regular-star').classList.toggle('hidden', isFavorited);
+        }
+        
+        async function loadFavoriteStatus(userId, gameId) {
+            if (!userId || !gameId) return;
+            currentUserId = userId;
+            currentGameId = gameId;
 
-                    const favoriteGameIds = favoritesSnapshot.docs.map(doc => parseInt(doc.id, 10));
-                    const favoriteGames = games.filter(game => favoriteGameIds.includes(game.id));
-
-                    if (favoriteGames.length > 0) {
-                        favoritesBar.innerHTML = ''; // Clear any previous content
-                        favoriteGames.forEach(game => {
-                            // Adjust image path: assumes paths in cards-data.js are like './thumbnails/image.png'
-                            const imagePath = `../${game.image.replace(/^\.\//, '')}`;
-                            const gameCardHTML = `
-                                <a href="./index.html?id=${game.id}" class="favorite-game-card" title="${game.name}">
-                                    <img src="${imagePath}" alt="${game.name}">
-                                    <div class="card-title">${game.name}</div>
-                                </a>
-                            `;
-                            favoritesBar.innerHTML += gameCardHTML;
-                        });
-                        favoritesContainer.style.display = 'block'; // Show the container
-                    } else {
-                        favoritesContainer.style.display = 'none'; // Hide if no valid favorites found
-                    }
-
-                } catch (error) {
-                    console.error("Error loading favorite games:", error);
-                    favoritesContainer.style.display = 'none'; // Hide on error
-                }
+            const db = firebase.firestore();
+            try {
+                const doc = await db.collection('users').doc(userId).collection('favorites').doc(String(gameId)).get();
+                const isFavorited = doc.exists;
+                toggleFavoriteUI(isFavorited);
+            } catch (error) {
+                console.error("Error loading favorite status:", error);
             }
-            // --- END: FUNCTION TO LOAD FAVORITE GAMES ---
+        }
 
-            function getCurrentKeyHostOnly() {
-                return window.location.host;
+        async function toggleFavorite() {
+            if (!currentUserId || !currentGameId) return;
+            const db = firebase.firestore();
+            const favoriteDocRef = db.collection('users').doc(currentUserId).collection('favorites').doc(String(currentGameId));
+
+            try {
+                const doc = await favoriteDocRef.get();
+                if (doc.exists) {
+                    // Remove favorite
+                    await favoriteDocRef.delete();
+                    toggleFavoriteUI(false);
+                    console.log("Favorite removed.");
+                } else {
+                    // Add favorite (using a minimal document)
+                    await favoriteDocRef.set({ added: firebase.firestore.FieldValue.serverTimestamp() });
+                    toggleFavoriteUI(true);
+                    console.log("Favorite added.");
+                }
+            } catch (error) {
+                console.error("Error toggling favorite:", error);
             }
+        }
+        
+        favoriteButton.addEventListener("click", toggleFavorite);
+        // --- END Firebase/Favorites Management ---
 
-            function getBaseURLForPage(page) {
-                const currentHost = getCurrentKeyHostOnly();
-                const currentPath = window.location.pathname;
 
-                if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
-                    if (!page || page === 1) return "/STRONGDOG/";
-                    if (page === 2) return "/strongdog2/";
-                    if (page === 3) return "/strongdog3/";
-                    if (page === 4) return "/strongdog4/";
-                    if (page === 5) return "/strongdog5/"; // ⬅️ ADDED
-                    return "/STRONGDOG/";
+        // --- Game Loading Logic (Copied from index(4).html) ---
+
+        function getCurrentKeyHostOnly() {
+            return window.location.host;
+        }
+
+        function getBaseURLForPage(page) {
+            const currentHost = getCurrentKeyHostOnly();
+            const currentPath = window.location.pathname;
+
+            if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
+                if (!page || page === 1) return "/STRONGDOG/";
+                if (page === 2) return "/strongdog2/";
+                if (page === 3) return "/strongdog3/";
+                if (page === 4) return "/strongdog4/";
+                if (page === 5) return "/strongdog5/";
+                return "/STRONGDOG/";
+            }
+            const explicitMappings = {
+                "jman1593.github.io": {
+                    2: "../strongdog2/",
+                },
+                "v5-4simpleproblems.github.io": {
+                    2: "../../strongdog2/",
+                    3: "../../strongdog3/",
+                    4: "../../strongdog4/",
+                    5: "../../strongdog5/",
                 }
-                const explicitMappings = {
-                    "jman1593.github.io": {
-                        2: "../strongdog2/",
-                    },
-                    "v5-4simpleproblems.github.io": {
-                        2: "../../strongdog2/",
-                        3: "../../strongdog3/",
-                        4: "../../strongdog4/",
-                        5: "../../strongdog5/", // ⬅️ ADDED
-                    }
-                };
-                if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
-                    return explicitMappings[currentHost][page];
-                }
-                if (!page || page === 1) return "../";
-                const arr = siteMapping[currentHost];
-                if (!arr) {
-                    if (page === 2) return "../../strongdog2/";
-                    if (page === 3) return "../../strongdog3/";
-                    if (page === 4) return "../../strongdog4/";
-                    if (page === 5) return "../../strongdog5/"; // ⬅️ ADDED
-                    return "../";
-                }
-                const index = page - 2;
-                if (arr[index]) return arr[index].replace(/^\.\/$/, "../");
+            };
+            if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
+                return explicitMappings[currentHost][page];
+            }
+            if (!page || page === 1) return "../";
+            const arr = siteMapping[currentHost];
+            if (!arr) {
                 if (page === 2) return "../../strongdog2/";
                 if (page === 3) return "../../strongdog3/";
                 if (page === 4) return "../../strongdog4/";
-                if (page === 5) return "../../strongdog5/"; // ⬅️ ADDED
-                return "../../";
+                if (page === 5) return "../../strongdog5/";
+                return "../";
             }
+            const index = page - 2;
+            if (arr[index]) return arr[index].replace(/^\.\/$/, "../");
+            if (page === 2) return "../../strongdog2/";
+            if (page === 3) return "../../strongdog3/";
+            if (page === 4) return "../../strongdog4/";
+            if (page === 5) return "../../strongdog5/";
+            return "../../";
+        }
 
-            async function getEmbedPath(adjustedHref, originalHref, page) {
-                let cleanHref = adjustedHref.replace(/index\.html$/, "").replace(/base\.html$/, "").replace(/\.html$/, "");
-                if (!cleanHref.endsWith("/")) cleanHref += "/";
-                const pathsToTry = [cleanHref + "game/index.html", cleanHref + "game/base.html", cleanHref + "gamereal/index.html", cleanHref + "gamereal/base.html", cleanHref + "index.html", cleanHref + "base.html", ];
-                try {
-                    const response = await fetch(adjustedHref, {
-                        method: "GET"
-                    });
-                    if (response.ok) {
-                        const text = await response.text();
-                        const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/);
-                        if (match) {
-                            const [, , embedPath, , title] = match;
-                            const resolvedPath = new URL(embedPath, adjustedHref).href;
-                            if (await fileExists(resolvedPath)) return resolvedPath;
-                        }
+        async function getEmbedPath(adjustedHref, originalHref, page) {
+            let cleanHref = adjustedHref.replace(/index\.html$/, "").replace(/base\.html$/, "").replace(/\.html$/, "");
+            if (!cleanHref.endsWith("/")) cleanHref += "/";
+            const pathsToTry = [cleanHref + "game/index.html", cleanHref + "game/base.html", cleanHref + "gamereal/index.html", cleanHref + "gamereal/base.html", cleanHref + "index.html", cleanHref + "base.html", ];
+            try {
+                const response = await fetch(adjustedHref, {
+                    method: "GET"
+                });
+                if (response.ok) {
+                    const text = await response.text();
+                    const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/);
+                    if (match) {
+                        const [, , embedPath, , title] = match;
+                        const resolvedPath = new URL(embedPath, adjustedHref).href;
+                        if (await fileExists(resolvedPath)) return resolvedPath;
                     }
-                } catch (error) {
-                    console.warn("Failed to parse embed path from cards-data.js", error);
                 }
-                for (const path of pathsToTry) {
-                    if (await fileExists(path)) return path;
+            } catch (error) {
+                console.warn("Failed to parse embed path from cards-data.js", error);
+            }
+            for (const path of pathsToTry) {
+                if (await fileExists(path)) return path;
+            }
+            return adjustHrefPath(originalHref, page);
+        }
+
+        function adjustHrefPath(path, page) {
+            path = path.replace(/^\.\//, "").replace(/^\//, "");
+            const baseURL = getBaseURLForPage(page);
+            let finalPath;
+            if (baseURL === "../") {
+                finalPath = "../" + path;
+            } else {
+                finalPath = baseURL.endsWith("/") ? baseURL + path : baseURL + "/" + path;
+            }
+            return finalPath;
+        }
+
+        async function fileExists(url) {
+            try {
+                const response = await fetch(url, {
+                    method: "HEAD"
+                });
+                return response.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        function embedGame(gamePath, title) {
+            const iframe = document.createElement("iframe");
+            iframe.src = gamePath;
+            iframe.allowFullscreen = true;
+            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
+
+            const gameContainer = document.getElementById('gameContainer');
+            gameContainer.innerHTML = ''; 
+            gameContainer.appendChild(iframe);
+
+            const gameTitleElement = document.getElementById("gameTitle");
+            gameTitleElement.textContent = title;
+            // Also set as a tooltip for truncated title
+            gameTitleElement.title = title;
+        }
+        
+        // --- Fullscreen Logic ---
+        const fullscreenButton = document.getElementById("fullscreenButton");
+        fullscreenButton.addEventListener("click", () => {
+            const gameIframe = document.querySelector('#gameContainer iframe');
+            if (gameIframe) {
+                if (gameIframe.requestFullscreen) {
+                    gameIframe.requestFullscreen();
+                } else if (gameIframe.webkitRequestFullscreen) {
+                    gameIframe.webkitRequestFullscreen();
+                } else if (gameIframe.msRequestFullscreen) {
+                    gameIframe.msRequestFullscreen();
                 }
-                return adjustHrefPath(originalHref, page);
             }
+        });
 
-            function adjustHrefPath(path, page) {
-                path = path.replace(/^\.\//, "").replace(/^\//, "");
-                const baseURL = getBaseURLForPage(page);
-                let finalPath;
-                if (baseURL === "../") {
-                    finalPath = "../" + path;
-                } else {
-                    finalPath = baseURL.endsWith("/") ? baseURL + path : baseURL + "/" + path;
-                }
-                return finalPath;
-            }
-
-            async function fileExists(url) {
-                try {
-                    const response = await fetch(url, {
-                        method: "HEAD"
-                    });
-                    return response.ok;
-                } catch {
-                    return false;
-                }
-            }
-
-            function embedGame(gamePath, title) {
-                const iframe = document.createElement("iframe");
-                iframe.src = gamePath;
-                iframe.allowFullscreen = true;
-
-                // --- FULLSCREEN BUG FIX ---
-                // Added 'allow-fullscreen' to the sandbox attribute.
-                // This permission is required for the Fullscreen API to work inside a sandboxed iframe.
-                // Without it, the browser blocks the fullscreen request, often resulting in a grey or blank screen.
-                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
-                // --- END BUG FIX ---
-
-                const gameContainer = document.getElementById('gameContainer');
-                gameContainer.innerHTML = ''; // Clear previous game
-                gameContainer.appendChild(iframe);
-
-                const gameTitleElement = document.getElementById("gameTitle");
-                gameTitleElement.textContent = title;
-            }
-
-            let selectedGame = null;
+        // --- Initialization ---
+        document.addEventListener("DOMContentLoaded", async function () {
             const urlParams = new URLSearchParams(window.location.search);
             const gameId = urlParams.get("id");
-            const fullscreenButton = document.getElementById("fullscreenButton");
-            const redirectMessage = document.getElementById("redirectMessage");
-            const manualRedirectLink = document.getElementById("manualRedirectLink");
-            const gameArea = document.getElementById('gameArea');
+            let selectedGame = null;
 
             if (gameId) {
                 const idNum = parseInt(gameId, 10);
@@ -569,7 +354,9 @@
             }
 
             if (!selectedGame) {
-                embedGame("../404.html", "Not Found");
+                // Not Found Game
+                embedGame("../404.html", "Game Not Found");
+                favoriteButton.style.display = 'none'; // Hide favorite for 404
             } else {
                 const page = selectedGame.page;
                 const baseURL = getBaseURLForPage(page);
@@ -577,56 +364,19 @@
                 adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
                 const embedPath = await getEmbedPath(adjustedHref, selectedGame.href, page);
                 embedGame(embedPath, selectedGame.name);
-
-                // --- UPDATED: Fullscreen logic ---
-                fullscreenButton.addEventListener("click", () => {
-                    // Select the iframe inside the game container
-                    const gameIframe = document.querySelector('#gameContainer iframe');
-
-                    // Check if the iframe exists and request fullscreen on it
-                    if (gameIframe) {
-                        if (gameIframe.requestFullscreen) {
-                            gameIframe.requestFullscreen();
-                        } else if (gameIframe.webkitRequestFullscreen) { // Safari
-                            gameIframe.webkitRequestFullscreen();
-                        } else if (gameIframe.msRequestFullscreen) { // IE11
-                            gameIframe.msRequestFullscreen();
-                        }
-                    }
-                });
-                // The 'fullscreenchange' event listener has been removed as it is no longer needed.
+                
+                currentGameId = selectedGame.id; // Set global game ID
+                // Note: The favorite status will be loaded in the separate 'userAuthenticated' block after Firebase loads.
             }
-
-            manualRedirectLink.addEventListener("click", function (e) {
-                e.preventDefault();
-                const selectedId = urlParams.get("id");
-                const sGame = games.find((g) => g.id == selectedId);
-                if (sGame && sGame.href) window.location.href = "../" + sGame.href;
-            });
-            
-            // This needs to be outside the DOMContentLoaded but inside the script for auth to work properly on page load
         });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const menuIcon = document.getElementById("menuIcon");
-            const slideMenu = document.getElementById("slideMenu");
-
-            menuIcon.addEventListener("click", function (event) {
-                event.stopPropagation();
-                slideMenu.classList.toggle('active');
-            });
-
-            window.addEventListener("click", function (event) {
-                if (event.target !== menuIcon && !slideMenu.contains(event.target)) {
-                    slideMenu.classList.remove('active');
-                }
-            });
-        });
-
-        document.addEventListener("keydown", function (event) {
-            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
-                event.preventDefault();
+        
+        // --- END Game Loading Logic ---
+        
+        // This is a workaround to call the function after auth is complete
+        document.addEventListener('userAuthenticated', (event) => {
+            const userId = event.detail.uid;
+            if (userId && currentGameId) {
+                loadFavoriteStatus(userId, currentGameId);
             }
         });
     </script>
@@ -635,90 +385,34 @@
         /**
          * Authentication Gate
          * This script protects the page by ensuring a user is logged in.
-         * 1. If the user is logged out, it redirects to the login page.
-         * 2. If the user is logged in, it reveals the page content, allowing other scripts
-         * (like ban-enforcer.js) to perform their subsequent checks.
+         * It reveals the page and dispatches an event for module scripts.
          */
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof firebase === 'undefined') {
-                console.error("Auth Error: Firebase is not loaded.");
                 document.body.style.visibility = 'visible';
-                document.body.innerHTML = `<h1 style="color:white; text-align:center;">Error: Cannot connect to services.</h1>`;
+                document.body.innerHTML = `<h1 style="color:white; text-align:center;">Error: Cannot connect to services (Firebase).</h1>`;
                 return;
             }
 
             firebase.auth().onAuthStateChanged(user => {
                 if (user) {
-                    // User is logged in. Reveal the page.
-                    // The external ban-enforcer.js script will handle checking for bans.
-                    console.log("Authentication successful. Revealing page content.");
+                    // User is logged in. Reveal the page and notify modules.
                     document.body.style.visibility = 'visible';
-                    
-                    // NEW: Manually trigger an event to load favorites, since the logic is now in a module.
-                    // This ensures the DOM is ready and the user is authenticated.
                     document.dispatchEvent(new CustomEvent('userAuthenticated', { detail: { uid: user.uid } }));
                     
                 } else {
                     // User is logged out. Redirect them to the login page.
-                    console.log("Authentication failed: No user is logged in. Redirecting...");
                     window.location.href = 'https://4simpleproblems.github.io/login.html';
                 }
             });
         });
-    </script>
-    
-    <script type="module">
-        // This is a bit of a workaround to call a function inside a module from a regular script.
-        // We listen for the custom event dispatched when the user is authenticated.
-        document.addEventListener('userAuthenticated', (event) => {
-            // Since we can't directly call the function, we have to duplicate the logic or re-architect.
-            // For simplicity, we will re-run the fetching logic here. A better long-term solution
-            // would be to have a shared state management system.
-            
-            // Re-importing necessary modules for this script block.
-            import games from "../cards-data.js";
-    
-            async function loadFavoriteGames(userId) {
-                const db = firebase.firestore();
-                const favoritesContainer = document.getElementById('favorites-container');
-                const favoritesBar = document.getElementById('favorites-bar');
-
-                try {
-                    const favoritesSnapshot = await db.collection('users').doc(userId).collection('favorites').get();
-                    if (favoritesSnapshot.empty) {
-                        favoritesContainer.style.display = 'none';
-                        return;
-                    }
-                    const favoriteGameIds = favoritesSnapshot.docs.map(doc => parseInt(doc.id, 10));
-                    const favoriteGames = games.filter(game => favoriteGameIds.includes(game.id));
-
-                    if (favoriteGames.length > 0) {
-                        favoritesBar.innerHTML = '';
-                        favoriteGames.forEach(game => {
-                            const imagePath = `../${game.image.replace(/^\.\//, '')}`;
-                            const gameCardHTML = `
-                                <a href="./index.html?id=${game.id}" class="favorite-game-card" title="${game.name}">
-                                    <img src="${imagePath}" alt="${game.name}">
-                                    <div class="card-title">${game.name}</div>
-                                </a>`;
-                            favoritesBar.innerHTML += gameCardHTML;
-                        });
-                        favoritesContainer.style.display = 'block';
-                    } else {
-                        favoritesContainer.style.display = 'none';
-                    }
-                } catch (error) {
-                    console.error("Error loading favorite games:", error);
-                    favoritesContainer.style.display = 'none';
-                }
-            }
-
-            const userId = event.detail.uid;
-            if (userId) {
-                loadFavoriteGames(userId);
+        
+        // Prevent default behavior for directional keys for smoother iframe interaction
+        document.addEventListener("keydown", function (event) {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
+                event.preventDefault();
             }
         });
     </script>
 </body>
-
 </html>
