@@ -25,6 +25,7 @@
                         'card-dark': '#111111',
                         'accent-indigo': '#4f46e5', // Unified accent color
                         'brand-border': '#252525',
+                        'strongdog-orange': '#FFA500', // Added category color
                     },
                     fontFamily: {
                         sans: ['Geist', 'sans-serif'],
@@ -41,13 +42,13 @@
                 }
             },
             // The aspect-ratio plugin is part of Tailwind core, 
-            // no need to add it via 'plugins' array here, especially with 'require()'.
+            // no need to add it via 'plugins' array here.
         }
     </script>
     
     <!-- Custom Styles -->
     <style>
-        /* Base styles to match other professional pages */
+        /* Base styles */
         body {
             font-family: 'Geist', sans-serif;
             font-weight: 300;
@@ -55,12 +56,10 @@
             padding-bottom: 100px; /* Space for the fixed search bar */
         }
         
-        /* Heavier font weight for headings and bold text */
         h1, h2, h3, .font-bold, .font-semibold, strong {
             font-weight: 400 !important;
         }
         
-        /* New Game Card styles inspired by dailyphoto.html */
         .zone-item {
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
@@ -69,8 +68,23 @@
             box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
         }
 
-        /* --- New Star Hover CSS --- */
-        /* Base state: solid icon visible, regular hidden */
+        /* --- New Play Button Hover CSS --- */
+        .play-btn .fa-solid-play { 
+            display: inline-block; 
+            /* color is set by Tailwind class text-accent-indigo */
+        }
+        .play-btn .fa-regular-play { 
+            display: none; 
+        }
+        .play-btn:hover .fa-solid-play { 
+            display: none; 
+        }
+        .play-btn:hover .fa-regular-play { 
+            display: inline-block; 
+            /* color is set by Tailwind class text-accent-indigo */
+        }
+
+        /* --- Favorite Star Hover CSS --- */
         .favorite-btn .fa-solid-star { 
             display: inline-block; 
         }
@@ -78,7 +92,6 @@
             display: none; 
         }
 
-        /* Hover state (not favorited): regular icon visible, solid hidden */
         .favorite-btn:not(.favorited):hover .fa-solid-star { 
             display: none; 
         }
@@ -87,7 +100,6 @@
             color: white; /* On hover, make it white */
         }
 
-        /* Favorited state: solid icon visible, yellow */
         .favorite-btn.favorited .fa-solid-star {
             display: inline-block;
             color: #facc15; /* yellow-400 */
@@ -96,7 +108,6 @@
             display: none;
         }
 
-        /* Favorited hover state: regular icon visible, yellow (to imply unfavorite) */
         .favorite-btn.favorited:hover .fa-solid-star {
             display: none;
         }
@@ -104,7 +115,6 @@
             display: inline-block;
             color: #facc15; /* yellow-400 */
         }
-        /* --- End New Star Hover CSS --- */
         
         /* Search Bar Results Styling */
         .search-results {
@@ -133,22 +143,20 @@
         /* Responsive adjustments for the bottom bar */
         @media (max-width: 768px) {
             #bottom-fixed-bar {
-                width: calc(100% - 30px) !important;
-                left: 15px !important;
-                right: 15px !important;
+                /* On mobile, make it full-width minus padding */
+                left: 10px !important;
+                right: 10px !important;
                 bottom: 10px !important;
+                width: auto !important; /* Override desktop max-w-md */
             }
         }
 
-        /* Polyfill for aspect-ratio for browsers that might not support it in core */
-        /* This is safer than the plugin 'require' */
+        /* Polyfill for aspect-ratio */
         .aspect-w-3 {
             position: relative;
             padding-bottom: 66.666667%; /* 2 / 3 * 100 */
         }
-        .aspect-h-2 {
-            /* This class is just a marker in this polyfill */
-        }
+        .aspect-h-2 { }
         .aspect-w-3 > * {
             position: absolute;
             height: 100%;
@@ -183,15 +191,14 @@
         </h2>
         <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
-        <!-- All Games Section -->
-        <h2 class="text-center text-3xl font-bold mt-12 mb-6 text-white"><strong>All Games</strong></h2>
-        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="allList">
-            <!-- Game cards will be injected here -->
+        <!-- All Games Section - Now a container for categories -->
+        <div id="category-container">
+            <!-- Game categories and cards will be injected here -->
         </div>
     </main>
 
-    <!-- Bottom Fixed Search Bar -->
-    <div id="bottom-fixed-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
+    <!-- Bottom Fixed Search Bar - Pushed to right -->
+    <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
         <div class="relative w-full">
             <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
             <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
@@ -202,11 +209,13 @@
 
     <!-- Main Application Logic -->
     <script type="module">
-        // --- Restored original game import logic ---
         import games from "./cards-data.js";
 
+        // --- Global Game List ---
+        let allGames = []; // Will hold games with category info
+
         // --- DOM Elements ---
-        const allListElement = document.getElementById("allList");
+        const categoryContainerElement = document.getElementById("category-container");
         const favoritesHeader = document.getElementById("favoritesHeader");
         const favoritesGameList = document.getElementById("favoritesGameList");
         const searchInput = document.getElementById("searchInput");
@@ -228,24 +237,20 @@
             }
             saveFavorites(favorites);
 
-            // Update all matching cards (one in 'All Games', one in 'Favorites')
+            // Update all matching cards
             document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
-                // Update title
                 btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
             });
             
             renderFavorites(); // Re-render the favorites list
         }
 
-        // --- URL and Path Helpers (FIXED) ---
+        // --- URL and Path Helpers ---
         function getAdjustedUrls(imgSrc, page) {
-            // This logic is based on the original site's structure where games were split across folders like 'strongdog2', 'strongdog3', etc.
             if (page && page > 1) {
-                // Constructs a relative path assuming a sibling directory structure (e.g., ../strongdog2/img/...)
                 return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
             }
-            // For games on page 1, the path is relative to the current directory.
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
 
@@ -256,13 +261,12 @@
             const isFavorite = getFavorites().includes(id);
 
             const card = document.createElement("div");
-            card.className = 'zone-item bg-card-dark rounded-lg border border-brand-border overflow-hidden'; // Removed flex flex-col
+            card.className = 'zone-item bg-card-dark rounded-lg border border-brand-border overflow-hidden';
             card.dataset.gameId = id;
 
             card.innerHTML = `
                 <div class="relative w-full cursor-pointer group" onclick="window.location.href='./play/?id=${id}'">
                     <!-- Aspect ratio container 3:2 -->
-                    <!-- Note: The 'group' class on the parent div is used by Tailwind's aspect-ratio plugin -->
                     <div class="aspect-w-3 aspect-h-2">
                         <img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
                     </div>
@@ -270,13 +274,15 @@
                     <!-- Title Top Right -->
                     <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${name}">${name}</h3>
 
-                    <!-- Blurred Bottom Bar -->
-                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-black/50 backdrop-blur-md border-t border-white/10 flex items-center justify-between">
-                        <button class="play-btn bg-accent-indigo text-white font-semibold py-1 px-4 rounded-md text-xs transition hover:bg-indigo-700 focus:outline-none shadow-md">
-                            PLAY
+                    <!-- Control Buttons Bottom Right -->
+                    <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
+                        <!-- Play Button -->
+                        <button class="play-btn rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
+                            <i class="fa-solid fa-play fa-solid-play text-accent-indigo transition-colors"></i>
+                            <i class="fa-regular fa-play fa-regular-play text-accent-indigo transition-colors"></i>
                         </button>
-                        <button class="favorite-btn p-2 rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
-                            <!-- Icons for hover effect -->
+                        <!-- Favorite Button -->
+                        <button class="favorite-btn rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
                             <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
                             <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
                         </button>
@@ -297,6 +303,7 @@
             return card;
         }
 
+        // Renders a list of games into a target element
         function renderGames(gamesToRender, targetElement) {
             targetElement.innerHTML = '';
             const fragment = document.createDocumentFragment();
@@ -306,12 +313,58 @@
             targetElement.appendChild(fragment);
         }
 
+        // Renders all games grouped by category
+        function renderAllCategories(filterText = '') {
+            const filteredGames = filterText 
+                ? allGames.filter(g => g.name.toLowerCase().includes(filterText)) 
+                : allGames;
+
+            // Group games by category
+            const gamesByCategory = filteredGames.reduce((acc, game) => {
+                const category = game.category || 'Other'; // Default category
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(game);
+                return acc;
+            }, {});
+
+            categoryContainerElement.innerHTML = ''; // Clear previous render
+            const fragment = document.createDocumentFragment();
+
+            // Define category color map
+            const categoryColors = {
+                'StrongdogXP': 'text-strongdog-orange'
+                // Add other categories and their colors here
+            };
+
+            for (const categoryName in gamesByCategory) {
+                const categoryGames = gamesByCategory[categoryName];
+                if (categoryGames.length === 0) continue; // Skip empty categories
+
+                // Create Category Title
+                const titleEl = document.createElement('h2');
+                const colorClass = categoryColors[categoryName] || 'text-white'; // Default to white
+                titleEl.className = `text-3xl font-bold mt-12 mb-6 ${colorClass}`;
+                titleEl.innerHTML = `<strong>${categoryName}</strong>`;
+                fragment.appendChild(titleEl);
+
+                // Create Grid Container
+                const gridEl = document.createElement('div');
+                gridEl.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4';
+                
+                // Render games into this grid
+                renderGames(categoryGames, gridEl); // Reuse our simple render function
+                fragment.appendChild(gridEl);
+            }
+            categoryContainerElement.appendChild(fragment);
+        }
+
         function renderFavorites() {
             const favoriteIds = getFavorites();
             if (favoriteIds.length > 0) {
                 favoritesHeader.style.display = "block";
                 favoritesGameList.style.display = "grid";
-                const favoriteGames = games.filter(game => favoriteIds.includes(game.id));
+                // Filter from the global 'allGames' list
+                const favoriteGames = allGames.filter(game => favoriteIds.includes(game.id));
                 renderGames(favoriteGames, favoritesGameList);
             } else {
                 favoritesHeader.style.display = "none";
@@ -330,12 +383,11 @@
         const updateSearchResults = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
             
-            // Filter the main game list
-            const filteredGames = text ? games.filter(g => g.name.toLowerCase().includes(text)) : games;
-            renderGames(filteredGames, allListElement);
+            // Filter the main category list
+            renderAllCategories(text);
 
             // Update the dropdown
-            const filteredDropdown = text ? games.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
+            const filteredDropdown = text ? allGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
             searchResults.innerHTML = "";
             if (filteredDropdown.length === 0 || !text) {
                 searchResults.style.display = "none";
@@ -356,13 +408,14 @@
 
         // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Removed the problematic plugin check.
-            // The aspect-ratio classes will work or be polyfilled by the CSS above.
-            
-            renderGames(games, allListElement);
+            // Assign category to all imported games
+            allGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
+
+            // Initial render
+            renderAllCategories();
             renderFavorites();
 
-            searchInput.placeholder = `Search ${games.length} games...`;
+            searchInput.placeholder = `Search ${allGames.length} games...`;
             searchInput.addEventListener("input", updateSearchResults);
             searchInput.addEventListener("focus", updateSearchResults);
             
