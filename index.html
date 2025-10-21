@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>4SP - STRONGDOG</title>
+    <title>4SP - GAMES</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
 
+    <!-- Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Tailwind CSS Configuration -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -20,23 +23,25 @@
                     colors: {
                         'deep-black': '#070707',
                         'card-dark': '#111111',
-                        'accent-purple': '#5A10A9',
+                        'accent-indigo': '#4f46e5', // Unified accent color
                         'brand-border': '#252525',
                     },
                     fontFamily: {
                         sans: ['Geist', 'sans-serif'],
                     },
                     borderRadius: {
+                        'md': '0.375rem',
+                        'lg': '0.5rem',
                         'xl': '1rem',
-                        '2xl': '1.25rem',
                     }
                 }
             }
         }
     </script>
     
+    <!-- Custom Styles -->
     <style>
-        /* Base styles to match playindex.html and dailyphoto.html */
+        /* Base styles to match other professional pages */
         body {
             font-family: 'Geist', sans-serif;
             font-weight: 300;
@@ -44,147 +49,95 @@
             padding-bottom: 100px; /* Space for the fixed search bar */
         }
         
+        /* Heavier font weight for headings and bold text */
         h1, h2, h3, .font-bold, .font-semibold, strong {
             font-weight: 400 !important;
         }
-
-        /* Logo styling */
-        .logo {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-weight: 700; /* Logo keeps its bold weight */
-            letter-spacing: 0.5px;
-            text-decoration: none;
-            transition: transform 0.3s ease;
+        
+        /* New Game Card styles */
+        .zone-item .card-overlay {
+            transition: opacity 0.3s ease-in-out;
         }
 
-        .logo:hover {
-            transform: translateX(-50%) scale(1.02);
-        }
-
-        /* Credits Modal Styling */
-        #credits-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.85); z-index: 2000; align-items: center; justify-content: center;
-        }
-        #credits-popup {
-            background-color: #111111; padding: 30px; border-radius: 1rem; border: 1px solid #252525;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); max-width: 400px; width: 90%; color: white; position: relative;
-        }
-        #close-credits-popup {
-            position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: 300; cursor: pointer; color: #777;
-        }
-
-        /* Generic Modal Styling */
-        .modal {
-            display: none; position: fixed; z-index: 1005; left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.7);
-        }
-        .modal-content {
-            background-color: #111111; margin: 15% auto; padding: 20px; border: 1px solid #252525;
-            width: 80%; max-width: 500px; border-radius: 1.25rem; position: relative; color: white;
-        }
-        .modal-close {
-            color: #aaa; float: right; font-size: 28px; font-weight: bold;
-        }
-        .modal-close:hover, .modal-close:focus {
-            color: white; text-decoration: none; cursor: pointer;
+        .favorite-btn.favorited i {
+            color: #facc15; /* Tailwind yellow-400 for favorited star */
         }
         
         /* Search Bar Results Styling */
         .search-results {
-            max-height: 250px; overflow-y: auto; border-top: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 250px;
+            overflow-y: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         .search-item {
-            display: flex; align-items: center; padding: 8px 15px; cursor: pointer; transition: background-color 0.2s; color: white; text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: white;
+            text-decoration: none;
         }
         .search-item:hover { background-color: #333; }
-        .search-item img { width: 40px; height: 40px; border-radius: 8px; margin-right: 12px; object-fit: cover;}
+        .search-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-right: 12px;
+            object-fit: cover;
+        }
 
+        /* Responsive adjustments for the bottom bar */
         @media (max-width: 768px) {
             #bottom-fixed-bar {
-                width: calc(100% - 30px) !important; left: 15px !important; right: 15px !important; bottom: 10px !important;
+                width: calc(100% - 30px) !important;
+                left: 15px !important;
+                right: 15px !important;
+                bottom: 10px !important;
             }
         }
     </style>
 </head>
 
 <body class="bg-deep-black text-white min-h-screen">
-    <div class="navbar sticky top-0 z-50 p-4 shadow-xl bg-black/80 backdrop-blur-md flex items-center justify-between border-b border-brand-border">
-        <div class="menu-icon text-3xl cursor-pointer transition duration-300 hover:text-accent-purple" id="menuIcon">
-            &#9776; </div>
-        <a href="index.html" class="logo text-4xl font-extrabold text-white transition duration-300">
-            strongdog<span class="xp text-accent-purple shadow-accent-purple/50 drop-shadow-lg">XP</span>
-        </a>
-        <div class="navbar-right w-12"></div> 
-    </div>
+    <!-- Simplified Header -->
+    <header class="w-full p-4 flex justify-end items-center">
+        <a href="https://foursimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
+    </header>
 
-    <main class="mx-auto my-5 w-full max-w-7xl px-6">
+    <main class="mx-auto my-5 w-full max-w-7xl px-4">
+        <!-- Welcome message remains -->
         <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl">
-            <p class="bg-card-dark text-white p-5 rounded-2xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
-                <strong>Welcome to StrongdogXP!</strong><br>
-                This website is being hosted by <a href="https://4simpleproblems.github.io/"
-                    class="text-accent-purple font-bold no-underline hover:underline" target="_blank">4SP</a>. I have fixed
-                several bugs, and have worked with StrongdogXP to have this connected to my website. So yeah, go nuts.
+            <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
+                <strong>Welcome to the 4SP Game Hub!</strong><br>
+                This is a collection of games curated for the 4SP community. Use the search bar below to find your favorite.
             </p>
         </div>
         
+        <!-- Favorites Section -->
         <h2 id="favoritesHeader" class="text-center text-3xl font-bold mt-12 mb-6 text-white" style="display: none;">
             <strong>Favorites</strong>
         </h2>
-        <div class="games-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="favoritesGameList" style="display: none;"></div>
+        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3" id="favoritesGameList" style="display: none;"></div>
 
+        <!-- All Games Section -->
         <h2 class="text-center text-3xl font-bold mt-12 mb-6 text-white"><strong>All Games</strong></h2>
-        <div class="games-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="allList">
-            </div>
+        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3" id="allList">
+            <!-- Game cards will be injected here -->
+        </div>
     </main>
 
-    <div class="slide-menu fixed top-0 left-0 h-screen w-80 bg-black/95 backdrop-blur-md shadow-2xl shadow-black/70 z-[1000] transform -translate-x-full transition-transform duration-500 overflow-y-auto p-6 border-r border-brand-border" id="slideMenu">
-        <h3 class="text-2xl font-bold mb-6 text-white border-b border-gray-700 pb-3">Navigation</h3>
-        <div class="categories flex flex-col space-y-3">
-            <a href="https://foursimpleproblems.github.io/logged-in/games.html" class="option-link p-4 bg-card-dark rounded-xl text-white text-lg font-medium text-center transition duration-200 hover:bg-accent-purple hover:shadow-lg hover:shadow-accent-purple/50 border border-brand-border">Back to 4SP</a>
-            <a href="#" id="blockLanschool" class="option-link p-4 bg-card-dark rounded-xl text-white text-lg font-medium text-center transition duration-200 hover:bg-accent-purple hover:shadow-lg hover:shadow-accent-purple/50 border border-brand-border">Open in about:blank</a>
-            <a href="./save/index.html" class="option-link p-4 bg-card-dark rounded-xl text-white text-lg font-medium text-center transition duration-200 hover:bg-accent-purple hover:shadow-lg hover:shadow-accent-purple/50 border border-brand-border">Save manager</a>
-            <a href="https://discord.gg/dyyebUaqRS" class="option-link p-4 bg-card-dark rounded-xl text-white text-lg font-medium text-center transition duration-200 hover:bg-accent-purple hover:shadow-lg hover:shadow-accent-purple/50 border border-brand-border">Discord Server</a>
-            <a href="#" id="creditsBtn" class="option-link p-4 bg-card-dark rounded-xl text-white text-lg font-medium text-center transition duration-200 hover:bg-accent-purple hover:shadow-lg hover:shadow-accent-purple/50 border border-brand-border">Credits</a>
-        </div>
-    </div>
-    
-    <div id="credits-overlay">
-        <div id="credits-popup">
-            <span id="close-credits-popup">&times;</span>
-            <h3 class="text-xl font-bold mb-4">Credits</h3>
-            <div class="credit-person mb-3 border-b border-gray-700 pb-2">
-                <h4 class="font-semibold text-accent-purple">John P - Creator of StrongdogXP</h4>
-                <p class="text-sm text-gray-400">He downloaded, compiled and created Strongdog entirely.</p>
-            </div>
-            <div class="credit-person">
-                <h4 class="font-semibold text-accent-purple">4SP</h4>
-                <p class="text-sm text-gray-400">Converted file directories to work with the website, fixed many bugs, and polished up the design.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="popupModal">
-        <div class="modal-content">
-            <span class="modal-close" id="closeModal">&times;</span>
-            <p class="text-lg">
-                The strongdog Discord server is a place for strongdog users to chill, request
-                ideas, talk with developers, and have fun!
-                <a href="https://discord.gg/ea4x95f7cH" target="_blank" class="text-accent-purple font-bold hover:underline">Join here</a>.
-            </p>
-        </div>
-    </div>
-    
-    <div id="bottom-fixed-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-lg rounded-2xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md">
+    <!-- Bottom Fixed Search Bar -->
+    <div id="bottom-fixed-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
         <div class="relative w-full">
-            <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-purple" />
-            <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-xl shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
-                </div>
+            <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
+            <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
+                <!-- Search results dropdown will be injected here -->
+            </div>
         </div>
     </div>
 
+    <!-- Main Application Logic -->
     <script type="module">
         import games from "./cards-data.js";
 
@@ -194,8 +147,6 @@
         const favoritesGameList = document.getElementById("favoritesGameList");
         const searchInput = document.getElementById("searchInput");
         const searchResults = document.getElementById("searchResults");
-        const slideMenu = document.getElementById("slideMenu");
-        const menuIcon = document.getElementById("menuIcon");
 
         // --- Favorites Management ---
         const FAVORITES_KEY = 'strongdogXPFavorites_v2';
@@ -213,65 +164,64 @@
             }
             saveFavorites(favorites);
 
+            // Update all instances of the button for this game
             document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
-                btn.innerHTML = !isFavorited ? '&#9733;' : '&#9734;';
             });
             
             renderFavorites();
         }
 
         // --- URL and Path Helpers ---
-        function getPageNumberFromURL(url) { const regex = /(strongdog|mathcord|stroongdog)(\d*)/; const match = url.match(regex); if (match) return match[2] === "" ? 1 : parseInt(match[2], 10); return 1; }
-        const siteMapping = window.siteMapping || {};
-        function getCurrentSiteKey() { const currentURL = window.location.href; const keys = Object.keys(siteMapping).sort((a, b) => b.length - a.length); for (const k of keys) { if (currentURL.includes(k)) return k; } return null; }
-        function getAdjustedUrls(href, imgSrc, page) {
-            let adjustedImgSrc = `./img/${imgSrc}`; let currentSiteKey = getCurrentSiteKey();
-            if (currentSiteKey) {
-                const currentPageNumber = getPageNumberFromURL(currentSiteKey);
-                if (page !== undefined && page !== currentPageNumber) {
-                    let newBase = window.location.origin + `/strongdog${page}`;
-                    adjustedImgSrc = `${newBase}/img/${imgSrc.replace(/^\.\//, "")}`;
-                }
-            } else if (page !== undefined && page > 1) {
-                const newBase = `${window.location.origin}/strongdog${page}`;
-                adjustedImgSrc = `${newBase}/img/${imgSrc.replace(/^\.\//, "")}`;
-            }
-            return { adjustedImgSrc };
+        function getAdjustedUrls(imgSrc) {
+            // Simplified for a single-directory structure
+            return { adjustedImgSrc: `./img/${imgSrc}` };
         }
 
-        // --- Card Rendering (UPDATED) ---
+        // --- New Game Card Rendering Function ---
         function createGameCard(game) {
-            const { href, imgSrc, name, page, id } = game;
-            const { adjustedImgSrc } = getAdjustedUrls(href, imgSrc, page);
+            const { imgSrc, name, id } = game;
+            const { adjustedImgSrc } = getAdjustedUrls(imgSrc);
             const isFavorite = getFavorites().includes(id);
 
             const card = document.createElement("div");
-            card.className = 'zone-item bg-card-dark rounded-2xl border border-brand-border cursor-pointer transition-all duration-300 ease-in-out hover:border-accent-purple hover:-translate-y-1.5 hover:shadow-xl hover:shadow-accent-purple/20 relative overflow-hidden aspect-w-1 aspect-h-1';
+            card.className = 'zone-item group bg-card-dark rounded-md border border-brand-border cursor-pointer relative overflow-hidden aspect-w-1 aspect-h-1';
             card.dataset.gameId = id;
 
-            card.addEventListener('click', (e) => {
-                if (e.target.closest('button')) return;
-                window.location.href = `./play/?id=${id}`;
-            });
-            
             card.innerHTML = `
-                <img src="${adjustedImgSrc}" alt="${name}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/111111/888888?text=4SP'" class="w-full h-full object-cover rounded-t-2xl">
-                <div class="card-overlay absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black via-black/80 to-transparent">
-                    <h3 class="game-title text-white text-lg font-semibold mb-2">${name}</h3>
-                    <div class="flex justify-between items-center">
-                        <button class="card-play-btn bg-accent-purple text-white font-medium py-2 px-4 rounded-full text-sm transition duration-200 hover:bg-[#7216d8] hover:shadow-lg focus:outline-none flex-grow mr-2 text-center">
+                <img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/111111/888888?text=4SP'" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                
+                <div class="card-overlay absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <!-- Blurred Background -->
+                    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+                    
+                    <!-- Content Bar -->
+                    <div class="relative z-10 flex justify-between items-end h-full p-3">
+                        <button class="play-btn bg-accent-indigo text-white font-semibold py-2 px-4 rounded-md text-sm transition hover:bg-indigo-700 focus:outline-none">
                             PLAY
                         </button>
-                        <button class="favorite-btn p-2 rounded-full text-white transition duration-200 focus:outline-none text-xl ${isFavorite ? 'bg-red-600/20 text-red-400 favorited' : 'bg-white/10 hover:bg-white/20'}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
-                            ${isFavorite ? '&#9733;' : '&#9734;'}
+                        <button class="favorite-btn p-2 rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                            <i class="fa-solid fa-star text-gray-500 transition-colors"></i>
                         </button>
                     </div>
                 </div>
             `;
             
-            card.querySelector('.card-play-btn').addEventListener('click', (e) => { e.stopPropagation(); window.location.href = `./play/?id=${id}`; });
-            card.querySelector('.favorite-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(id); });
+            // Add event listeners
+            card.addEventListener('click', (e) => {
+                // Navigate if not clicking a button
+                if (!e.target.closest('button')) {
+                    window.location.href = `./play/?id=${id}`;
+                }
+            });
+            card.querySelector('.play-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = `./play/?id=${id}`;
+            });
+            card.querySelector('.favorite-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleFavorite(id);
+            });
 
             return card;
         }
@@ -309,11 +259,10 @@
         const updateSearchResults = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
             
-            const allGames = games; // Using the imported 'games' array
-            const filteredAllGames = text ? allGames.filter(g => g.name.toLowerCase().includes(text)) : allGames;
-            renderGames(filteredAllGames, allListElement);
+            const filteredGames = text ? games.filter(g => g.name.toLowerCase().includes(text)) : games;
+            renderGames(filteredGames, allListElement);
 
-            const filteredDropdown = text ? allGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
+            const filteredDropdown = text ? games.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
             searchResults.innerHTML = "";
             if (filteredDropdown.length === 0 || !text) {
                 searchResults.style.display = "none";
@@ -321,8 +270,8 @@
             }
             
             filteredDropdown.forEach(game => {
-                const { id, imgSrc, name, page } = game;
-                const { adjustedImgSrc } = getAdjustedUrls(game.href, imgSrc, page);
+                const { id, imgSrc, name } = game;
+                const { adjustedImgSrc } = getAdjustedUrls(imgSrc);
                 const linkEl = document.createElement("a");
                 linkEl.href = `./play/?id=${id}`;
                 linkEl.className = 'search-item';
@@ -332,6 +281,7 @@
             searchResults.style.display = "block";
         }, 250);
 
+        // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {
             renderGames(games, allListElement);
             renderFavorites();
@@ -341,46 +291,12 @@
             searchInput.addEventListener("focus", updateSearchResults);
             
             document.addEventListener("click", ev => {
-                if (!searchInput.closest('#bottom-fixed-bar').contains(ev.target)) {
+                const searchBarContainer = document.getElementById('bottom-fixed-bar');
+                if (searchBarContainer && !searchBarContainer.contains(ev.target)) {
                     searchResults.style.display = "none";
                 }
             });
-            
-            menuIcon.addEventListener("click", ev => {
-                ev.stopPropagation();
-                slideMenu.classList.toggle('-translate-x-full');
-            });
-            window.addEventListener("click", ev => {
-                if (!slideMenu.classList.contains('-translate-x-full') && !slideMenu.contains(ev.target) && ev.target !== menuIcon) {
-                    slideMenu.classList.add('-translate-x-full');
-                }
-            });
-
-            document.querySelector("#blockLanschool")?.addEventListener("click", ev => {
-                ev.preventDefault();
-                const newTab = window.open();
-                if (newTab) newTab.document.write(`<html><body style="margin:0;height:100vh;background:#070707;"><iframe src="${window.location.href}" style="border:none;width:100%;height:100%"></iframe></body></html>`);
-            });
-
-            const creditsBtn = document.getElementById('creditsBtn');
-            const creditsOverlay = document.getElementById('credits-overlay');
-            const closeCreditsPopup = document.getElementById('close-credits-popup');
-            if (creditsBtn) {
-                creditsBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (slideMenu) slideMenu.classList.add('-translate-x-full');
-                    if (creditsOverlay) creditsOverlay.style.display = 'flex';
-                });
-            }
-            const closePopup = () => { if (creditsOverlay) creditsOverlay.style.display = 'none'; };
-            if (closeCreditsPopup) closeCreditsPopup.addEventListener('click', closePopup);
-            if (creditsOverlay) creditsOverlay.addEventListener('click', (e) => { if (e.target === creditsOverlay) closePopup(); });
         });
     </script>
-
-    <script src="/firebase-config.js" defer></script>
-    <script src="/ban-enforcer.js" defer></script>
-    <script src="/url-changer.js" defer></script>
-    <script src="/panic-key.js" defer></script>
 </body>
 </html>
