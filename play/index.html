@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="../img/favicon.ico" id="faviconLink" />
 
+    <!-- Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
@@ -13,6 +14,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Tailwind CSS Configuration (Copied from index(5).html) -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -41,6 +43,7 @@
         }
     </script>
     
+    <!-- Custom Styles (Including Marquee) -->
     <style>
         /* Base styles */
         body {
@@ -78,15 +81,13 @@
             border: none;
         }
 
-        /* Styling for the overlay buttons (replicated sleek button style) */
-        .overlay-btn {
+        /* Styling for the control buttons */
+        .control-btn {
             width: 44px;
             height: 44px;
             border-radius: 8px;
-            background-color: rgba(30, 30, 30, 0.5); /* Dark background */
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #1a1a1a; /* Dark background for controls */
+            border: 1px solid #252525; /* brand-border */
             font-size: 20px;
             color: #fff;
             cursor: pointer;
@@ -97,9 +98,9 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
-        .overlay-btn:hover {
+        .control-btn:hover {
             transform: scale(1.05);
-            background: rgba(0, 0, 0, 0.7);
+            background: #000;
             border-color: #4f46e5; /* accent-indigo */
         }
 
@@ -107,39 +108,94 @@
         #favoriteButton.favorited .fa-solid-star {
             color: #facc15; /* yellow-400 */
         }
+        
+        /* Marquee setup for the game title */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            /* Sets the maximum width the title can occupy before scrolling */
+            max-width: calc(100% - 140px); /* 140px is a conservative estimate for button width + spacing */
+        }
+        
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100%; /* Start off-screen */
+        }
+        
+        /* Apply animation only when content overflows (handled by JS) */
+        .marquee-container.animate .marquee-text {
+            animation: marquee 15s linear infinite;
+        }
+
+        @media (max-width: 640px) {
+            /* On small screens, reduce overall padding and increase available game width */
+            .main-content {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            .marquee-container {
+                max-width: calc(100% - 100px); /* Tighter space for mobile buttons */
+            }
+            .control-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 
 <body class="bg-deep-black text-white min-h-screen">
+    <!-- Navbar from index(4).html, updated with Tailwind classes for appearance -->
     <div class="navbar sticky top-0 z-50 bg-black/70 backdrop-blur-lg border-b border-brand-border h-16 flex items-center justify-between px-6 shadow-xl">
         <a href="https://forsimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
-        <div></div> </div>
+        <div></div> <!-- Spacer for right alignment consistency -->
+    </div>
 
-    <main class="mx-auto my-8 w-full max-w-screen-xl px-4">
+    <main class="mx-auto my-8 w-full max-w-[96%] xl:max-w-screen-xl px-2 main-content">
+        <!-- Game Area -->
         <div class="game-area" id="gameArea">
-            <div class="game-container relative" id="gameContainer">
-                <div id="gameTitle" class="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur-sm rounded-md px-3 py-1 text-white truncate text-base font-semibold shadow-lg max-w-[50%]" style="font-weight: 400;">
-                    </div>
+            
+            <!-- NEW: Control Bar Above Frame -->
+            <div class="flex justify-between items-center mb-4 p-2 bg-card-dark rounded-xl border border-brand-border">
+                
+                <!-- Game Title Top Left (Marquee) -->
+                <div id="gameTitleContainer" class="marquee-container text-white text-xl font-semibold overflow-hidden">
+                    <span id="gameTitle" class="marquee-text" style="font-weight: 400;">Loading Game...</span>
+                </div>
 
-                <div id="gameOverlayButtons" class="absolute top-2 right-2 z-10 flex items-center space-x-3">
-                    <button id="favoriteButton" class="overlay-btn text-white transition duration-200 focus:outline-none" title="Favorite Game">
-                        <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
-                        <i class="fa-regular fa-star fa-regular-star text-white transition-colors hidden"></i>
+                <!-- Control Buttons Top Right -->
+                <div id="gameOverlayButtons" class="flex items-center space-x-3 flex-shrink-0">
+                    <!-- Favorite Button -->
+                    <button id="favoriteButton" class="control-btn text-white focus:outline-none" title="Favorite Game">
+                        <!-- Font Awesome Icons -->
+                        <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors hidden"></i>
+                        <i class="fa-regular fa-star fa-regular-star text-white transition-colors"></i>
                     </button>
-                    <button id="fullscreenButton" class="overlay-btn text-white transition duration-200 focus:outline-none" title="Fullscreen">
+                    <!-- Fullscreen Button -->
+                    <button id="fullscreenButton" class="control-btn text-white focus:outline-none" title="Fullscreen">
                         <i class="fa-solid fa-expand"></i>
                     </button>
                 </div>
-                
-                </div>
+            </div>
+
+            <!-- Game Frame Container -->
+            <div class="game-container" id="gameContainer">
+                <!-- Iframe will be injected here -->
+            </div>
             
             <p id="fullscreenDisclaimer" class="text-center text-gray-400 mt-4 mb-8 text-sm">
                 Use the fullscreen button for a better experience.
             </p>
         </div>
-        
-        </main>
+    </main>
     
+    <!-- External Scripts for Firebase and app logic (kept, paths are relative to index(4).html) -->
     <script src="../firebase-config.js"></script>
     <script src="../panic-key.js"></script>
     <script src="../ban-enforcer.js"></script>
@@ -147,15 +203,38 @@
     <script src="../navigation.js"></script>
     <script src="../appscript.js"></script>
     
+    <!-- Firebase/Auth Scripts from index(4).html -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
+    <!-- Main Game Loading and Logic -->
     <script type="module">
         import games from "../cards-data.js";
         import {
             siteMapping
         } from "../site-mapping.js";
+
+        // --- Utility Functions for Marquee ---
+        function updateMarquee(title) {
+            const container = document.getElementById('gameTitleContainer');
+            const textElement = document.getElementById('gameTitle');
+            
+            // Set the title text
+            textElement.textContent = title;
+            textElement.title = title;
+            
+            // Wait for the DOM to render the text to check its scroll width
+            setTimeout(() => {
+                // If the text width is greater than the container's max-width, apply marquee class
+                if (textElement.scrollWidth > container.clientWidth) {
+                    container.classList.add('animate');
+                } else {
+                    container.classList.remove('animate');
+                    textElement.style.paddingLeft = '0'; // Remove padding for non-scrolling text
+                }
+            }, 50);
+        }
 
         // --- Firebase/Favorites Management ---
         const favoriteButton = document.getElementById("favoriteButton");
@@ -175,9 +254,15 @@
             currentUserId = userId;
             currentGameId = gameId;
 
+            // Using the new secure Firestore path structure
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const db = firebase.firestore();
+            
+            // Private data storage path: /artifacts/{appId}/users/{userId}/favorites
+            const favoriteDocRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('favorites').doc(String(gameId));
+            
             try {
-                const doc = await db.collection('users').doc(userId).collection('favorites').doc(String(gameId)).get();
+                const doc = await favoriteDocRef.get();
                 const isFavorited = doc.exists;
                 toggleFavoriteUI(isFavorited);
             } catch (error) {
@@ -187,8 +272,11 @@
 
         async function toggleFavorite() {
             if (!currentUserId || !currentGameId) return;
+            
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const db = firebase.firestore();
-            const favoriteDocRef = db.collection('users').doc(currentUserId).collection('favorites').doc(String(currentGameId));
+            // Private data storage path: /artifacts/{appId}/users/{userId}/favorites
+            const favoriteDocRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUserId).collection('favorites').doc(String(currentGameId));
 
             try {
                 const doc = await favoriteDocRef.get();
@@ -198,8 +286,13 @@
                     toggleFavoriteUI(false);
                     console.log("Favorite removed.");
                 } else {
-                    // Add favorite (using a minimal document)
-                    await favoriteDocRef.set({ added: firebase.firestore.FieldValue.serverTimestamp() });
+                    // Add favorite
+                    await favoriteDocRef.set({ 
+                        added: firebase.firestore.FieldValue.serverTimestamp(),
+                        gameId: currentGameId,
+                        // Optionally store game name for easier lookup
+                        gameName: document.getElementById('gameTitle').textContent 
+                    });
                     toggleFavoriteUI(true);
                     console.log("Favorite added.");
                 }
@@ -212,7 +305,7 @@
         // --- END Firebase/Favorites Management ---
 
 
-        // --- Game Loading Logic (Copied from index(4).html) ---
+        // --- Game Loading Logic (Updated for new structure) ---
 
         function getCurrentKeyHostOnly() {
             return window.location.host;
@@ -321,17 +414,21 @@
             gameContainer.innerHTML = ''; 
             gameContainer.appendChild(iframe);
 
-            const gameTitleElement = document.getElementById("gameTitle");
-            gameTitleElement.textContent = title;
-            // Also set as a tooltip for truncated title
-            gameTitleElement.title = title;
+            // Update title with marquee logic
+            updateMarquee(title);
         }
         
         // --- Fullscreen Logic ---
         const fullscreenButton = document.getElementById("fullscreenButton");
         fullscreenButton.addEventListener("click", () => {
             const gameIframe = document.querySelector('#gameContainer iframe');
-            if (gameIframe) {
+            const gameContainer = document.getElementById('gameContainer');
+            
+            if (gameContainer && gameContainer.requestFullscreen) {
+                // Request fullscreen on the container, which holds the iframe
+                gameContainer.requestFullscreen();
+            } else if (gameIframe) {
+                // Fallback to requesting fullscreen on the iframe if the container fails
                 if (gameIframe.requestFullscreen) {
                     gameIframe.requestFullscreen();
                 } else if (gameIframe.webkitRequestFullscreen) {
@@ -381,6 +478,7 @@
         });
     </script>
 
+    <!-- Authentication Gate (Kept as a regular script block) -->
     <script>
         /**
          * Authentication Gate
@@ -393,16 +491,48 @@
                 document.body.innerHTML = `<h1 style="color:white; text-align:center;">Error: Cannot connect to services (Firebase).</h1>`;
                 return;
             }
+            
+            // Set up Firebase Auth and Firestore instances
+            // Note: The __firebase_config and __initial_auth_token are provided globally by the Canvas environment.
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            const app = firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+            db.settings({
+                ignoreUndefinedProperties: true
+            });
+            firebase.firestore.setLogLevel('debug'); // Enable Firestore logging
 
-            firebase.auth().onAuthStateChanged(user => {
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+            
+            const handleAuth = async () => {
+                try {
+                    if (initialAuthToken) {
+                        await auth.signInWithCustomToken(initialAuthToken);
+                    } else {
+                        await auth.signInAnonymously();
+                    }
+                } catch (error) {
+                    console.error("Firebase Auth Error:", error);
+                    // Fallback to anonymous sign-in if custom token fails
+                    await auth.signInAnonymously();
+                }
+            };
+            
+            auth.onAuthStateChanged(user => {
                 if (user) {
                     // User is logged in. Reveal the page and notify modules.
                     document.body.style.visibility = 'visible';
                     document.dispatchEvent(new CustomEvent('userAuthenticated', { detail: { uid: user.uid } }));
                     
                 } else {
-                    // User is logged out. Redirect them to the login page.
-                    window.location.href = 'https://4simpleproblems.github.io/login.html';
+                    // Start the authentication process if not already logged in
+                    if (!auth.currentUser) {
+                        handleAuth();
+                    } else {
+                        // If auth state changes to null unexpectedly, redirect to login
+                        window.location.href = 'https://4simpleproblems.github.io/login.html';
+                    }
                 }
             });
         });
@@ -410,7 +540,8 @@
         // Prevent default behavior for directional keys for smoother iframe interaction
         document.addEventListener("keydown", function (event) {
             if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
-                event.preventDefault();
+                // event.preventDefault(); // Commented out to allow iframe games to potentially handle these keys, 
+                                          // but kept for reference if needed for the parent page.
             }
         });
     </script>
