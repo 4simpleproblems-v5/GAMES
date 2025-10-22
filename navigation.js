@@ -10,6 +10,7 @@
  * for all Gemini API calls, as requested.
  * 2. CRITICAL CDN FIX (COMPLETE): Ensures the navigation bar renders by using stable Firebase Compat SDKs.
  * 3. RENDER PRIORITY: Ensures the navigation bar is rendered immediately after CSS injection, preventing the AI logic failure from blocking the UI.
+ * 4. WIDESCREEN UPDATE: Removed max-width from the 'nav' element to allow it to fill the screen.
  */
 
 // =========================================================================
@@ -211,7 +212,8 @@ let currentAgent = 'Standard'; // Default agent
                 /* Base Styles */
                 body { padding-top: 4rem; }
                 .auth-navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: #000000; border-bottom: 1px solid rgb(31 41 55); height: 4rem; }
-                .auth-navbar nav { max-width: 80rem; margin: auto; padding: 0 1rem; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative; }
+                /* WIDESCREEN UPDATE: Removed 'max-width: 80rem;' and 'margin: auto;' */
+                .auth-navbar nav { padding: 0 1rem; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative; }
                 .initial-avatar { background: linear-gradient(135deg, #374151 0%, #111827 100%); font-family: sans-serif; text-transform: uppercase; display: flex; align-items: center; justify-content: center; color: white; }
                 
                 /* Auth Dropdown Menu Styles */
