@@ -6,17 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
 
-    <!-- Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Note: Make sure this path is correct for index.html -->
     <script src="./navigation.js"></script> 
 
-    <!-- Tailwind CSS Configuration -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -46,7 +43,6 @@
         }
     </script>
     
-    <!-- Custom Styles -->
     <style>
         /* Base styles */
         body {
@@ -171,7 +167,6 @@
 
 <body class="bg-deep-black text-white min-h-screen">
     <header class="w-full p-4 flex justify-end items-center">
-        <!-- Changed: Updated href to be relative for root -->
         <a href="./index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
     </header>
 
@@ -188,31 +183,25 @@
         </h2>
         <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
-        <!-- New Category Viewer -->
         <div id="category-viewer" class="w-full mt-12">
-            <!-- Category Title Slider -->
             <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
                 <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="overflow-hidden w-64 text-center">
                     <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
-                        <!-- Category titles will be dynamically injected here -->
-                    </div>
+                        </div>
                 </div>
                 <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
             
-            <!-- Game Grid -->
             <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
-                <!-- Game cards for the selected category will be injected here -->
-            </div>
+                </div>
         </div>
     </main>
 
-    <!-- Bottom Fixed Search Bar -->
     <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
         <div class="relative flex items-center w-full">
             <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
@@ -220,12 +209,10 @@
                 <i class="fa-solid fa-layer-group"></i>
             </button>
             <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
-                <!-- Search results dropdown will be injected here -->
-            </div>
+                </div>
         </div>
     </div>
     
-    <!-- Game Viewer Modal -->
     <div id="zoneViewer" aria-modal="true" role="dialog">
         <div class="zone-header">
              <div class="zone-title">
@@ -240,7 +227,6 @@
         <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"></iframe>
     </div>
 
-    <!-- Main Application Logic -->
     <script type="module">
         import games from "./cards-data.js";
         // ADDED: Import siteMapping, assuming it's in the same root directory
@@ -302,7 +288,7 @@
         function getAdjustedUrls(imgSrc, page) {
             if (page && page > 1) {
                 // Assumes index.html is in root, so strongdog folders are peers
-                return { adjustedImgSrc: `./strongdog${page}/img/${imgSrc}` };
+                return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
             }
             // Assumes default images are in ./img/
             return { adjustedImgSrc: `./img/${imgSrc}` };
@@ -314,6 +300,7 @@
             return window.location.host;
         }
 
+        // --- THIS FUNCTION HAS BEEN MODIFIED ---
         function getBaseURLForPage(page) {
             const currentHost = getCurrentKeyHostOnly();
             const currentPath = window.location.pathname;
@@ -321,18 +308,20 @@
             // Adjusted paths assuming index.html is in the root
             if (currentHost === "v5-simpleproblems.github.io" && currentPath.toLowerCase().startsWith('/GAMES/')) {
                 if (!page || page === 1) return "/GAMES/";
+                // Changed from ../ to ./
                 if (page === 2) return "../strongdog2/";
                 if (page === 3) return "../strongdog3/";
                 if (page === 4) return "../strongdog4/";
                 if (page === 5) return "../strongdog5/";
-                return "../GAMES/";
+                return "/GAMES/"; // Fallback for this specific host
             }
             const explicitMappings = {
                 "jman1593.github.io": {
-                    2: "./strongdog2/", // Changed from ../
+                    2: "./strongdog2/", // Already correct
                 },
                 "v5-4simpleproblems.github.io": {
-                    2: "../strongdog2/", // Changed from ../../
+                    // Changed from ../ to ./
+                    2: "../strongdog2/", 
                     3: "../strongdog3/",
                     4: "../strongdog4/",
                     5: "../strongdog5/",
@@ -343,25 +332,27 @@
             }
             
             // Default paths assuming peer directories
-            if (!page || page === 1) return "./"; // Default Strongdog path
+            if (!page || page === 1) return "./"; // Default Strongdog path (root)
             
             const arr = siteMapping[currentHost];
             if (!arr) {
-                if (page === 2) return ".../strongdog2/";
-                if (page === 3) return "./strongdog3/";
+                // Changed from .../ and ../ to ./
+                if (page === 2) return "../strongdog2/";
+                if (page === 3) return "../strongdog3/";
                 if (page === 4) return "../strongdog4/";
                 if (page === 5) return "../strongdog5/";
-                return "../";
+                return "./"; // Fallback to root
             }
             const index = page - 2;
             if (arr[index]) return arr[index]; // Use mapping directly
             
             // Fallback
+            // Changed from ../ to ./
             if (page === 2) return "../strongdog2/";
             if (page === 3) return "../strongdog3/";
             if (page === 4) return "../strongdog4/";
             if (page === 5) return "../strongdog5/";
-            return "../";
+            return "./"; // Fallback to root
         }
 
         async function getEmbedPath(adjustedHref, originalHref, page) {
