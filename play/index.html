@@ -52,7 +52,6 @@
             padding: 0;
             overflow-x: hidden;
             line-height: 1.6;
-            /* Removed visibility: hidden; and now it defaults to visible */
         }
         
         h1, h2, h3, .font-bold, .font-semibold, strong {
@@ -100,12 +99,6 @@
             transform: scale(1.05);
             background: #000;
             border-color: #4f46e5; /* accent-indigo */
-        }
-
-        /* Favorite Star coloring */
-        /* Since favorites logic is removed, this CSS is now decorative */
-        #favoriteButton.favorited .fa-solid-star {
-            color: #facc15; /* yellow-400 */
         }
         
         /* Marquee setup for the game title */
@@ -164,9 +157,8 @@
                 </div>
 
                 <div id="gameOverlayButtons" class="flex items-center space-x-3 flex-shrink-0">
-                    <button id="favoriteButton" class="control-btn text-white focus:outline-none" title="Favorite Game">
-                        <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors hidden"></i>
-                        <i class="fa-regular fa-star fa-regular-star text-white transition-colors"></i>
+                    <button id="downloadButton" class="control-btn text-white focus:outline-none" title="Download Game">
+                        <i class="fa-solid fa-download"></i>
                     </button>
                     <button id="fullscreenButton" class="control-btn text-white focus:outline-none" title="Fullscreen">
                         <i class="fa-solid fa-expand"></i>
@@ -175,7 +167,7 @@
             </div>
 
             <div class="game-container" id="gameContainer">
-                </div>
+            </div>
             
             <p id="fullscreenDisclaimer" class="text-center text-gray-400 mt-4 mb-8 text-sm">
                 Use the fullscreen button for a better experience.
@@ -217,23 +209,42 @@
             }, 50);
         }
 
-        // --- Firebase/Favorites Management (REMOVED: Keeping minimum variables for script to run) ---
-        const favoriteButton = document.getElementById("favoriteButton");
-        let currentGameId = null;
-
-        function toggleFavoriteUI(isFavorited) {
-            favoriteButton.classList.toggle('favorited', isFavorited);
-            favoriteButton.title = isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
-            // Simple Font Awesome toggle based on the 'favorited' class
-            favoriteButton.querySelector('.fa-solid-star').classList.toggle('hidden', !isFavorited);
-            favoriteButton.querySelector('.fa-regular-star').classList.toggle('hidden', isFavorited);
-        }
+        // --- Download Logic (REPLACING Favorites) ---
+        const downloadButton = document.getElementById("downloadButton");
+        let currentGamePath = null;
+        let currentTitle = "Game";
         
-        // Disable the favorite button functionality since authentication is removed
-        favoriteButton.addEventListener("click", () => {
-             console.log("Favorite functionality is disabled as authentication was removed.");
+        downloadButton.addEventListener("click", () => {
+            if (currentGamePath) {
+                // NOTE: The actual downloaded file/archive must include the "4SP" watermark 
+                // in the bottom-right corner of the game's display area.
+                // The watermark should be dark and translucent to preserve visibility and clickability 
+                // of elements beneath it. This modification must be applied to the game's source 
+                // files (i.e., the HTML/CSS of the game running inside the iframe) before packaging 
+                // for download. This client-side function initiates the download.
+                
+                console.log(`Attempting to download game: ${currentTitle} from path: ${currentGamePath}`);
+                
+                // For a client-side placeholder, you might link to a pre-packaged zip or use a service.
+                // Here, we just log and could potentially link to a known download URL for the game.
+                
+                // Example of initiating a simple file download (requires the path to be a downloadable file/archive):
+                const downloadLink = document.createElement('a');
+                // You would need a server-side endpoint or a pre-packaged ZIP path here.
+                // For example: downloadLink.href = `/download/game/${currentGameId}.zip`;
+                downloadLink.href = currentGamePath; // Placeholder, assuming currentGamePath points to a downloadable asset
+                downloadLink.download = `${currentTitle.replace(/\s/g, '_')}_4SP.zip`; 
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                alert(`Preparing to download "${currentTitle}". Ensure your downloaded files contain the translucent '4SP' watermark.`);
+
+            } else {
+                 alert("Game is not loaded or cannot be downloaded.");
+            }
         });
-        // --- END Firebase/Favorites Management ---
+        // --- END Download Logic ---
 
 
         // --- Game Loading Logic (Updated for new structure) ---
@@ -347,6 +358,10 @@
 
             // Update title with marquee logic
             updateMarquee(title);
+            
+            // Set global variables for download function
+            currentGamePath = gamePath; // Using embed path as placeholder for download link
+            currentTitle = title;
         }
         
         // --- Fullscreen Logic ---
@@ -384,7 +399,7 @@
             if (!selectedGame) {
                 // Not Found Game
                 embedGame("../404.html", "Game Not Found");
-                favoriteButton.style.display = 'none'; // Hide favorite for 404
+                downloadButton.style.display = 'none'; // Hide download button for 404
             } else {
                 const page = selectedGame.page;
                 const baseURL = getBaseURLForPage(page);
@@ -393,7 +408,7 @@
                 const embedPath = await getEmbedPath(adjustedHref, selectedGame.href, page);
                 embedGame(embedPath, selectedGame.name);
                 
-                currentGameId = selectedGame.id; // Set global game ID
+                // currentGameId is no longer needed since favorite is removed.
             }
         });
         
