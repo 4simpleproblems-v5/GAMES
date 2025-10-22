@@ -6,13 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
 
+    <!-- Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../navigation.js"></script>
 
+    <!-- Tailwind CSS Configuration -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -42,6 +45,7 @@
         }
     </script>
     
+    <!-- Custom Styles -->
     <style>
         /* Base styles */
         body {
@@ -115,22 +119,26 @@
         /* --- Game Viewer Modal --- */
         #zoneViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 5000; flex-direction: column; }
         #zoneViewer .zone-header {
-            background-color: #111111; /* Changed: Black background */
+            background-color: #111111;
             padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #252525; /* Changed: Dark border */
+            border-bottom: 1px solid #252525;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             flex-shrink: 0;
         }
         #zoneViewer .zone-header .zone-title h2 {
             margin: 0;
             font-size: 1.3em;
-            color: #ffffff; /* Changed: White title */
+            color: #ffffff;
             font-family: 'Geist', sans-serif;
         }
-        /* Changed: New button styles */
+        /* Added: Flex layout for horizontal buttons */
+        #zoneViewer .zone-header .zone-controls {
+            display: flex;
+            align-items: center;
+        }
         #zoneViewer .zone-header .zone-controls button {
             margin-left: 8px;
             width: 40px;
@@ -142,7 +150,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 0.5rem; /* squircle */
             cursor: pointer;
-            font-size: 1em; /* Make icon a reasonable size */
+            font-size: 1em;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -159,7 +167,8 @@
 
 <body class="bg-deep-black text-white min-h-screen">
     <header class="w-full p-4 flex justify-end items-center">
-        <a href="https://foursimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
+        <!-- Changed: Updated href -->
+        <a href="../index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
     </header>
 
     <main class="mx-auto my-5 w-full max-w-screen-2xl px-4">
@@ -175,25 +184,31 @@
         </h2>
         <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
+        <!-- New Category Viewer -->
         <div id="category-viewer" class="w-full mt-12">
+            <!-- Category Title Slider -->
             <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
                 <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="overflow-hidden w-64 text-center">
                     <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
-                        </div>
+                        <!-- Category titles will be dynamically injected here -->
+                    </div>
                 </div>
                 <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
             
+            <!-- Game Grid -->
             <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
-                </div>
+                <!-- Game cards for the selected category will be injected here -->
+            </div>
         </div>
     </main>
 
+    <!-- Bottom Fixed Search Bar -->
     <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
         <div class="relative flex items-center w-full">
             <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
@@ -201,10 +216,12 @@
                 <i class="fa-solid fa-layer-group"></i>
             </button>
             <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
-                </div>
+                <!-- Search results dropdown will be injected here -->
+            </div>
         </div>
     </div>
     
+    <!-- Game Viewer Modal -->
     <div id="zoneViewer" aria-modal="true" role="dialog">
         <div class="zone-header">
              <div class="zone-title">
@@ -219,8 +236,11 @@
         <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
     </div>
 
+    <!-- Main Application Logic -->
     <script type="module">
         import games from "./cards-data.js";
+        // IMPORT: Added siteMapping, required for Strongdog game path calculation
+        import { siteMapping } from "../site-mapping.js";
 
         // --- Configuration & Globals ---
         const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
@@ -231,6 +251,9 @@
         let allGames = [];
         let categories = [];
         let currentCategoryIndex = 0;
+        // ADDED: Stores the game object currently loaded in the modal
+        let currentGameInViewer = null; 
+        
         const categoryColors = {
             'StrongdogXP': 'text-strongdog-orange',
             'GN-Math': 'text-gn-math'
@@ -270,7 +293,6 @@
         }
 
         // --- URL and Path Helpers ---
-        // Added: Re-introduced getAdjustedUrls from index.html
         function getAdjustedUrls(imgSrc, page) {
             if (page && page > 1) {
                 return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
@@ -278,11 +300,112 @@
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
 
+        // --- HELPER FUNCTIONS (Ported from playindex.html) ---
+        
+        function getCurrentKeyHostOnly() {
+            return window.location.host;
+        }
+
+        function getBaseURLForPage(page) {
+            const currentHost = getCurrentKeyHostOnly();
+            const currentPath = window.location.pathname;
+
+            if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
+                if (!page || page === 1) return "/STRONGDOG/";
+                if (page === 2) return "/strongdog2/";
+                if (page === 3) return "/strongdog3/";
+                if (page === 4) return "/strongdog4/";
+                if (page === 5) return "/strongdog5/";
+                return "/STRONGDOG/";
+            }
+            const explicitMappings = {
+                "jman1593.github.io": {
+                    2: "../strongdog2/",
+                },
+                "v5-4simpleproblems.github.io": {
+                    2: "../../strongdog2/",
+                    3: "../../strongdog3/",
+                    4: "../../strongdog4/",
+                    5: "../../strongdog5/",
+                }
+            };
+            if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
+                return explicitMappings[currentHost][page];
+            }
+            if (!page || page === 1) return "../";
+            const arr = siteMapping[currentHost];
+            if (!arr) {
+                if (page === 2) return "../../strongdog2/";
+                if (page === 3) return "../../strongdog3/";
+                if (page === 4) return "../../strongdog4/";
+                if (page === 5) return "../../strongdog5/";
+                return "../";
+            }
+            const index = page - 2;
+            if (arr[index]) return arr[index].replace(/^\.\/$/, "../");
+            if (page === 2) return "../../strongdog2/";
+            if (page === 3) return "../../strongdog3/";
+            if (page === 4) return "../../strongdog4/";
+            if (page === 5) return "../../strongdog5/";
+            return "../../";
+        }
+
+        async function getEmbedPath(adjustedHref, originalHref, page) {
+            let cleanHref = adjustedHref.replace(/index\.html$/, "").replace(/base\.html$/, "").replace(/\.html$/, "");
+            if (!cleanHref.endsWith("/")) cleanHref += "/";
+            const pathsToTry = [cleanHref + "game/index.html", cleanHref + "game/base.html", cleanHref + "gamereal/index.html", cleanHref + "gamereal/base.html", cleanHref + "index.html", cleanHref + "base.html", ];
+            try {
+                const response = await fetch(adjustedHref, {
+                    method: "GET"
+                });
+                if (response.ok) {
+                    const text = await response.text();
+                    const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/);
+                    if (match) {
+                        const [, , embedPath, , title] = match;
+                        const resolvedPath = new URL(embedPath, adjustedHref).href;
+                        if (await fileExists(resolvedPath)) return resolvedPath;
+                    }
+                }
+            } catch (error) {
+                console.warn("Failed to parse embed path from cards-data.js", error);
+            }
+            for (const path of pathsToTry) {
+                if (await fileExists(path)) return path;
+            }
+            return adjustHrefPath(originalHref, page);
+        }
+
+        function adjustHrefPath(path, page) {
+            path = path.replace(/^\.\//, "").replace(/^\//, "");
+            const baseURL = getBaseURLForPage(page);
+            let finalPath;
+            if (baseURL === "../") {
+                finalPath = "../" + path;
+            } else {
+                finalPath = baseURL.endsWith("/") ? baseURL + path : baseURL + "/" + path;
+            }
+            return finalPath;
+        }
+
+        async function fileExists(url) {
+            try {
+                const response = await fetch(url, {
+                    method: "HEAD"
+                });
+                return response.ok;
+            } catch {
+                return false;
+            }
+        }
+        
+        // --- END HELPER FUNCTIONS ---
+
+
         // --- Game Card Rendering ---
         function createGameCard(game) {
             const isStrongdog = game.category === 'StrongdogXP';
             
-            // Changed: Use getAdjustedUrls for strongdog, direct src for others
             let imgSrc;
             if (isStrongdog) {
                 const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
@@ -316,14 +439,34 @@
                 </div>
             `;
             
-            const handlePlay = (e) => {
+            // --- MODIFIED: handlePlay now loads Strongdog games in the modal ---
+            const handlePlay = async (e) => {
                 e.stopPropagation();
+                
+                // You could add a loading spinner here
+                
                 if (isStrongdog) {
-                    window.location.href = `./play/?id=${game.id}`;
+                    // --- Logic ported from playindex.html ---
+                    const page = game.page;
+                    const baseURL = getBaseURLForPage(page);
+                    let adjustedHref = game.href.replace(/^\.\//, "");
+                    adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                    const embedPath = await getEmbedPath(adjustedHref, game.href, page);
+                    
+                    // Create a game object compatible with openZone
+                    const strongdogGameData = {
+                        ...game,
+                        url: embedPath, // The direct path to embed
+                        isDirectLink: true // Flag to tell openZone to set src directly
+                    };
+                    openZone(strongdogGameData);
+                    // --- End of ported logic ---
                 } else {
+                    // GN-Math games (existing logic)
                     openZone(game);
                 }
             };
+            // --- END MODIFICATION ---
 
             card.querySelector('.group').addEventListener('click', handlePlay);
             card.querySelector('.play-btn').addEventListener('click', handlePlay);
@@ -336,64 +479,96 @@
         }
 
         // --- Game Viewer Logic ---
+        // --- MODIFIED: openZone now handles both game types ---
         function openZone(game) {
             if (!game || !game.url) {
                 console.error("Could not load game: Invalid game data.");
                 return;
             }
+
+            currentGameInViewer = game; // Store the game object for 'New Tab' logic
+            
             const gameUrl = game.url;
             const zoneViewer = document.getElementById('zoneViewer');
             const zoneFrame = document.getElementById('zoneFrame');
             const zoneNameEl = document.getElementById('zoneNameEl');
             
             zoneNameEl.textContent = game.name;
-            zoneFrame.src = 'about:blank';
+            zoneFrame.src = 'about:blank'; // Clear previous game
 
-            fetch(`${gameUrl}?t=${Date.now()}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-                    return response.text();
-                })
-                .then(html => {
-                    const doc = zoneFrame.contentWindow.document;
-                    doc.open();
-                    doc.write(html);
-                    doc.close();
-                    zoneViewer.style.display = "flex";
-                })
-                .catch(error => {
-                    console.error(`Failed to load game "${game.name}": ${error.message}.`);
-                    closeZoneViewer();
-                });
+            // Set sandbox for Strongdog games (like playindex.html did)
+            // Remove it for GN-Math games (like index.html did)
+            if (game.isDirectLink) {
+                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
+            } else {
+                zoneFrame.removeAttribute('sandbox');
+            }
+
+            if (game.isDirectLink) {
+                // --- Strongdog Game Logic ---
+                // This is a direct path, just set the src.
+                zoneFrame.src = gameUrl;
+                zoneViewer.style.display = "flex";
+            } else {
+                // --- GN-Math Game Logic (existing) ---
+                // This is a relative path, fetch the HTML.
+                fetch(`${gameUrl}?t=${Date.now()}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                        return response.text();
+                    })
+                    .then(html => {
+                        const doc = zoneFrame.contentWindow.document;
+                        doc.open();
+                        doc.write(html);
+                        doc.close();
+                        zoneViewer.style.display = "flex";
+                    })
+                    .catch(error => {
+                        console.error(`Failed to load game "${game.name}": ${error.message}.`);
+                        closeZoneViewer();
+                    });
+            }
         }
 
+        // --- MODIFIED: closeZoneViewer now clears the stored game ---
         function closeZoneViewer() {
             const zoneViewer = document.getElementById('zoneViewer');
             const zoneFrame = document.getElementById('zoneFrame');
             zoneViewer.style.display = "none";
             if (zoneFrame) zoneFrame.src = 'about:blank';
+            currentGameInViewer = null; // Clear the current game
         }
 
+        // --- MODIFIED: openGameInNewTab now handles both game types ---
         function openGameInNewTab() {
-            const zoneNameEl = document.getElementById('zoneNameEl');
-            const game = allGames.find(z => z.name === zoneNameEl.textContent);
-            if (!game) return;
+            if (!currentGameInViewer) return;
 
-            const gameUrl = game.url;
-            const newWindow = window.open("about:blank", "_blank");
-            if (newWindow) {
-                fetch(`${gameUrl}?t=${Date.now()}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        newWindow.document.open();
-                        newWindow.document.write(html);
-                        newWindow.document.close();
-                    }).catch(err => {
-                        console.error("Error opening in new tab:", err);
-                        newWindow.close();
-                    });
+            const gameUrl = currentGameInViewer.url; // This is the correct, final URL
+            
+            if (currentGameInViewer.isDirectLink) {
+                // --- Strongdog Game Logic ---
+                // It's a direct link, just open it.
+                window.open(gameUrl, "_blank");
+            } else {
+                // --- GN-Math Game Logic (existing) ---
+                // It's a relative path, fetch and write.
+                const newWindow = window.open("about:blank", "_blank");
+                if (newWindow) {
+                    fetch(`${gameUrl}?t=${Date.now()}`)
+                        .then(response => response.text())
+                        .then(html => {
+                            newWindow.document.open();
+                            newWindow.document.write(html);
+                            newWindow.document.close();
+                        }).catch(err => {
+                            console.error("Error opening in new tab:", err);
+                            newWindow.close();
+                        });
+                }
             }
         }
+        // --- END MODIFICATIONS ---
 
 
         // --- Game List Rendering ---
@@ -478,7 +653,6 @@
             filteredDropdown.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
                 
-                // Changed: Logic for imgSrc in dropdown
                 let imgSrc;
                 if (isStrongdog) {
                     const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
@@ -487,20 +661,32 @@
                     imgSrc = game.imgSrc;
                 }
                 
-                const href = isStrongdog ? `./play/?id=${game.id}` : '#'; // Use # for modal games
+                // MODIFIED: No longer links to /play/ page
+                const href = '#'; 
                 
                 const linkEl = document.createElement("a");
                 linkEl.href = href;
                 linkEl.className = 'search-item';
                 linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
                 
-                if(!isStrongdog) {
-                    linkEl.addEventListener('click', (e) => {
-                        e.preventDefault();
+                // MODIFIED: Search results now also use the new loading logic
+                linkEl.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    if (isStrongdog) {
+                        const page = game.page;
+                        const baseURL = getBaseURLForPage(page);
+                        let adjustedHref = game.href.replace(/^\.\//, "");
+                        adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                        const embedPath = await getEmbedPath(adjustedHref, game.href, page);
+                        openZone({ ...game, url: embedPath, isDirectLink: true });
+                    } else {
                         openZone(game);
-                        searchResults.style.display = "none";
-                    });
-                }
+                    }
+                    searchResults.style.display = "none";
+                    searchInput.value = ''; // Clear search
+                    renderGamesForCurrentCategory(); // Reset grid
+                });
+                
                 searchResults.appendChild(linkEl);
             });
             searchResults.style.display = "block";
@@ -558,7 +744,14 @@
 
             document.getElementById('fullscreenBtnZone')?.addEventListener('click', () => {
                 const zoneFrame = document.getElementById('zoneFrame');
-                if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
+                // MODIFIED: Request fullscreen on the iframe itself, as it's the game content
+                if (zoneFrame?.requestFullscreen) {
+                    zoneFrame.requestFullscreen();
+                } else if (zoneFrame?.webkitRequestFullscreen) { /* Safari */
+                    zoneFrame.webkitRequestFullscreen();
+                } else if (zoneFrame?.msRequestFullscreen) { /* IE11 */
+                    zoneFrame.msRequestFullscreen();
+                }
             });
             document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
