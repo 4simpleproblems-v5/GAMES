@@ -4,7 +4,7 @@
     <title>4SP - Game Hub</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" id="faviconLink" />
 
     <!-- Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -238,9 +238,9 @@
 
     <!-- Main Application Logic -->
     <script type="module">
-        import games from "/cards-data.js";
+        import games from "../cards-data.js";
         // IMPORT: Added siteMapping, required for Strongdog game path calculation
-        import { siteMapping } from "/site-mapping.js";
+        import { siteMapping } from "../site-mapping.js";
 
         // --- Configuration & Globals ---
         const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
@@ -297,7 +297,7 @@
             if (page && page > 1) {
                 return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
             }
-            return { adjustedImgSrc: `./img/${imgSrc}` };
+            return { adjustedImgSrc: `../img/${imgSrc}` };
         }
 
         // --- HELPER FUNCTIONS (Ported from playindex.html) ---
@@ -310,7 +310,7 @@
             const currentHost = getCurrentKeyHostOnly();
             const currentPath = window.location.pathname;
 
-            if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
+            if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/games/')) {
                 if (!page || page === 1) return "/STRONGDOG/";
                 if (page === 2) return "/strongdog2/";
                 if (page === 3) return "/strongdog3/";
@@ -335,19 +335,19 @@
             if (!page || page === 1) return "../";
             const arr = siteMapping[currentHost];
             if (!arr) {
-                if (page === 2) return "../../strongdog2/";
-                if (page === 3) return "../../strongdog3/";
-                if (page === 4) return "../../strongdog4/";
-                if (page === 5) return "../../strongdog5/";
+                if (page === 2) return "../strongdog2/";
+                if (page === 3) return "../strongdog3/";
+                if (page === 4) return "../strongdog4/";
+                if (page === 5) return "../strongdog5/";
                 return "../";
             }
             const index = page - 2;
             if (arr[index]) return arr[index].replace(/^\.\/$/, "../");
-            if (page === 2) return "../../strongdog2/";
-            if (page === 3) return "../../strongdog3/";
-            if (page === 4) return "../../strongdog4/";
-            if (page === 5) return "../../strongdog5/";
-            return "../../";
+            if (page === 2) return "../strongdog2/";
+            if (page === 3) return "../strongdog3/";
+            if (page === 4) return "../strongdog4/";
+            if (page === 5) return "../strongdog5/";
+            return "../";
         }
 
         async function getEmbedPath(adjustedHref, originalHref, page) {
@@ -761,3 +761,4 @@
     </script>
 </body>
 </html>
+
