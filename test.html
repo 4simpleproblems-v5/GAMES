@@ -319,23 +319,23 @@
             const currentPath = window.location.pathname;
 
             // Adjusted paths assuming index.html is in the root
-            if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
-                if (!page || page === 1) return "/STRONGDOG/";
-                if (page === 2) return "/strongdog2/";
-                if (page === 3) return "/strongdog3/";
-                if (page === 4) return "/strongdog4/";
-                if (page === 5) return "/strongdog5/";
-                return "/STRONGDOG/";
+            if (currentHost === "v5-simpleproblems.github.io" && currentPath.toLowerCase().startsWith('/GAMES/')) {
+                if (!page || page === 1) return "/GAMES/";
+                if (page === 2) return "../strongdog2/";
+                if (page === 3) return "../strongdog3/";
+                if (page === 4) return "../strongdog4/";
+                if (page === 5) return "../strongdog5/";
+                return "../GAMES/";
             }
             const explicitMappings = {
                 "jman1593.github.io": {
                     2: "./strongdog2/", // Changed from ../
                 },
                 "v5-4simpleproblems.github.io": {
-                    2: "./strongdog2/", // Changed from ../../
-                    3: "./strongdog3/",
-                    4: "./strongdog4/",
-                    5: "./strongdog5/",
+                    2: "../strongdog2/", // Changed from ../../
+                    3: "../strongdog3/",
+                    4: "../strongdog4/",
+                    5: "../strongdog5/",
                 }
             };
             if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
@@ -347,21 +347,21 @@
             
             const arr = siteMapping[currentHost];
             if (!arr) {
-                if (page === 2) return "./strongdog2/";
+                if (page === 2) return ".../strongdog2/";
                 if (page === 3) return "./strongdog3/";
-                if (page === 4) return "./strongdog4/";
-                if (page === 5) return "./strongdog5/";
-                return "./";
+                if (page === 4) return "../strongdog4/";
+                if (page === 5) return "../strongdog5/";
+                return "../";
             }
             const index = page - 2;
             if (arr[index]) return arr[index]; // Use mapping directly
             
             // Fallback
-            if (page === 2) return "./strongdog2/";
-            if (page === 3) return "./strongdog3/";
-            if (page === 4) return "./strongdog4/";
-            if (page === 5) return "./strongdog5/";
-            return "./";
+            if (page === 2) return "../strongdog2/";
+            if (page === 3) return "../strongdog3/";
+            if (page === 4) return "../strongdog4/";
+            if (page === 5) return "../strongdog5/";
+            return "../";
         }
 
         async function getEmbedPath(adjustedHref, originalHref, page) {
