@@ -93,6 +93,7 @@
             justify-content: center;
             transition: all 0.2s ease;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            flex-shrink: 0; /* Prevent the button from shrinking */
         }
 
         .control-btn:hover {
@@ -105,8 +106,7 @@
         .marquee-container {
             overflow: hidden;
             white-space: nowrap;
-            /* Sets the maximum width the title can occupy before scrolling */
-            max-width: calc(100% - 140px); /* 140px is a conservative estimate for button width + spacing */
+            /* Max width is dynamically calculated in JS to respect the button's width */
         }
         
         @keyframes marquee {
@@ -130,9 +130,6 @@
                 padding-left: 0.5rem;
                 padding-right: 0.5rem;
             }
-            .marquee-container {
-                max-width: calc(100% - 100px); /* Tighter space for mobile buttons */
-            }
             .control-btn {
                 width: 38px;
                 height: 38px;
@@ -144,22 +141,23 @@
 
 <body class="bg-deep-black text-white min-h-screen">
     <div class="navbar sticky top-0 z-50 bg-black/70 backdrop-blur-lg border-b border-brand-border h-16 flex items-center justify-between px-6 shadow-xl">
-        <a href="https://forsimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
-        <div></div> </div>
+        <!-- NAV BAR TITLE: Updated to redirect to ../index.html -->
+        <a href="../index.html" class="text-white font-semibold text-lg hover:text-accent-indigo transition" style="font-weight: 400;">4SP Games</a>
+        <div></div> 
+    </div>
 
     <main class="mx-auto my-8 w-full max-w-[96%] xl:max-w-screen-xl px-2 main-content">
         <div class="game-area" id="gameArea">
             
             <div class="flex justify-between items-center mb-4 p-2 bg-card-dark rounded-xl border border-brand-border">
                 
-                <div id="gameTitleContainer" class="marquee-container text-white text-xl font-semibold overflow-hidden">
+                <!-- TITLE CONTAINER: Updated to use flex-grow for maximum width -->
+                <div id="gameTitleContainer" class="marquee-container text-white text-xl font-semibold overflow-hidden flex-grow mr-4">
                     <span id="gameTitle" class="marquee-text" style="font-weight: 400;">Loading Game...</span>
                 </div>
 
                 <div id="gameOverlayButtons" class="flex items-center space-x-3 flex-shrink-0">
-                    <button id="downloadButton" class="control-btn text-white focus:outline-none" title="Download Game">
-                        <i class="fa-solid fa-download"></i>
-                    </button>
+                    <!-- ONLY FULLSCREEN BUTTON REMAINS -->
                     <button id="fullscreenButton" class="control-btn text-white focus:outline-none" title="Fullscreen">
                         <i class="fa-solid fa-expand"></i>
                     </button>
@@ -188,66 +186,29 @@
             siteMapping
         } from "../site-mapping.js";
 
-        // --- Utility Functions for Marquee ---
+        // --- Utility Functions for Marquee (Updated for dynamic width check) ---
         function updateMarquee(title) {
             const container = document.getElementById('gameTitleContainer');
             const textElement = document.getElementById('gameTitle');
             
+            // Reset state first
+            container.classList.remove('animate');
+            textElement.style.paddingLeft = '0'; 
+
             // Set the title text
             textElement.textContent = title;
             textElement.title = title;
             
             // Wait for the DOM to render the text to check its scroll width
             setTimeout(() => {
-                // If the text width is greater than the container's max-width, apply marquee class
+                // Check if the content width exceeds the container width
                 if (textElement.scrollWidth > container.clientWidth) {
                     container.classList.add('animate');
-                } else {
-                    container.classList.remove('animate');
-                    textElement.style.paddingLeft = '0'; // Remove padding for non-scrolling text
                 }
             }, 50);
         }
 
-        // --- Download Logic (REPLACING Favorites) ---
-        const downloadButton = document.getElementById("downloadButton");
-        let currentGamePath = null;
-        let currentTitle = "Game";
-        
-        downloadButton.addEventListener("click", () => {
-            if (currentGamePath) {
-                // NOTE: The actual downloaded file/archive must include the "4SP" watermark 
-                // in the bottom-right corner of the game's display area.
-                // The watermark should be dark and translucent to preserve visibility and clickability 
-                // of elements beneath it. This modification must be applied to the game's source 
-                // files (i.e., the HTML/CSS of the game running inside the iframe) before packaging 
-                // for download. This client-side function initiates the download.
-                
-                console.log(`Attempting to download game: ${currentTitle} from path: ${currentGamePath}`);
-                
-                // For a client-side placeholder, you might link to a pre-packaged zip or use a service.
-                // Here, we just log and could potentially link to a known download URL for the game.
-                
-                // Example of initiating a simple file download (requires the path to be a downloadable file/archive):
-                const downloadLink = document.createElement('a');
-                // You would need a server-side endpoint or a pre-packaged ZIP path here.
-                // For example: downloadLink.href = `/download/game/${currentGameId}.zip`;
-                downloadLink.href = currentGamePath; // Placeholder, assuming currentGamePath points to a downloadable asset
-                downloadLink.download = `${currentTitle.replace(/\s/g, '_')}_4SP.zip`; 
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                
-                alert(`Preparing to download "${currentTitle}". Ensure your downloaded files contain the translucent '4SP' watermark.`);
-
-            } else {
-                 alert("Game is not loaded or cannot be downloaded.");
-            }
-        });
-        // --- END Download Logic ---
-
-
-        // --- Game Loading Logic (Updated for new structure) ---
+        // --- Game Loading Logic ---
 
         function getCurrentKeyHostOnly() {
             return window.location.host;
@@ -359,9 +320,7 @@
             // Update title with marquee logic
             updateMarquee(title);
             
-            // Set global variables for download function
-            currentGamePath = gamePath; // Using embed path as placeholder for download link
-            currentTitle = title;
+            // Removed download variables
         }
         
         // --- Fullscreen Logic ---
@@ -399,7 +358,7 @@
             if (!selectedGame) {
                 // Not Found Game
                 embedGame("../404.html", "Game Not Found");
-                downloadButton.style.display = 'none'; // Hide download button for 404
+                fullscreenButton.style.display = 'none'; // Hide button for 404
             } else {
                 const page = selectedGame.page;
                 const baseURL = getBaseURLForPage(page);
@@ -407,14 +366,12 @@
                 adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
                 const embedPath = await getEmbedPath(adjustedHref, selectedGame.href, page);
                 embedGame(embedPath, selectedGame.name);
-                
-                // currentGameId is no longer needed since favorite is removed.
             }
         });
         
         // --- END Game Loading Logic ---
         
-        // Removed the 'userAuthenticated' event listener as authentication is removed.
+        // No more event listeners for features that were removed (download, favorite).
     </script>
 
     <script>
