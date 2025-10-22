@@ -25,7 +25,8 @@
                         'card-dark': '#111111',
                         'accent-indigo': '#4f46e5', // Unified accent color
                         'brand-border': '#252525',
-                        'strongdog-orange': '#FFA500', // Added category color
+                        'strongdog-orange': '#FFA500',
+                        'gn-math': '#FB2651', // Added new category color
                     },
                     fontFamily: {
                         sans: ['Geist', 'sans-serif'],
@@ -35,14 +36,11 @@
                         'lg': '0.5rem',
                         'xl': '1rem',
                     },
-                    // Add aspect ratio plugin for 3:2
                     aspectRatio: {
                         '3/2': '3 / 2',
                     },
                 }
-            },
-            // The aspect-ratio plugin is part of Tailwind core, 
-            // no need to add it via 'plugins' array here.
+            }
         }
     </script>
     
@@ -50,7 +48,7 @@
     <style>
         /* Base styles */
         body {
-            font-family: 'Geist', sans-serif;
+            font-family: 'Geist', 'sans-serif';
             font-weight: 300;
             background-color: #070707;
             padding-bottom: 100px; /* Space for the fixed search bar */
@@ -69,52 +67,20 @@
         }
 
         /* --- New Play Button Hover CSS --- */
-        .play-btn .fa-solid-play { 
-            display: inline-block; 
-            /* color is set by Tailwind class text-accent-indigo */
-        }
-        .play-btn .fa-regular-play { 
-            display: none; 
-        }
-        .play-btn:hover .fa-solid-play { 
-            display: none; 
-        }
-        .play-btn:hover .fa-regular-play { 
-            display: inline-block; 
-            /* color is set by Tailwind class text-accent-indigo */
-        }
+        .play-btn .fa-solid-play { display: inline-block; }
+        .play-btn .fa-regular-play { display: none; }
+        .play-btn:hover .fa-solid-play { display: none; }
+        .play-btn:hover .fa-regular-play { display: inline-block; }
 
         /* --- Favorite Star Hover CSS --- */
-        .favorite-btn .fa-solid-star { 
-            display: inline-block; 
-        }
-        .favorite-btn .fa-regular-star { 
-            display: none; 
-        }
-
-        .favorite-btn:not(.favorited):hover .fa-solid-star { 
-            display: none; 
-        }
-        .favorite-btn:not(.favorited):hover .fa-regular-star { 
-            display: inline-block; 
-            color: white; /* On hover, make it white */
-        }
-
-        .favorite-btn.favorited .fa-solid-star {
-            display: inline-block;
-            color: #facc15; /* yellow-400 */
-        }
-        .favorite-btn.favorited .fa-regular-star {
-            display: none;
-        }
-
-        .favorite-btn.favorited:hover .fa-solid-star {
-            display: none;
-        }
-        .favorite-btn.favorited:hover .fa-regular-star {
-            display: inline-block;
-            color: #facc15; /* yellow-400 */
-        }
+        .favorite-btn .fa-solid-star { display: inline-block; }
+        .favorite-btn .fa-regular-star { display: none; }
+        .favorite-btn:not(.favorited):hover .fa-solid-star { display: none; }
+        .favorite-btn:not(.favorited):hover .fa-regular-star { display: inline-block; color: white; }
+        .favorite-btn.favorited .fa-solid-star { display: inline-block; color: #facc15; }
+        .favorite-btn.favorited .fa-regular-star { display: none; }
+        .favorite-btn.favorited:hover .fa-solid-star { display: none; }
+        .favorite-btn.favorited:hover .fa-regular-star { display: inline-block; color: #facc15; }
         
         /* Search Bar Results Styling */
         .search-results {
@@ -133,51 +99,78 @@
         }
         .search-item:hover { background-color: #333; }
         .search-item img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            margin-right: 12px;
-            object-fit: cover;
+            width: 40px; height: 40px; border-radius: 8px;
+            margin-right: 12px; object-fit: cover;
         }
 
-        /* Responsive adjustments for the bottom bar */
         @media (max-width: 768px) {
             #bottom-fixed-bar {
-                /* On mobile, make it full-width minus padding */
-                left: 10px !important;
-                right: 10px !important;
-                bottom: 10px !important;
-                width: auto !important; /* Override desktop max-w-md */
+                left: 10px !important; right: 10px !important;
+                bottom: 10px !important; width: auto !important;
             }
         }
 
         /* Polyfill for aspect-ratio */
-        .aspect-w-3 {
-            position: relative;
-            padding-bottom: 66.666667%; /* 2 / 3 * 100 */
-        }
+        .aspect-w-3 { position: relative; padding-bottom: 66.666667%; }
         .aspect-h-2 { }
-        .aspect-w-3 > * {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
+        .aspect-w-3 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
+        
+        /* --- Game Viewer Modal --- */
+        #zoneViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 5000; flex-direction: column; }
+        #zoneViewer .zone-header {
+            background-color: #111111;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #252525;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
+        #zoneViewer .zone-header .zone-title h2 {
+            margin: 0;
+            font-size: 1.3em;
+            color: #ffffff;
+            font-family: 'Geist', sans-serif;
+        }
+        /* Added: Flex layout for horizontal buttons */
+        #zoneViewer .zone-header .zone-controls {
+            display: flex;
+            align-items: center;
+        }
+        #zoneViewer .zone-header .zone-controls button {
+            margin-left: 8px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px); /* Safari support */
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem; /* squircle */
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease-in-out;
+        }
+        #zoneViewer .zone-header .zone-controls button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
+        .hidden { display: none !important; }
 
     </style>
 </head>
 
 <body class="bg-deep-black text-white min-h-screen">
-    <!-- Simplified Header -->
     <header class="w-full p-4 flex justify-end items-center">
-        <a href="https://foursimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
+        <!-- Changed: Updated href -->
+        <a href="../index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
     </header>
 
     <main class="mx-auto my-5 w-full max-w-screen-2xl px-4">
-        <!-- Welcome message remains -->
         <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl">
             <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
                 <strong>Welcome to the 4SP Game Hub!</strong><br>
@@ -185,44 +178,93 @@
             </p>
         </div>
         
-        <!-- Favorites Section -->
         <h2 id="favoritesHeader" class="text-center text-3xl font-bold mt-12 mb-6 text-white" style="display: none;">
             <strong>Favorites</strong>
         </h2>
         <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
-        <!-- All Games Section - Now a container for categories -->
-        <div id="category-container">
-            <!-- Game categories and cards will be injected here -->
+        <!-- New Category Viewer -->
+        <div id="category-viewer" class="w-full mt-12">
+            <!-- Category Title Slider -->
+            <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
+                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="overflow-hidden w-64 text-center">
+                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
+                        <!-- Category titles will be dynamically injected here -->
+                    </div>
+                </div>
+                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Game Grid -->
+            <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
+                <!-- Game cards for the selected category will be injected here -->
+            </div>
         </div>
     </main>
 
-    <!-- Bottom Fixed Search Bar - Pushed to right -->
+    <!-- Bottom Fixed Search Bar -->
     <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
-        <div class="relative w-full">
+        <div class="relative flex items-center w-full">
             <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
+            <button id="category-cycle-btn" title="Next Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
+                <i class="fa-solid fa-layer-group"></i>
+            </button>
             <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
                 <!-- Search results dropdown will be injected here -->
             </div>
         </div>
+    </div>
+    
+    <!-- Game Viewer Modal -->
+    <div id="zoneViewer" aria-modal="true" role="dialog">
+        <div class="zone-header">
+             <div class="zone-title">
+                <h2 id="zoneNameEl">Game Title</h2>
+             </div>
+             <div class="zone-controls">
+                <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                <button id="newTabBtnZone" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></button>
+                <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
+             </div>
+        </div>
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
     </div>
 
     <!-- Main Application Logic -->
     <script type="module">
         import games from "./cards-data.js";
 
-        // --- Global Game List ---
-        let allGames = []; // Will hold games with category info
+        // --- Configuration & Globals ---
+        const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
+        const GN_COVER_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
+        const GN_HTML_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
+        const FAVORITES_KEY = 'gameHubFavorites_v3';
 
+        let allGames = [];
+        let categories = [];
+        let currentCategoryIndex = 0;
+        const categoryColors = {
+            'StrongdogXP': 'text-strongdog-orange',
+            'GN-Math': 'text-gn-math'
+        };
+        
         // --- DOM Elements ---
-        const categoryContainerElement = document.getElementById("category-container");
         const favoritesHeader = document.getElementById("favoritesHeader");
         const favoritesGameList = document.getElementById("favoritesGameList");
         const searchInput = document.getElementById("searchInput");
         const searchResults = document.getElementById("searchResults");
+        const categorySlider = document.getElementById('category-slider');
+        const prevCategoryBtn = document.getElementById('prev-category');
+        const nextCategoryBtn = document.getElementById('next-category');
+        const categoryCycleBtn = document.getElementById('category-cycle-btn');
+        const gamesGridContainer = document.getElementById('games-grid-container');
 
         // --- Favorites Management ---
-        const FAVORITES_KEY = 'strongdogXPFavorites_v2';
         const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
         const saveFavorites = (favs) => localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
         
@@ -237,13 +279,11 @@
             }
             saveFavorites(favorites);
 
-            // Update all matching cards
             document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
                 btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
             });
-            
-            renderFavorites(); // Re-render the favorites list
+            renderFavorites();
         }
 
         // --- URL and Path Helpers ---
@@ -254,34 +294,35 @@
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
 
-        // --- New Game Card Rendering Function ---
+        // --- Game Card Rendering ---
         function createGameCard(game) {
-            const { imgSrc, name, id, page } = game;
-            const { adjustedImgSrc } = getAdjustedUrls(imgSrc, page);
-            const isFavorite = getFavorites().includes(id);
+            const isStrongdog = game.category === 'StrongdogXP';
+            
+            let imgSrc;
+            if (isStrongdog) {
+                const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
+                imgSrc = adjustedImgSrc;
+            } else {
+                imgSrc = game.imgSrc;
+            }
+            
+            const isFavorite = getFavorites().includes(game.id);
 
             const card = document.createElement("div");
             card.className = 'zone-item bg-card-dark rounded-lg border border-brand-border overflow-hidden';
-            card.dataset.gameId = id;
+            card.dataset.gameId = game.id;
 
             card.innerHTML = `
-                <div class="relative w-full cursor-pointer group" onclick="window.location.href='./play/?id=${id}'">
-                    <!-- Aspect ratio container 3:2 -->
+                <div class="relative w-full cursor-pointer group">
                     <div class="aspect-w-3 aspect-h-2">
-                        <img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
+                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
                     </div>
-                    
-                    <!-- Title Top Right -->
-                    <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${name}">${name}</h3>
-
-                    <!-- Control Buttons Bottom Right -->
+                    <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${game.name}">${game.name}</h3>
                     <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
-                        <!-- Play Button -->
                         <button class="play-btn rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
                             <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
                             <i class="fa-regular fa-circle-play fa-regular-play text-accent-indigo transition-colors"></i>
                         </button>
-                        <!-- Favorite Button -->
                         <button class="favorite-btn rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
                             <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
                             <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
@@ -290,72 +331,92 @@
                 </div>
             `;
             
-            // Add event listeners for buttons
-            card.querySelector('.play-btn').addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent card click
-                window.location.href = `./play/?id=${id}`;
-            });
+            const handlePlay = (e) => {
+                e.stopPropagation();
+                if (isStrongdog) {
+                    window.location.href = `./play/?id=${game.id}`;
+                } else {
+                    openZone(game);
+                }
+            };
+
+            card.querySelector('.group').addEventListener('click', handlePlay);
+            card.querySelector('.play-btn').addEventListener('click', handlePlay);
             card.querySelector('.favorite-btn').addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent card click
-                toggleFavorite(id);
+                e.stopPropagation();
+                toggleFavorite(game.id);
             });
 
             return card;
         }
 
-        // Renders a list of games into a target element
+        // --- Game Viewer Logic ---
+        function openZone(game) {
+            if (!game || !game.url) {
+                console.error("Could not load game: Invalid game data.");
+                return;
+            }
+            const gameUrl = game.url;
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
+            const zoneNameEl = document.getElementById('zoneNameEl');
+            
+            zoneNameEl.textContent = game.name;
+            zoneFrame.src = 'about:blank';
+
+            fetch(`${gameUrl}?t=${Date.now()}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                    return response.text();
+                })
+                .then(html => {
+                    const doc = zoneFrame.contentWindow.document;
+                    doc.open();
+                    doc.write(html);
+                    doc.close();
+                    zoneViewer.style.display = "flex";
+                })
+                .catch(error => {
+                    console.error(`Failed to load game "${game.name}": ${error.message}.`);
+                    closeZoneViewer();
+                });
+        }
+
+        function closeZoneViewer() {
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
+            zoneViewer.style.display = "none";
+            if (zoneFrame) zoneFrame.src = 'about:blank';
+        }
+
+        function openGameInNewTab() {
+            const zoneNameEl = document.getElementById('zoneNameEl');
+            const game = allGames.find(z => z.name === zoneNameEl.textContent);
+            if (!game) return;
+
+            const gameUrl = game.url;
+            const newWindow = window.open("about:blank", "_blank");
+            if (newWindow) {
+                fetch(`${gameUrl}?t=${Date.now()}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        newWindow.document.open();
+                        newWindow.document.write(html);
+                        newWindow.document.close();
+                    }).catch(err => {
+                        console.error("Error opening in new tab:", err);
+                        newWindow.close();
+                    });
+            }
+        }
+
+
+        // --- Game List Rendering ---
         function renderGames(gamesToRender, targetElement) {
             targetElement.innerHTML = '';
             const fragment = document.createDocumentFragment();
-            gamesToRender.forEach(game => {
-                fragment.appendChild(createGameCard(game));
-            });
+            gamesToRender.forEach(game => fragment.appendChild(createGameCard(game)));
             targetElement.appendChild(fragment);
-        }
-
-        // Renders all games grouped by category
-        function renderAllCategories(filterText = '') {
-            const filteredGames = filterText 
-                ? allGames.filter(g => g.name.toLowerCase().includes(filterText)) 
-                : allGames;
-
-            // Group games by category
-            const gamesByCategory = filteredGames.reduce((acc, game) => {
-                const category = game.category || 'Other'; // Default category
-                if (!acc[category]) acc[category] = [];
-                acc[category].push(game);
-                return acc;
-            }, {});
-
-            categoryContainerElement.innerHTML = ''; // Clear previous render
-            const fragment = document.createDocumentFragment();
-
-            // Define category color map
-            const categoryColors = {
-                'StrongdogXP': 'text-strongdog-orange'
-                // Add other categories and their colors here
-            };
-
-            for (const categoryName in gamesByCategory) {
-                const categoryGames = gamesByCategory[categoryName];
-                if (categoryGames.length === 0) continue; // Skip empty categories
-
-                // Create Category Title
-                const titleEl = document.createElement('h2');
-                const colorClass = categoryColors[categoryName] || 'text-white'; // Default to white
-                titleEl.className = `text-3xl font-bold mt-12 mb-6 ${colorClass}`;
-                titleEl.innerHTML = `<strong>${categoryName}</strong>`;
-                fragment.appendChild(titleEl);
-
-                // Create Grid Container
-                const gridEl = document.createElement('div');
-                gridEl.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4';
-                
-                // Render games into this grid
-                renderGames(categoryGames, gridEl); // Reuse our simple render function
-                fragment.appendChild(gridEl);
-            }
-            categoryContainerElement.appendChild(fragment);
         }
 
         function renderFavorites() {
@@ -363,7 +424,6 @@
             if (favoriteIds.length > 0) {
                 favoritesHeader.style.display = "block";
                 favoritesGameList.style.display = "grid";
-                // Filter from the global 'allGames' list
                 const favoriteGames = allGames.filter(game => favoriteIds.includes(game.id));
                 renderGames(favoriteGames, favoritesGameList);
             } else {
@@ -372,6 +432,44 @@
             }
         }
         
+        // --- Category Navigation & Display ---
+        function setupCategorySlider() {
+            categorySlider.innerHTML = categories.map(cat => 
+                `<div class="w-64 flex-shrink-0">
+                    <h2 class="text-3xl font-bold ${categoryColors[cat] || 'text-white'}">
+                        <strong>${cat}</strong>
+                    </h2>
+                </div>`
+            ).join('');
+            updateSliderPosition();
+        }
+
+        function updateSliderPosition() {
+            categorySlider.style.transform = `translateX(-${currentCategoryIndex * 100 / categories.length}%)`;
+        }
+
+        function switchCategory(newIndex) {
+            currentCategoryIndex = newIndex;
+            updateSliderPosition();
+            renderGamesForCurrentCategory();
+        }
+        
+        async function renderGamesForCurrentCategory(searchTerm = '') {
+            const categoryName = categories[currentCategoryIndex];
+            
+            gamesGridContainer.classList.add('opacity-0');
+            await new Promise(resolve => setTimeout(resolve, 150)); // Wait for fade out
+
+            let gamesToRender = allGames.filter(g => g.category === categoryName);
+            if(searchTerm) {
+                gamesToRender = gamesToRender.filter(g => g.name.toLowerCase().includes(searchTerm));
+            }
+            renderGames(gamesToRender, gamesGridContainer);
+            
+            gamesGridContainer.classList.remove('opacity-0');
+        }
+
+        // --- Search ---
         function debounce(func, delay) {
             let timeout;
             return function(...args) {
@@ -380,13 +478,11 @@
             };
         }
 
-        const updateSearchResults = debounce(() => {
+        const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
-            
-            // Filter the main category list
-            renderAllCategories(text);
+            renderGamesForCurrentCategory(text);
 
-            // Update the dropdown
+            // Update dropdown
             const filteredDropdown = text ? allGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
             searchResults.innerHTML = "";
             if (filteredDropdown.length === 0 || !text) {
@@ -395,39 +491,94 @@
             }
             
             filteredDropdown.forEach(game => {
-                const { id, imgSrc, name, page } = game;
-                const { adjustedImgSrc } = getAdjustedUrls(imgSrc, page);
+                const isStrongdog = game.category === 'StrongdogXP';
+                
+                let imgSrc;
+                if (isStrongdog) {
+                    const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
+                    imgSrc = adjustedImgSrc;
+                } else {
+                    imgSrc = game.imgSrc;
+                }
+                
+                const href = isStrongdog ? `./play/?id=${game.id}` : '#'; // Use # for modal games
+                
                 const linkEl = document.createElement("a");
-                linkEl.href = `./play/?id=${id}`;
+                linkEl.href = href;
                 linkEl.className = 'search-item';
-                linkEl.innerHTML = `<img src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${name}</span>`;
+                linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
+                
+                if(!isStrongdog) {
+                    linkEl.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openZone(game);
+                        searchResults.style.display = "none";
+                    });
+                }
                 searchResults.appendChild(linkEl);
             });
             searchResults.style.display = "block";
         }, 250);
 
-        // --- Initial Load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Assign category to all imported games
-            allGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
+        // --- Data Loading and Initialization ---
+        async function initializeApp() {
+            const strongdogGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
+            
+            try {
+                const response = await fetch(GN_ZONES_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const gnMathRaw = await response.json();
+                const gnMathGames = gnMathRaw.map(g => ({
+                    id: `gn-${g.id}`,
+                    name: g.name,
+                    imgSrc: g.cover.replace("{COVER_URL}", GN_COVER_URL_BASE),
+                    category: 'GN-Math',
+                    url: g.url.replace("{HTML_URL}", GN_HTML_URL_BASE)
+                }));
+                allGames = [...strongdogGames, ...gnMathGames];
+            } catch (error) {
+                console.error("Failed to load GN-Math games:", error);
+                allGames = strongdogGames; // Fallback
+            }
 
-            // Initial render
-            renderAllCategories();
+            categories = [...new Set(allGames.map(g => g.category))];
+            categorySlider.style.width = `${categories.length * 100}%`;
+
+            setupCategorySlider();
+            renderGamesForCurrentCategory();
             renderFavorites();
 
-            searchInput.placeholder = `Search ${allGames.length} games...`;
-            searchInput.addEventListener("input", updateSearchResults);
-            searchInput.addEventListener("focus", updateSearchResults);
+            searchInput.placeholder = `Search all games...`;
+            searchInput.addEventListener("input", handleSearch);
+            searchInput.addEventListener("focus", handleSearch);
             
+            // --- Event Listeners ---
+            const cycle = (direction) => {
+                 let newIndex = currentCategoryIndex + direction;
+                 if (newIndex < 0) newIndex = categories.length - 1;
+                 if (newIndex >= categories.length) newIndex = 0;
+                 switchCategory(newIndex);
+            };
+
+            prevCategoryBtn.addEventListener('click', () => cycle(-1));
+            nextCategoryBtn.addEventListener('click', () => cycle(1));
+            categoryCycleBtn.addEventListener('click', () => cycle(1));
+
             document.addEventListener("click", ev => {
-                const searchBarContainer = document.getElementById('bottom-fixed-bar');
-                if (searchBarContainer && !searchBarContainer.contains(ev.target)) {
+                if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
                     searchResults.style.display = "none";
                 }
             });
-        });
+
+            document.getElementById('fullscreenBtnZone')?.addEventListener('click', () => {
+                const zoneFrame = document.getElementById('zoneFrame');
+                if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
+            });
+            document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
+            document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
-
-
