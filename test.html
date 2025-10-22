@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
 
-    <!-- Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
@@ -14,7 +13,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind CSS Configuration -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -44,7 +42,6 @@
         }
     </script>
     
-    <!-- Custom Styles -->
     <style>
         /* Base styles */
         body {
@@ -117,9 +114,43 @@
         
         /* --- Game Viewer Modal --- */
         #zoneViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 5000; flex-direction: column; }
-        #zoneViewer .zone-header { background-color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; }
-        #zoneViewer .zone-header .zone-title h2 { margin: 0; font-size: 1.3em; color: #333; font-family: 'Geist', sans-serif; }
-        #zoneViewer .zone-header .zone-controls button { margin-left: 10px; padding: 8px 15px; background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Geist', sans-serif; font-size: 0.9em; }
+        #zoneViewer .zone-header {
+            background-color: #111111; /* Changed: Black background */
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #252525; /* Changed: Dark border */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        #zoneViewer .zone-header .zone-title h2 {
+            margin: 0;
+            font-size: 1.3em;
+            color: #ffffff; /* Changed: White title */
+            font-family: 'Geist', sans-serif;
+        }
+        /* Changed: New button styles */
+        #zoneViewer .zone-header .zone-controls button {
+            margin-left: 8px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px); /* Safari support */
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem; /* squircle */
+            cursor: pointer;
+            font-size: 1em; /* Make icon a reasonable size */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease-in-out;
+        }
+        #zoneViewer .zone-header .zone-controls button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
@@ -144,31 +175,25 @@
         </h2>
         <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
-        <!-- New Category Viewer -->
         <div id="category-viewer" class="w-full mt-12">
-            <!-- Category Title Slider -->
             <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
                 <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="overflow-hidden w-64 text-center">
                     <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
-                        <!-- Category titles will be dynamically injected here -->
-                    </div>
+                        </div>
                 </div>
                 <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
             
-            <!-- Game Grid -->
             <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
-                <!-- Game cards for the selected category will be injected here -->
-            </div>
+                </div>
         </div>
     </main>
 
-    <!-- Bottom Fixed Search Bar -->
     <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
         <div class="relative flex items-center w-full">
             <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
@@ -176,27 +201,24 @@
                 <i class="fa-solid fa-layer-group"></i>
             </button>
             <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
-                <!-- Search results dropdown will be injected here -->
-            </div>
+                </div>
         </div>
     </div>
     
-    <!-- Game Viewer Modal -->
     <div id="zoneViewer" aria-modal="true" role="dialog">
         <div class="zone-header">
              <div class="zone-title">
                 <h2 id="zoneNameEl">Game Title</h2>
              </div>
              <div class="zone-controls">
-                <button id="fullscreenBtnZone">Fullscreen</button>
-                <button id="newTabBtnZone">New Tab</button>
-                <button id="closeBtnZone">Close</button>
+                <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                <button id="newTabBtnZone" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></button>
+                <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
         <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
     </div>
 
-    <!-- Main Application Logic -->
     <script type="module">
         import games from "./cards-data.js";
 
@@ -247,10 +269,28 @@
             renderFavorites();
         }
 
+        // --- URL and Path Helpers ---
+        // Added: Re-introduced getAdjustedUrls from index.html
+        function getAdjustedUrls(imgSrc, page) {
+            if (page && page > 1) {
+                return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
+            }
+            return { adjustedImgSrc: `./img/${imgSrc}` };
+        }
+
         // --- Game Card Rendering ---
         function createGameCard(game) {
             const isStrongdog = game.category === 'StrongdogXP';
-            const imgSrc = isStrongdog ? `./img/${game.imgSrc}` : game.imgSrc;
+            
+            // Changed: Use getAdjustedUrls for strongdog, direct src for others
+            let imgSrc;
+            if (isStrongdog) {
+                const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
+                imgSrc = adjustedImgSrc;
+            } else {
+                imgSrc = game.imgSrc;
+            }
+            
             const isFavorite = getFavorites().includes(game.id);
 
             const card = document.createElement("div");
@@ -437,7 +477,16 @@
             
             filteredDropdown.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
-                const imgSrc = isStrongdog ? `./img/${game.imgSrc}` : game.imgSrc;
+                
+                // Changed: Logic for imgSrc in dropdown
+                let imgSrc;
+                if (isStrongdog) {
+                    const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
+                    imgSrc = adjustedImgSrc;
+                } else {
+                    imgSrc = game.imgSrc;
+                }
+                
                 const href = isStrongdog ? `./play/?id=${game.id}` : '#'; // Use # for modal games
                 
                 const linkEl = document.createElement("a");
@@ -519,4 +568,3 @@
     </script>
 </body>
 </html>
-
