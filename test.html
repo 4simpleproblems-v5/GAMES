@@ -114,6 +114,14 @@
         .aspect-w-3 { position: relative; padding-bottom: 66.666667%; }
         .aspect-h-2 { }
         .aspect-w-3 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
+        
+        /* --- Game Viewer Modal --- */
+        #zoneViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 5000; flex-direction: column; }
+        #zoneViewer .zone-header { background-color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; }
+        #zoneViewer .zone-header .zone-title h2 { margin: 0; font-size: 1.3em; color: #333; font-family: 'Geist', sans-serif; }
+        #zoneViewer .zone-header .zone-controls button { margin-left: 10px; padding: 8px 15px; background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Geist', sans-serif; font-size: 0.9em; }
+        #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
+        .hidden { display: none !important; }
 
     </style>
 </head>
@@ -171,6 +179,21 @@
                 <!-- Search results dropdown will be injected here -->
             </div>
         </div>
+    </div>
+    
+    <!-- Game Viewer Modal -->
+    <div id="zoneViewer" aria-modal="true" role="dialog">
+        <div class="zone-header">
+             <div class="zone-title">
+                <h2 id="zoneNameEl">Game Title</h2>
+             </div>
+             <div class="zone-controls">
+                <button id="fullscreenBtnZone">Fullscreen</button>
+                <button id="newTabBtnZone">New Tab</button>
+                <button id="closeBtnZone">Close</button>
+             </div>
+        </div>
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
     </div>
 
     <!-- Main Application Logic -->
@@ -258,7 +281,7 @@
                 if (isStrongdog) {
                     window.location.href = `./play/?id=${game.id}`;
                 } else {
-                    window.open(game.url, '_blank');
+                    openZone(game);
                 }
             };
 
@@ -271,6 +294,67 @@
 
             return card;
         }
+
+        // --- Game Viewer Logic ---
+        function openZone(game) {
+            if (!game || !game.url) {
+                console.error("Could not load game: Invalid game data.");
+                return;
+            }
+            const gameUrl = game.url;
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
+            const zoneNameEl = document.getElementById('zoneNameEl');
+            
+            zoneNameEl.textContent = game.name;
+            zoneFrame.src = 'about:blank';
+
+            fetch(`${gameUrl}?t=${Date.now()}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                    return response.text();
+                })
+                .then(html => {
+                    const doc = zoneFrame.contentWindow.document;
+                    doc.open();
+                    doc.write(html);
+                    doc.close();
+                    zoneViewer.style.display = "flex";
+                })
+                .catch(error => {
+                    console.error(`Failed to load game "${game.name}": ${error.message}.`);
+                    closeZoneViewer();
+                });
+        }
+
+        function closeZoneViewer() {
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
+            zoneViewer.style.display = "none";
+            if (zoneFrame) zoneFrame.src = 'about:blank';
+        }
+
+        function openGameInNewTab() {
+            const zoneNameEl = document.getElementById('zoneNameEl');
+            const game = allGames.find(z => z.name === zoneNameEl.textContent);
+            if (!game) return;
+
+            const gameUrl = game.url;
+            const newWindow = window.open("about:blank", "_blank");
+            if (newWindow) {
+                fetch(`${gameUrl}?t=${Date.now()}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        newWindow.document.open();
+                        newWindow.document.write(html);
+                        newWindow.document.close();
+                    }).catch(err => {
+                        console.error("Error opening in new tab:", err);
+                        newWindow.close();
+                    });
+            }
+        }
+
 
         // --- Game List Rendering ---
         function renderGames(gamesToRender, targetElement) {
@@ -354,14 +438,20 @@
             filteredDropdown.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
                 const imgSrc = isStrongdog ? `./img/${game.imgSrc}` : game.imgSrc;
-                const href = isStrongdog ? `./play/?id=${game.id}` : game.url;
-                const target = isStrongdog ? '' : 'target="_blank"';
-
+                const href = isStrongdog ? `./play/?id=${game.id}` : '#'; // Use # for modal games
+                
                 const linkEl = document.createElement("a");
                 linkEl.href = href;
                 linkEl.className = 'search-item';
                 linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
-                if(!isStrongdog) linkEl.target = "_blank";
+                
+                if(!isStrongdog) {
+                    linkEl.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openZone(game);
+                        searchResults.style.display = "none";
+                    });
+                }
                 searchResults.appendChild(linkEl);
             });
             searchResults.style.display = "block";
@@ -416,9 +506,17 @@
                     searchResults.style.display = "none";
                 }
             });
+
+            document.getElementById('fullscreenBtnZone')?.addEventListener('click', () => {
+                const zoneFrame = document.getElementById('zoneFrame');
+                if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
+            });
+            document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
+            document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
         }
 
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
+
