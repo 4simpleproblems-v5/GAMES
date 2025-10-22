@@ -1,535 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>4SP - STRONGDOG</title>
+    <title>4SP - Game Hub</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
+
+    <!-- Fonts and Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind CSS Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-black': '#070707',
+                        'card-dark': '#111111',
+                        'accent-indigo': '#4f46e5', // Unified accent color
+                        'brand-border': '#252525',
+                        'strongdog-orange': '#FFA500',
+                        'gn-math': '#FB2651', // Added new category color
+                    },
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'md': '0.375rem',
+                        'lg': '0.5rem',
+                        'xl': '1rem',
+                    },
+                    aspectRatio: {
+                        '3/2': '3 / 2',
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom Styles -->
     <style>
-        /* --- 1. Global Styles & Variables --- */
-        @font-face {
-            font-family: 'primary';
-            src: url('fonts/primary.woff') format('woff');
-        }
-
-        :root {
-            --red: rgb(220, 53, 69);
-            --green: rgb(40, 167, 69);
-            --ff: 'primary', sans-serif;
-            --bg: #2e2e2e;
-            --purple: #6720BD;
-        }
-
+        /* Base styles */
         body {
-            font-family: var(--ff);
-            margin: 0;
-            padding: 0 0 100px 0;
-            background-color: var(--bg);
-            overflow-x: hidden;
-        }
-
-        h2 {
-            text-align: center;
-            color: white;
-            margin: 40px 0;
-            font-size: 2.5rem;
-            text-shadow: none;
-        }
-
-        /* --- 2. Utility & State Classes --- */
-        /* These classes are toggled by JavaScript to manage the state of elements. */
-        /* This is far more durable than manipulating inline styles directly. */
-        .is-hidden {
-            display: none !important;
-        }
-
-        .slide-menu.is-open {
-            transform: translateX(0);
-        }
-
-        .overlay.is-open {
-            display: flex;
+            font-family: 'Geist', 'sans-serif';
+            font-weight: 300;
+            background-color: #070707;
+            padding-bottom: 100px; /* Space for the fixed search bar */
         }
         
-        /* Class for the link in the welcome message, moved from an inline style */
-        .link--highlight {
-            color: var(--purple);
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        /* --- 3. Components: Navbar --- */
-        .navbar {
-            background-color: rgba(50, 50, 50, 0.9);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-weight: 700;
-            font-size: 2.5rem;
-            letter-spacing: 1px;
-            transition: transform 0.3s ease;
-            text-decoration: none;
-            color: white;
-        }
-
-        .logo:hover {
-            transform: translateX(-50%) scale(1.025);
-        }
-
-        .logo .xp {
-            color: var(--purple);
-            text-shadow: 0 0 10px rgba(103, 32, 189, 0.5);
-        }
-
-        .menu-icon {
-            font-size: 2.5rem;
-            cursor: pointer;
-            color: white;
-            transition: transform 0.3s ease, color 0.3s ease;
-            /* Reset button styles to make it look like the original div */
-            background: none;
-            border: none;
-            padding: 0;
-            font-family: inherit;
-        }
-
-        .menu-icon:hover {
-            transform: scale(1.2);
-        }
-
-        .navbar-right {
-            /* Placeholder to keep the logo perfectly centered */
-            width: 275px; 
-        }
-
-        /* --- 4. Components: Slide Menu --- */
-        .slide-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 400px;
-            backdrop-filter: blur(10px);
-            color: white;
-            box-shadow: 5px 0 20px rgba(0, 0, 0, 0.7);
-            z-index: 1003;
-            transition: transform 0.5s ease;
-            /* Default state is hidden to the left */
-            transform: translateX(-100%);
-            padding: 20px;
-            overflow-y: auto;
-            box-sizing: border-box;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            background: linear-gradient(to bottom right, rgba(43, 43, 43, 0.599), rgba(53, 53, 53, 0.599), rgba(80, 80, 80, 0.599));
-        }
-
-        .slide-menu::-webkit-scrollbar {
-            display: none;
-        }
-
-        .categories {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding-top: 20px;
-        }
-
-        .categories>a {
-            padding: 17px;
-            background: linear-gradient(45deg, #333, #444);
-            border-radius: 15px;
-            text-decoration: none;
-            color: white;
-            transition: transform 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
-            text-align: center;
-            font-size: 1.2rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .categories>a:hover {
-            background: linear-gradient(45deg, #6720BD, #8a2be2);
-            box-shadow: 0 6px 20px rgba(103, 32, 189, 0.5);
-        }
-
-        .categories>a::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(0, 0, 0, 0.1);
-            transition: all 0.5s ease;
-        }
-
-        .categories>a:hover::after {
-            width: 500px;
-            height: 500px;
-        }
-
-        /* --- 5. Components: Game Grid & Cards --- */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
-            padding: 20px;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* Renamed .zone-item to .game-card for better semantics */
-        .game-card {
-            background-color: #3a3a3a;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            aspect-ratio: 4 / 3;
+        h1, h2, h3, .font-bold, .font-semibold, strong {
+            font-weight: 400 !important;
         }
         
-        .game-card img.game-cover {
-            width: 100%; height: 100%; object-fit: cover;
-            border-radius: 12px;
-            transition: transform 0.4s ease-in-out;
+        .zone-item {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
+        .zone-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
+        }
+
+        /* --- New Play Button Hover CSS --- */
+        .play-btn .fa-solid-play { display: inline-block; }
+        .play-btn .fa-regular-play { display: none; }
+        .play-btn:hover .fa-solid-play { display: none; }
+        .play-btn:hover .fa-regular-play { display: inline-block; }
+
+        /* --- Favorite Star Hover CSS --- */
+        .favorite-btn .fa-solid-star { display: inline-block; }
+        .favorite-btn .fa-regular-star { display: none; }
+        .favorite-btn:not(.favorited):hover .fa-solid-star { display: none; }
+        .favorite-btn:not(.favorited):hover .fa-regular-star { display: inline-block; color: white; }
+        .favorite-btn.favorited .fa-solid-star { display: inline-block; color: #facc15; }
+        .favorite-btn.favorited .fa-regular-star { display: none; }
+        .favorite-btn.favorited:hover .fa-solid-star { display: none; }
+        .favorite-btn.favorited:hover .fa-regular-star { display: inline-block; color: #facc15; }
         
-        .game-card .card-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, rgba(15, 15, 25, 0.9) 0%, rgba(20, 20, 30, 0.5) 50%, transparent 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 15px;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            box-sizing: border-box;
-            color: #fff;
-        }
-
-        .game-card:hover {
-            transform: translateY(-5px) scale(1.03);
-            box-shadow: 0 8px 30px rgba(103, 32, 189, 0.4);
-        }
-        .game-card:hover .game-cover {
-            transform: scale(1.1);
-        }
-        .game-card:hover .card-overlay {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .game-card .game-title {
-            font-family: var(--ff);
-            font-size: 1.1em;
-            font-weight: bold;
-            margin: 0 0 10px 0;
-            line-height: 1.3;
-            text-shadow: 1px 1px 5px rgba(0,0,0,0.7);
-        }
-
-        .game-card .card-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .game-card .card-play-btn, .game-card .favorite-btn {
-            border: none;
-            border-radius: 8px;
-            height: 38px;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .game-card .card-play-btn {
-            flex-grow: 1;
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #6720bd;
-            font-weight: bold;
-            font-family: var(--ff);
-        }
-        .game-card .card-play-btn:hover {
-            background-color: #fff;
-            transform: scale(1.05);
-        }
-
-        .game-card .favorite-btn {
-            width: 38px;
-            background-color: rgba(255, 255, 255, 0.2);
-            flex-shrink: 0;
-        }
-        .game-card .favorite-btn:hover {
-            background-color: rgba(255, 255, 255, 0.35);
-        }
-        .game-card .favorite-btn img {
-            width: 20px;
-            height: 20px;
-            transition: filter 0.3s ease, transform 0.3s ease;
-        }
-
-        .game-card .favorite-btn.favorited img {
-            filter: brightness(0) invert(1) drop-shadow(0 0 6px #ffc107) drop-shadow(0 0 10px #ff8c00);
-            transform: scale(1.1);
-        }
-
-        /* --- 6. Components: Bottom Search Bar --- */
-        .bottom-search-bar {
-            position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1001;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px;
-            background: linear-gradient(135deg, rgba(50, 50, 50, 0.2), rgba(30, 30, 30, 0.1));
-            backdrop-filter: blur(8px) saturate(1.5);
-            -webkit-backdrop-filter: blur(8px) saturate(1.5);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
-            width: 90%;
-            max-width: 450px;
-            box-sizing: border-box;
-        }
-        .bottom-search-bar input[type="text"] {
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid rgba(255,255,255,0.4);
-            border-radius: 0;
-            color: #fff;
-            padding: 8px 5px;
-            font-size: 1em;
-            outline: none;
-            font-family: var(--ff);
-            flex-grow: 1;
-            width: auto;
-        }
-        .bottom-search-bar input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
+        /* Search Bar Results Styling */
         .search-results {
-            position: absolute;
-            bottom: 100%;
-            left: 0; /* Changed from right: 0 to align with the parent */
-            width: 100%;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, rgba(55, 55, 55, 0.4), rgba(40, 40, 40, 0.3));
-            backdrop-filter: blur(8px) saturate(1.5);
-            -webkit-backdrop-filter: blur(8px) saturate(1.5);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-            border-radius: 15px;
-            display: none;
-            overflow: hidden;
-            z-index: 1000;
-            max-height: 350px;
+            max-height: 250px;
             overflow-y: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .search-results::-webkit-scrollbar { width: 8px; }
-        .search-results::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
-        .search-results::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.3); border-radius: 4px; }
-        .search-results::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.5); }
-        .search-results a {
+        .search-item {
             display: flex;
             align-items: center;
-            text-decoration: none;
-            color: white;
-            padding: 10px;
-            transition: all 0.3s ease;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        .search-results a:focus,
-        .search-results a:hover {
-            outline: none;
-            background: rgba(80, 80, 80, 0.7);
-            padding-left: 15px;
-        }
-        .search-results img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            margin-right: 15px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-        .search-results a:last-child {
-            border-bottom: none;
-        }
-
-        /* --- 7. Components: Other UI Elements --- */
-        .updates-container {
-            margin: 0 20%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .updates-paragraph-text {
-            color: black;
-            background: linear-gradient(156deg, #d1c4e9, #e6e6fa, #d8bfd8, #e0b0ff);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(209, 196, 233, 0.5);
-            font-size: 1.1rem;
-            text-align: center;
-            max-width: 850px;
-            margin-block: 20px;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            display: none; /* Initially hidden */
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 15vh;
-        }
-        .popup {
-            background: #3a3a3a;
-            color: white;
-            padding: 25px 35px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 550px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-            position: relative;
-            border: 1px solid #555;
-        }
-        .popup-close {
-            position: absolute; top: 10px; right: 15px;
-            font-size: 2.5rem; color: #ccc;
+            padding: 8px 15px;
             cursor: pointer;
-            transition: color 0.3s ease, transform 0.3s ease;
-            /* Reset button styles */
-            background: none; border: none; padding: 0;
-        }
-        .popup-close:hover {
+            transition: background-color 0.2s;
             color: white;
-            transform: scale(1.1);
+            text-decoration: none;
         }
-        .popup h3 {
-            text-align: center;
-            font-size: 2rem;
-            margin-top: 0;
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--purple);
-            padding-bottom: 10px;
+        .search-item:hover { background-color: #333; }
+        .search-item img {
+            width: 40px; height: 40px; border-radius: 8px;
+            margin-right: 12px; object-fit: cover;
         }
 
-        /* --- 8. Media Queries --- */
         @media (max-width: 768px) {
-            .navbar { flex-wrap: wrap; padding: 10px 15px; }
-            .menu-icon { font-size: 2rem; }
-            .logo { font-size: 1.8rem; }
-            .slide-menu { width: 250px; }
-            .categories>a { font-size: 1rem; padding: 15px; }
-            .games-grid { gap: 15px; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-            .bottom-search-bar { width: calc(100% - 30px); left: 15px; right: 15px; transform: none; }
-            .updates-container { margin: 0 5%; }
+            #bottom-fixed-bar {
+                left: 10px !important; right: 10px !important;
+                bottom: 10px !important; width: auto !important;
+            }
         }
+
+        /* Polyfill for aspect-ratio */
+        .aspect-w-3 { position: relative; padding-bottom: 66.666667%; }
+        .aspect-h-2 { }
+        .aspect-w-3 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
+
     </style>
 </head>
-<body>
-    <header class="navbar">
-        <button class="menu-icon" id="menuIcon" type="button" aria-label="Toggle Menu">☰</button>
-        <a href="index.html" class="logo">strongdog<span class="xp">XP</span></a>
-        <div class="navbar-right"></div> 
+
+<body class="bg-deep-black text-white min-h-screen">
+    <header class="w-full p-4 flex justify-end items-center">
+        <a href="https://foursimpleproblems.github.io/" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
     </header>
 
-    <main>
-        <section class="updates-container">
-            <p class="updates-paragraph-text">
-                <strong>Welcome to StrongdogXP!</strong><br>
-                This website is being hosted by <a href="https://4simpleproblems.github.io/" class="link--highlight" target="_blank">4SP</a>. I have fixed
-                several bugs, and have worked with StrongdogXP to have this connected to my website. So yeah, go nuts.
+    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4">
+        <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl">
+            <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
+                <strong>Welcome to the 4SP Game Hub!</strong><br>
+                This is a collection of games curated for the 4SP community. Use the search bar below to find your favorite.
             </p>
-        </section>
+        </div>
+        
+        <h2 id="favoritesHeader" class="text-center text-3xl font-bold mt-12 mb-6 text-white" style="display: none;">
+            <strong>Favorites</strong>
+        </h2>
+        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
-        <section id="favoritesSection" class="is-hidden">
-             <h2><strong>Favorites</strong></h2>
-             <div class="games-grid" id="favoritesGameList"></div>
-        </section>
-
-        <section>
-            <h2><strong>All Games</strong></h2>
-            <div class="games-grid" id="allGamesList"></div>
-        </section>
+        <!-- New Category Viewer -->
+        <div id="category-viewer" class="w-full mt-12">
+            <!-- Category Title Slider -->
+            <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
+                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="overflow-hidden w-64 text-center">
+                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
+                        <!-- Category titles will be dynamically injected here -->
+                    </div>
+                </div>
+                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Game Grid -->
+            <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
+                <!-- Game cards for the selected category will be injected here -->
+            </div>
+        </div>
     </main>
 
-    <nav class="slide-menu" id="slideMenu">
-        <div class="categories">
-            <a href="https://4simpleproblems.github.io/logged-in/games.html" class="option-link">Back to 4SP</a>
-            <a href="#" id="openBlank" class="option-link">Open in about:blank</a>
-            <a href="./save/index.html" class="option-link">Save manager</a>
-            <a href="https://discord.gg/dyyebUaqRS" class="option-link">Discord Server</a>
-            <a href="#" id="creditsBtn" class="option-link">Credits</a>
-        </div>
-    </nav>
-    
-    <footer class="bottom-search-bar">
-        <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" />
-        <div class="search-results" id="searchResults"></div>
-    </footer>
-    
-    <div id="credits-overlay" class="overlay">
-        <div id="credits-popup" class="popup">
-            <button id="closeCreditsPopup" class="popup-close" aria-label="Close Credits">&times;</button>
-            <h3>Credits</h3>
-            <div class="credit-person"><h4>John P - Creator of StrongdogXP</h4><p>He downloaded, compiled and created Strongdog entirely.</p></div>
-            <div class="credit-person"><h4>4SP</h4><p>Converted file directories to work with the website, fixed many bugs, and polished up the design.</p></div>
+    <!-- Bottom Fixed Search Bar -->
+    <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
+        <div class="relative flex items-center w-full">
+            <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
+            <button id="category-cycle-btn" title="Next Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
+                <i class="fa-solid fa-layer-group"></i>
+            </button>
+            <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
+                <!-- Search results dropdown will be injected here -->
+            </div>
         </div>
     </div>
-    
+
+    <!-- Main Application Logic -->
     <script type="module">
         import games from "./cards-data.js";
 
-        // --- 1. DOM Element Connections ---
-        // Grouping all DOM queries at the top makes the script easier to read and manage.
-        const allGamesList = document.getElementById("allGamesList");
-        const favoritesSection = document.getElementById("favoritesSection");
+        // --- Configuration & Globals ---
+        const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
+        const GN_COVER_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
+        const GN_HTML_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
+        const FAVORITES_KEY = 'gameHubFavorites_v3';
+
+        let allGames = [];
+        let categories = [];
+        let currentCategoryIndex = 0;
+        const categoryColors = {
+            'StrongdogXP': 'text-strongdog-orange',
+            'GN-Math': 'text-gn-math'
+        };
+        
+        // --- DOM Elements ---
+        const favoritesHeader = document.getElementById("favoritesHeader");
         const favoritesGameList = document.getElementById("favoritesGameList");
         const searchInput = document.getElementById("searchInput");
         const searchResults = document.getElementById("searchResults");
-        const menuIcon = document.getElementById("menuIcon");
-        const slideMenu = document.getElementById("slideMenu");
-        const openBlankLink = document.getElementById("openBlank");
-        const creditsBtn = document.getElementById('creditsBtn');
-        const creditsOverlay = document.getElementById('credits-overlay');
-        const closeCreditsPopup = document.getElementById('closeCreditsPopup');
+        const categorySlider = document.getElementById('category-slider');
+        const prevCategoryBtn = document.getElementById('prev-category');
+        const nextCategoryBtn = document.getElementById('next-category');
+        const categoryCycleBtn = document.getElementById('category-cycle-btn');
+        const gamesGridContainer = document.getElementById('games-grid-container');
 
-        // --- 2. State Management (Favorites) ---
-        const FAVORITES_KEY = 'strongdogXPFavorites_v2';
+        // --- Favorites Management ---
         const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
         const saveFavorites = (favs) => localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
         
@@ -544,97 +217,120 @@
             }
             saveFavorites(favorites);
 
-            // Update all visible cards for this game (in both lists)
-            document.querySelectorAll(`.game-card[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
+            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
+                btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
             });
-            
             renderFavorites();
         }
 
-        // --- 3. URL and Path Helpers (No changes needed here) ---
-        function getPageNumberFromURL(url) { const regex = /(strongdog|mathcord|stroongdog)(\d*)/; const match = url.match(regex); if (match) return match[2] === "" ? 1 : parseInt(match[2], 10); return 1; }
-        const siteMapping = window.siteMapping || {};
-        function getCurrentSiteKey() { const currentURL = window.location.href; const keys = Object.keys(siteMapping).sort((a, b) => b.length - a.length); for (const k of keys) { if (currentURL.includes(k)) return k; } return null; }
-        function getAdjustedUrls(href, imgSrc, page) {
-            let adjustedImgSrc = `./img/${imgSrc}`; let currentSiteKey = getCurrentSiteKey();
-            if (currentSiteKey) {
-                const currentPageNumber = getPageNumberFromURL(currentSiteKey);
-                if (page !== undefined && page !== currentPageNumber) {
-                    let newBase = window.location.origin + `/strongdog${page}`;
-                    adjustedImgSrc = `${newBase}/img/${imgSrc.replace(/^\.\//, "")}`;
-                }
-            } else if (page !== undefined && page > 1) {
-                const newBase = `${window.location.origin}/strongdog${page}`;
-                adjustedImgSrc = `${newBase}/img/${imgSrc.replace(/^\.\//, "")}`;
-            }
-            return { adjustedImgSrc };
-        }
-
-        // --- 4. UI Rendering ---
+        // --- Game Card Rendering ---
         function createGameCard(game) {
-            const { href, imgSrc, name, page, id } = game;
-            const { adjustedImgSrc } = getAdjustedUrls(href, imgSrc, page);
-            const favorites = getFavorites();
+            const isStrongdog = game.category === 'StrongdogXP';
+            const imgSrc = isStrongdog ? `./img/${game.imgSrc}` : game.imgSrc;
+            const isFavorite = getFavorites().includes(game.id);
 
-            // Create an <article> element for better semantics
-            const cardElement = document.createElement("article");
-            cardElement.className = "game-card";
-            cardElement.dataset.gameId = id;
-            
-            cardElement.addEventListener('click', (e) => {
-                // Only navigate if not clicking a button inside the card
-                if (e.target.closest('button')) return;
-                window.location.href = `./play/?id=${id}`;
-            });
+            const card = document.createElement("div");
+            card.className = 'zone-item bg-card-dark rounded-lg border border-brand-border overflow-hidden';
+            card.dataset.gameId = game.id;
 
-            const isFavorited = favorites.includes(id);
-            // Using innerHTML for efficient creation of the card's content
-            cardElement.innerHTML = `
-                <img class="game-cover" src="${adjustedImgSrc}" alt="${name}" loading="lazy" onerror="this.onerror=null;this.src='./img/favicon.ico';this.style.objectFit='contain';">
-                <div class="card-overlay">
-                    <h3 class="game-title">${name}</h3>
-                    <div class="card-buttons">
-                        <button class="card-play-btn">PLAY</button>
-                        <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" aria-label="Toggle Favorite">
-                            <img src="images/star-dark.png" alt="Favorite Star">
+            card.innerHTML = `
+                <div class="relative w-full cursor-pointer group">
+                    <div class="aspect-w-3 aspect-h-2">
+                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${game.name}">${game.name}</h3>
+                    <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
+                        <button class="play-btn rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
+                            <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
+                            <i class="fa-regular fa-circle-play fa-regular-play text-accent-indigo transition-colors"></i>
+                        </button>
+                        <button class="favorite-btn rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                            <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                            <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
                         </button>
                     </div>
                 </div>
             `;
             
-            // Add event listeners to the buttons after they are created
-            cardElement.querySelector('.card-play-btn').addEventListener('click', (e) => {
-                 e.stopPropagation(); window.location.href = `./play/?id=${id}`; 
-            });
-            cardElement.querySelector('.favorite-btn').addEventListener('click', (e) => {
-                 e.stopPropagation(); toggleFavorite(id); 
+            const handlePlay = (e) => {
+                e.stopPropagation();
+                if (isStrongdog) {
+                    window.location.href = `./play/?id=${game.id}`;
+                } else {
+                    window.open(game.url, '_blank');
+                }
+            };
+
+            card.querySelector('.group').addEventListener('click', handlePlay);
+            card.querySelector('.play-btn').addEventListener('click', handlePlay);
+            card.querySelector('.favorite-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleFavorite(game.id);
             });
 
-            return cardElement;
+            return card;
         }
 
+        // --- Game List Rendering ---
         function renderGames(gamesToRender, targetElement) {
-            targetElement.innerHTML = ''; // Clear previous content
+            targetElement.innerHTML = '';
             const fragment = document.createDocumentFragment();
-            gamesToRender.forEach(game => {
-                fragment.appendChild(createGameCard(game));
-            });
+            gamesToRender.forEach(game => fragment.appendChild(createGameCard(game)));
             targetElement.appendChild(fragment);
         }
 
         function renderFavorites() {
             const favoriteIds = getFavorites();
             if (favoriteIds.length > 0) {
-                favoritesSection.classList.remove('is-hidden'); // Show section
-                const favoriteGames = games.filter(game => favoriteIds.includes(game.id));
+                favoritesHeader.style.display = "block";
+                favoritesGameList.style.display = "grid";
+                const favoriteGames = allGames.filter(game => favoriteIds.includes(game.id));
                 renderGames(favoriteGames, favoritesGameList);
             } else {
-                favoritesSection.classList.add('is-hidden'); // Hide section
+                favoritesHeader.style.display = "none";
+                favoritesGameList.style.display = "none";
             }
         }
         
-        // Debounce function for performance
+        // --- Category Navigation & Display ---
+        function setupCategorySlider() {
+            categorySlider.innerHTML = categories.map(cat => 
+                `<div class="w-64 flex-shrink-0">
+                    <h2 class="text-3xl font-bold ${categoryColors[cat] || 'text-white'}">
+                        <strong>${cat}</strong>
+                    </h2>
+                </div>`
+            ).join('');
+            updateSliderPosition();
+        }
+
+        function updateSliderPosition() {
+            categorySlider.style.transform = `translateX(-${currentCategoryIndex * 100 / categories.length}%)`;
+        }
+
+        function switchCategory(newIndex) {
+            currentCategoryIndex = newIndex;
+            updateSliderPosition();
+            renderGamesForCurrentCategory();
+        }
+        
+        async function renderGamesForCurrentCategory(searchTerm = '') {
+            const categoryName = categories[currentCategoryIndex];
+            
+            gamesGridContainer.classList.add('opacity-0');
+            await new Promise(resolve => setTimeout(resolve, 150)); // Wait for fade out
+
+            let gamesToRender = allGames.filter(g => g.category === categoryName);
+            if(searchTerm) {
+                gamesToRender = gamesToRender.filter(g => g.name.toLowerCase().includes(searchTerm));
+            }
+            renderGames(gamesToRender, gamesGridContainer);
+            
+            gamesGridContainer.classList.remove('opacity-0');
+        }
+
+        // --- Search ---
         function debounce(func, delay) {
             let timeout;
             return function(...args) {
@@ -643,87 +339,86 @@
             };
         }
 
-        const updateSearchResults = debounce(() => {
+        const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
-            
-            // Filter the main grid of all games
-            const filteredAllGames = text ? games.filter(g => g.name.toLowerCase().includes(text)) : games;
-            renderGames(filteredAllGames, allGamesList);
+            renderGamesForCurrentCategory(text);
 
-            // Update the dropdown search results panel
-            const filteredDropdown = text ? games.filter(g => g.name.toLowerCase().includes(text)).slice(0, 7) : [];
+            // Update dropdown
+            const filteredDropdown = text ? allGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
             searchResults.innerHTML = "";
             if (filteredDropdown.length === 0 || !text) {
                 searchResults.style.display = "none";
                 return;
             }
+            
             filteredDropdown.forEach(game => {
-                const { id, imgSrc, name, page } = game;
-                const { adjustedImgSrc } = getAdjustedUrls(game.href, imgSrc, page);
+                const isStrongdog = game.category === 'StrongdogXP';
+                const imgSrc = isStrongdog ? `./img/${game.imgSrc}` : game.imgSrc;
+                const href = isStrongdog ? `./play/?id=${game.id}` : game.url;
+                const target = isStrongdog ? '' : 'target="_blank"';
+
                 const linkEl = document.createElement("a");
-                linkEl.href = `./play/?id=${id}`;
-                linkEl.innerHTML = `<img src="${adjustedImgSrc}" alt="${name}"><span>${name}</span>`;
+                linkEl.href = href;
+                linkEl.className = 'search-item';
+                linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
+                if(!isStrongdog) linkEl.target = "_blank";
                 searchResults.appendChild(linkEl);
             });
             searchResults.style.display = "block";
         }, 250);
 
-        // --- 5. Event Handlers & Initialization ---
-        // This single DOMContentLoaded listener is the entry point for the application.
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initial render
-            renderGames(games, allGamesList);
+        // --- Data Loading and Initialization ---
+        async function initializeApp() {
+            const strongdogGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
+            
+            try {
+                const response = await fetch(GN_ZONES_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const gnMathRaw = await response.json();
+                const gnMathGames = gnMathRaw.map(g => ({
+                    id: `gn-${g.id}`,
+                    name: g.name,
+                    imgSrc: g.cover.replace("{COVER_URL}", GN_COVER_URL_BASE),
+                    category: 'GN-Math',
+                    url: g.url.replace("{HTML_URL}", GN_HTML_URL_BASE)
+                }));
+                allGames = [...strongdogGames, ...gnMathGames];
+            } catch (error) {
+                console.error("Failed to load GN-Math games:", error);
+                allGames = strongdogGames; // Fallback
+            }
+
+            categories = [...new Set(allGames.map(g => g.category))];
+            categorySlider.style.width = `${categories.length * 100}%`;
+
+            setupCategorySlider();
+            renderGamesForCurrentCategory();
             renderFavorites();
-            searchInput.placeholder = `Search ${games.length} games...`;
 
-            // Menu interactions
-            menuIcon.addEventListener("click", ev => {
-                ev.stopPropagation();
-                slideMenu.classList.toggle('is-open');
-            });
-
-            // Credits popup interactions
-            creditsBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                slideMenu.classList.remove('is-open'); // Close menu if open
-                creditsOverlay.classList.add('is-open');
-            });
+            searchInput.placeholder = `Search all games...`;
+            searchInput.addEventListener("input", handleSearch);
+            searchInput.addEventListener("focus", handleSearch);
             
-            const closePopup = () => creditsOverlay.classList.remove('is-open');
-            closeCreditsPopup.addEventListener('click', closePopup);
-            creditsOverlay.addEventListener('click', (e) => {
-                // Close if clicking on the overlay itself, not the popup content
-                if (e.target === creditsOverlay) closePopup();
-            });
+            // --- Event Listeners ---
+            const cycle = (direction) => {
+                 let newIndex = currentCategoryIndex + direction;
+                 if (newIndex < 0) newIndex = categories.length - 1;
+                 if (newIndex >= categories.length) newIndex = 0;
+                 switchCategory(newIndex);
+            };
 
-            // Search interactions
-            searchInput.addEventListener("input", updateSearchResults);
-            searchInput.addEventListener("focus", updateSearchResults);
-            
-            // "Open in about:blank" functionality
-            openBlankLink?.addEventListener("click", ev => {
-                ev.preventDefault();
-                const newTab = window.open();
-                if (newTab) newTab.document.write(`<html><body style="margin:0;height:100vh;"><iframe src="${window.location.href}" style="border:none;width:100%;height:100%"></iframe></body></html>`);
-            });
+            prevCategoryBtn.addEventListener('click', () => cycle(-1));
+            nextCategoryBtn.addEventListener('click', () => cycle(1));
+            categoryCycleBtn.addEventListener('click', () => cycle(1));
 
-            // Global click listener to close menus
             document.addEventListener("click", ev => {
-                // Close slide menu if clicking outside of it
-                if (!slideMenu.contains(ev.target) && !menuIcon.contains(ev.target)) {
-                    slideMenu.classList.remove('is-open');
-                }
-                // Close search results if clicking outside the search bar
-                if (!searchInput.parentElement.contains(ev.target)) {
+                if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
                     searchResults.style.display = "none";
                 }
             });
-        });
-    </script>
+        }
 
-    <script src="/firebase-config.js" defer></script>
-    <script src="/ban-enforcer.js" defer></script>
-    <script src="/url-changer.js" defer></script>
-    <script src="/panic-key.js" defer></script>
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
 </body>
 </html>
