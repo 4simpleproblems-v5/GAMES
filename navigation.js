@@ -11,6 +11,9 @@
  * 2. CRITICAL CDN FIX (COMPLETE): Ensures the navigation bar renders by using stable Firebase Compat SDKs.
  * 3. RENDER PRIORITY: Ensures the navigation bar is rendered immediately after CSS injection, preventing the AI logic failure from blocking the UI.
  * 4. WIDESCREEN UPDATE: Removed max-width from the 'nav' element to allow it to fill the screen.
+ * 5. SCROLL GLIDER FIX: Scroll buttons are now visible by default (static) and use the 'hover' opacity (1.0) at all times, only fading out when not needed.
+ * 6. LOGOUT REDIRECT (NEW): If a user is logged out, they are automatically redirected to '../../index.html' unless they are already on an entry page.
+ * 7. SETTINGS REMOVAL (NEW): The 'Settings' link has been removed from the authenticated user menu.
  */
 
 // =========================================================================
@@ -240,11 +243,15 @@ let currentAgent = 'Standard'; // Default agent
                 .tab-scroll-container::-webkit-scrollbar { display: none; }
                 .scroll-glide-button {
                     position: absolute; top: 0; height: 100%; width: 4rem; display: flex; align-items: center; justify-content: center; background: #000000; 
-                    color: white; font-size: 1.2rem; cursor: pointer; opacity: 0.8; transition: opacity 0.3s, background 0.3s; z-index: 10; pointer-events: auto;
+                    color: white; font-size: 1.2rem; cursor: pointer; 
+                    /* MODIFICATION: Always use hover opacity (1.0) as base opacity */
+                    opacity: 1; 
+                    transition: opacity 0.3s, background 0.3s; z-index: 10; pointer-events: auto;
                 }
-                .scroll-glide-button:hover { opacity: 1; }
+                /* REMOVED: .scroll-glide-button:hover { opacity: 1; } is no longer needed */
                 #glide-left { left: 0; background: linear-gradient(to right, #000000 50%, transparent); justify-content: flex-start; padding-left: 0.5rem; }
                 #glide-right { right: 0; background: linear-gradient(to left, #000000 50%, transparent); justify-content: flex-end; padding-right: 0.5rem; }
+                /* The hidden class now purely controls visibility based on need/scroll position */
                 .scroll-glide-button.hidden { opacity: 0 !important; pointer-events: none !important; }
                 .nav-tab { flex-shrink: 0; padding: 0.5rem 1rem; color: #9ca3af; font-size: 0.875rem; font-weight: 500; border-radius: 0.5rem; transition: all 0.2s; text-decoration: none; line-height: 1.5; display: flex; align-items: center; margin-right: 0.5rem; border: 1px solid transparent; }
                 .nav-tab:not(.active):hover { color: white; border-color: #d1d5db; background-color: rgba(79, 70, 229, 0.05); }
@@ -418,6 +425,7 @@ let currentAgent = 'Standard'; // Default agent
                 const isScrolledToLeft = container.scrollLeft < 5; 
                 const isScrolledToRight = container.scrollLeft + container.offsetWidth >= container.scrollWidth - 5; 
 
+                // Ensure the buttons are visible initially if there is overflow
                 leftButton.classList.remove('hidden');
                 rightButton.classList.remove('hidden');
 
@@ -428,6 +436,7 @@ let currentAgent = 'Standard'; // Default agent
                     rightButton.classList.add('hidden');
                 }
             } else {
+                // If there is no overflow, hide both buttons
                 leftButton.classList.add('hidden');
                 rightButton.classList.add('hidden');
             }
@@ -500,10 +509,6 @@ let currentAgent = 'Standard'; // Default agent
                                 <i class="fa-solid fa-house-user"></i>
                                 Dashboard
                             </a>
-                            <a href="/logged-in/settings.html" class="auth-menu-link">
-                                <i class="fa-solid fa-gear"></i>
-                                Settings
-                            </a>
                             <button id="logout-button" class="auth-menu-button text-red-400 hover:bg-red-900/50 hover:text-red-300">
                                 <i class="fa-solid fa-right-from-bracket"></i>
                                 Log Out
@@ -522,13 +527,15 @@ let currentAgent = 'Standard'; // Default agent
                         </a>
 
                         <div class="tab-wrapper">
-                            <button id="glide-left" class="scroll-glide-button hidden"><i class="fa-solid fa-chevron-left"></i></button>
+                            <!-- MODIFICATION: Removed 'hidden' class to show statically on load -->
+                            <button id="glide-left" class="scroll-glide-button"><i class="fa-solid fa-chevron-left"></i></button>
 
                             <div class="tab-scroll-container">
                                 ${tabsHtml}
                             </div>
                             
-                            <button id="glide-right" class="scroll-glide-button hidden"><i class="fa-solid fa-chevron-right"></i></button>
+                            <!-- MODIFICATION: Removed 'hidden' class to show statically on load -->
+                            <button id="glide-right" class="scroll-glide-button"><i class="fa-solid fa-chevron-right"></i></button>
                         </div>
 
                         ${user ? loggedInView(user, userData) : loggedOutView}
@@ -537,7 +544,7 @@ let currentAgent = 'Standard'; // Default agent
             `;
 
             // --- Append AI Modal HTML to the Body ---
-            // This block will now effectively be skipped since isPrivilegedUser is false.
+            // This block will now effectively be skipped since isPrivilegedUser is false
             if (isPrivilegedUser) {
                 let aiModal = document.getElementById('ai-modal');
                 if (!aiModal) {
@@ -578,6 +585,7 @@ let currentAgent = 'Standard'; // Default agent
                 tabContainer.scrollLeft = activeTab.offsetLeft - (tabContainer.offsetWidth / 2) + (activeTab.offsetWidth / 2);
             }
             
+            // Initial check to hide/show them correctly after load
             updateScrollGilders();
         };
 
@@ -823,12 +831,22 @@ let currentAgent = 'Standard'; // Default agent
             } else {
                 // User is signed out.
                 renderNavbar(null, null, pages, false);
-                // Attempt to sign in anonymously for a seamless guest experience.
-                auth.signInAnonymously().catch((error) => {
-                    if (error.code !== 'auth/operation-not-allowed') {
-                        console.error("Anonymous sign-in error:", error);
-                    }
-                });
+                
+                // KICK USER TO INDEX: If the user is logged out, redirect them to ../../index.html
+                const targetUrl = '../../index.html';
+                const currentPathname = window.location.pathname;
+                
+                // Determine if the current page is one of the designated entry points 
+                // (index or authentication page) to prevent an infinite loop.
+                const isEntryPoint = currentPathname.includes('index.html') || currentPathname.includes('authentication.html') || currentPathname === '/';
+                
+                if (!isEntryPoint) {
+                    console.log(`User logged out. Restricting access and redirecting to ${targetUrl}`);
+                    window.location.href = targetUrl;
+                }
+                
+                // NOTE: The previous anonymous sign-in attempt has been removed, as the intent of
+                // this change is to restrict access to the current page when logged out.
             }
         });
 
