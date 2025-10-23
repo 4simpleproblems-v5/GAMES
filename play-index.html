@@ -226,10 +226,10 @@
                 // This original logic seems to be for different *sub-directories* of strongdog.
                 // Keeping it close to original but changing ".." to "." for root context.
                 if (!page || page === 1) return "./";
-                if (page === 2) return "strongdog2/";
-                if (page === 3) return "strongdog3/";
-                if (page === 4) return "strongdog4/";
-                if (page === 5) return "strongdog5/";
+                if (page === 2) return "../strongdog2/";
+                if (page === 3) return "../strongdog3/";
+                if (page === 4) return "../strongdog4/";
+                if (page === 5) return "../strongdog5/";
                 return "./";
             }
             
@@ -241,13 +241,13 @@
             // to sibling directories like /strongdog2/, /strongdog3/, etc.
             // I'm simplifying the old complex logic to assume this directory structure
             // is standard in the root.
-            if (page === 2) return "strongdog2/";
-            if (page === 3) return "strongdog3/";
-            if (page === 4) return "strongdog4/";
-            if (page === 5) return "strongdog5/";
+            if (page === 2) return "../strongdog2/";
+            if (page === 3) return "../strongdog3/";
+            if (page === 4) return "../strongdog4/";
+            if (page === 5) return "../strongdog5/";
             
             // Fallback to the current directory (root)
-            return "./"; 
+            return "../"; 
         }
 
         async function getEmbedPath(adjustedHref, originalHref, page) {
