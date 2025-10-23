@@ -302,12 +302,12 @@
         }
         
         // --- START: Logic ported from playindex.html ---
+        // --- THIS BLOCK has been replaced with the logic from play-index.html ---
 
         function getCurrentKeyHostOnly() {
             return window.location.host;
         }
 
-        // --- THIS FUNCTION HAS BEEN REPLACED ---
         /* Simplified getBaseURLForPage for root directory context.
         The complex, multi-host logic is mostly removed/simplified 
         as all references will now be relative to the root.
@@ -348,17 +348,7 @@
         async function getEmbedPath(adjustedHref, originalHref, page) {
             let cleanHref = adjustedHref.replace(/index\.html$/, "").replace(/base\.html$/, "").replace(/\.html$/, "");
             if (!cleanHref.endsWith("/")) cleanHref += "/";
-            
-            // Prioritize index.html in the game's root folder
-            const pathsToTry = [
-                cleanHref + "index.html",
-                cleanHref + "base.html",
-                cleanHref + "game/index.html",
-                cleanHref + "game/base.html",
-                cleanHref + "gamereal/index.html",
-                cleanHref + "gamereal/base.html",
-            ];
-            
+            const pathsToTry = [cleanHref + "game/index.html", cleanHref + "game/base.html", cleanHref + "gamereal/index.html", cleanHref + "gamereal/base.html", cleanHref + "index.html", cleanHref + "base.html", ];
             try {
                 const response = await fetch(adjustedHref, {
                     method: "GET"
@@ -378,10 +368,9 @@
             for (const path of pathsToTry) {
                 if (await fileExists(path)) return path;
             }
-            return adjustHrefPath(originalHref, page); // Fallback
+            return adjustHrefPath(originalHref, page);
         }
 
-        // --- THIS FUNCTION HAS BEEN REPLACED ---
         function adjustHrefPath(path, page) {
             path = path.replace(/^\.\//, "").replace(/^\//, "");
             const baseURL = getBaseURLForPage(page);
@@ -842,4 +831,3 @@
     </script>
 </body>
 </html>
-
