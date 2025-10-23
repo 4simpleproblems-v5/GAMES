@@ -235,9 +235,9 @@
     </div>
 
     <script type="module">
-        import games from "/GAMES/cards-data.js";
-        // ADDED: Import siteMapping, assuming it's in the same root directory
-        import { siteMapping } from "/GAMES/site-mapping.js";
+        import games from "./cards-data.js";
+        // ADDED: Import siteMapping, assuming it's in the same directory
+        import { siteMapping } from "./site-mapping.js";
 
         // --- Configuration & Globals ---
         const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
@@ -735,6 +735,17 @@
 
         // --- Data Loading and Initialization ---
         async function initializeApp() {
+            // ADDED: Check if games loaded
+            if (!games || !Array.isArray(games)) {
+                console.error("CRITICAL ERROR: 'cards-data.js' failed to load or is not a valid array. Game hub cannot initialize.");
+                // Optionally display this error to the user
+                const gameGrid = document.getElementById('games-grid-container');
+                if (gameGrid) {
+                    gameGrid.innerHTML = `<p class="col-span-full text-center text-red-500 text-lg">Failed to load game data. Please check the console (F12) for errors (404s on 'cards-data.js' or 'site-mapping.js').</p>`;
+                }
+                return; // Stop initialization
+            }
+
             const strongdogGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
             
             try {
@@ -831,3 +842,4 @@
     </script>
 </body>
 </html>
+
