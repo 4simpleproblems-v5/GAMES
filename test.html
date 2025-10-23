@@ -1,7 +1,7 @@
 <!DOCTYPE html> 
 <html lang="en">
 <head>
-    <title>4SP - Game Hub</title>
+    <title>4SP - GAMES</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
@@ -162,6 +162,11 @@
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
+        /* --- ADDED: Style for disabled arrow buttons --- */
+        .arrow-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -185,14 +190,16 @@
 
         <div id="category-viewer" class="w-full mt-12">
             <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
-                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
+                <!-- ADDED: 'arrow-btn' class -->
+                <button id="prev-category" class="arrow-btn absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="overflow-hidden w-64 text-center">
                     <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
                         </div>
                 </div>
-                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
+                <!-- ADDED: 'arrow-btn' class -->
+                <button id="next-category" class="arrow-btn absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
@@ -300,59 +307,42 @@
             return window.location.host;
         }
 
-        // --- THIS FUNCTION HAS BEEN MODIFIED ---
+        // --- THIS FUNCTION HAS BEEN REPLACED ---
+        /* Simplified getBaseURLForPage for root directory context.
+        The complex, multi-host logic is mostly removed/simplified 
+        as all references will now be relative to the root.
+        */
         function getBaseURLForPage(page) {
             const currentHost = getCurrentKeyHostOnly();
             const currentPath = window.location.pathname;
 
-            // Adjusted paths assuming index.html is in the root
-            if (currentHost === "v5-simpleproblems.github.io" && currentPath.toLowerCase().startsWith('/GAMES/')) {
-                if (!page || page === 1) return "/GAMES/";
-                // Changed from ../ to ./
+            // Simplified: If the path is /strongdog/, it means the game pages are relative to that folder.
+            if (currentPath.toLowerCase().startsWith('/strongdog/')) {
+                // This original logic seems to be for different *sub-directories* of strongdog.
+                // Keeping it close to original but changing ".." to "." for root context.
+                if (!page || page === 1) return "./";
                 if (page === 2) return "../strongdog2/";
                 if (page === 3) return "../strongdog3/";
                 if (page === 4) return "../strongdog4/";
                 if (page === 5) return "../strongdog5/";
-                return "/GAMES/"; // Fallback for this specific host
-            }
-            const explicitMappings = {
-                "jman1593.github.io": {
-                    2: "./strongdog2/", // Already correct
-                },
-                "v5-4simpleproblems.github.io": {
-                    // Changed from ../ to ./
-                    2: "../strongdog2/", 
-                    3: "../strongdog3/",
-                    4: "../strongdog4/",
-                    5: "../strongdog5/",
-                }
-            };
-            if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
-                return explicitMappings[currentHost][page];
+                return "./";
             }
             
-            // Default paths assuming peer directories
-            if (!page || page === 1) return "./"; // Default Strongdog path (root)
-            
-            const arr = siteMapping[currentHost];
-            if (!arr) {
-                // Changed from .../ and ../ to ./
-                if (page === 2) return "../strongdog2/";
-                if (page === 3) return "../strongdog3/";
-                if (page === 4) return "../strongdog4/";
-                if (page === 5) return "../strongdog5/";
-                return "./"; // Fallback to root
-            }
-            const index = page - 2;
-            if (arr[index]) return arr[index]; // Use mapping directly
-            
-            // Fallback
-            // Changed from ../ to ./
+            // For general hosting, we assume all game folders are sibling to this file.
+            // Page 1 is always root context (./).
+            if (!page || page === 1) return "./";
+
+            // If a game uses page 2, 3, 4, 5, etc., the logic below maps them 
+            // to sibling directories like /strongdog2/, /strongdog3/, etc.
+            // I'm simplifying the old complex logic to assume this directory structure
+            // is standard in the root.
             if (page === 2) return "../strongdog2/";
             if (page === 3) return "../strongdog3/";
             if (page === 4) return "../strongdog4/";
             if (page === 5) return "../strongdog5/";
-            return "./"; // Fallback to root
+            
+            // Fallback to the current directory (root)
+            return "../"; 
         }
 
         async function getEmbedPath(adjustedHref, originalHref, page) {
@@ -391,14 +381,17 @@
             return adjustHrefPath(originalHref, page); // Fallback
         }
 
+        // --- THIS FUNCTION HAS BEEN REPLACED ---
         function adjustHrefPath(path, page) {
             path = path.replace(/^\.\//, "").replace(/^\//, "");
             const baseURL = getBaseURLForPage(page);
             let finalPath;
-            
-            // Simplified path logic for root index.html
-            finalPath = baseURL.endsWith("/") ? baseURL + path : baseURL + "/" + path;
-            
+            // The logic is adjusted to account for the new baseURLs being relative to the root (e.g., "./" or "strongdog2/")
+            if (baseURL === "./") {
+                finalPath = "./" + path;
+            } else {
+                finalPath = baseURL.endsWith("/") ? baseURL + path : baseURL + "/" + path;
+            }
             return finalPath;
         }
 
@@ -487,6 +480,7 @@
                 // --- Calculate Strongdog URL ---
                 try {
                     const page = game.page;
+                    // USE THE REPLACED FUNCTIONS
                     const baseURL = getBaseURLForPage(page);
                     let adjustedHref = game.href.replace(/^\.\//, "");
                     adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
@@ -549,6 +543,7 @@
             try {
                 if (game.category === 'StrongdogXP') {
                     const page = game.page;
+                    // USE THE REPLACED FUNCTIONS
                     const baseURL = getBaseURLForPage(page);
                     let adjustedHref = game.href.replace(/^\.\//, "");
                     adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
@@ -603,6 +598,35 @@
         }
         
         // --- Category Navigation & Display ---
+
+        // ADDED: Helper to slugify category names
+        function slugify(text) {
+            return text.toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with -
+                .replace(/^-+|-+$/g, '');     // Remove leading/trailing -
+        }
+
+        // ADDED: New function to control arrow button states
+        function updateArrowVisibility() {
+            // Disable/enable prev button
+            if (currentCategoryIndex === 0) {
+                prevCategoryBtn.classList.add('disabled');
+                prevCategoryBtn.disabled = true;
+            } else {
+                prevCategoryBtn.classList.remove('disabled');
+                prevCategoryBtn.disabled = false;
+            }
+
+            // Disable/enable next button
+            if (currentCategoryIndex === categories.length - 1) {
+                nextCategoryBtn.classList.add('disabled');
+                nextCategoryBtn.disabled = true;
+            } else {
+                nextCategoryBtn.classList.remove('disabled');
+                nextCategoryBtn.disabled = false;
+            }
+        }
+
         function setupCategorySlider() {
             categorySlider.innerHTML = categories.map(cat => 
                 `<div class="w-64 flex-shrink-0">
@@ -618,10 +642,27 @@
             categorySlider.style.transform = `translateX(-${currentCategoryIndex * 100 / categories.length}%)`;
         }
 
-        function switchCategory(newIndex) {
+        // ADDED: New function to update state WITHOUT pushing to history
+        // This is used for initial load and browser back/forward (onpopstate)
+        function updateCategoryState(newIndex) {
+            if (newIndex < 0 || newIndex >= categories.length) return; // Safety check
             currentCategoryIndex = newIndex;
             updateSliderPosition();
             renderGamesForCurrentCategory();
+            updateArrowVisibility();
+        }
+        
+        // MODIFIED: This function now handles pushing to browser history
+        function switchCategory(newIndex) {
+            updateCategoryState(newIndex); // Update UI
+
+            // Update URL
+            const categoryName = categories[currentCategoryIndex];
+            const categorySlug = slugify(categoryName);
+            const url = new URL(window.location);
+            url.searchParams.set('category', categorySlug);
+            // Push state to history
+            history.pushState({ category: categorySlug }, `Category: ${categoryName}`, url);
         }
         
         async function renderGamesForCurrentCategory(searchTerm = '') {
@@ -716,8 +757,20 @@
             categories = [...new Set(allGames.map(g => g.category))];
             categorySlider.style.width = `${categories.length * 100}%`;
 
+            // --- ADDED: Read category from URL on load ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryParam = urlParams.get('category');
+            let initialIndex = 0;
+            if (categoryParam) {
+                const foundIndex = categories.findIndex(cat => slugify(cat) === categoryParam);
+                if (foundIndex !== -1) {
+                    initialIndex = foundIndex;
+                }
+            }
+            // --- End URL reading ---
+
             setupCategorySlider();
-            renderGamesForCurrentCategory();
+            updateCategoryState(initialIndex); // Set initial state without pushing to history
             renderFavorites();
 
             searchInput.placeholder = `Search all games...`;
@@ -725,16 +778,22 @@
             searchInput.addEventListener("focus", handleSearch);
             
             // --- Event Listeners ---
+            
+            // MODIFIED: Cycle function now stops at ends
             const cycle = (direction) => {
                  let newIndex = currentCategoryIndex + direction;
-                 if (newIndex < 0) newIndex = categories.length - 1;
-                 if (newIndex >= categories.length) newIndex = 0;
-                 switchCategory(newIndex);
+                 
+                 // STOP at the ends, don't cycle
+                 if (newIndex < 0 || newIndex >= categories.length) {
+                     return; // Do nothing if at the boundary
+                 }
+                 
+                 switchCategory(newIndex); // switchCategory will update history
             };
 
             prevCategoryBtn.addEventListener('click', () => cycle(-1));
             nextCategoryBtn.addEventListener('click', () => cycle(1));
-            categoryCycleBtn.addEventListener('click', () => cycle(1));
+            categoryCycleBtn.addEventListener('click', () => cycle(1)); // This one still cycles
 
             document.addEventListener("click", ev => {
                 if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
@@ -748,6 +807,24 @@
             });
             document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
+
+            // ADDED: Listen for browser back/forward buttons
+            window.onpopstate = (event) => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const categoryParam = urlParams.get('category');
+                
+                let newIndex = 0; // Default to first category
+                if (categoryParam) {
+                    const foundIndex = categories.findIndex(cat => slugify(cat) === categoryParam);
+                    if (foundIndex !== -1) {
+                        newIndex = foundIndex;
+                    }
+                }
+
+                if (newIndex !== currentCategoryIndex) {
+                    updateCategoryState(newIndex); // Update state without pushing history
+                }
+            };
         }
 
         document.addEventListener('DOMContentLoaded', initializeApp);
