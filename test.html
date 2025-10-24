@@ -315,54 +315,93 @@
             const currentPath = window.location.pathname;
 
             // Adjusted paths from playindex.html (e.g., /STRONGDOG/ -> ./)
+            // This block uses absolute paths, it should be fine.
             if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
-                if (!page || page === 1) return "./"; // Was /STRONGDOG/
-                if (page === 2) return "./strongdog2/"; // Was /strongdog2/
-                if (page === 3) return "./strongdog3/"; // Was /strongdog3/
-                if (page === 4) return "./strongdog4/"; // Was /strongdog4/
-                if (page === 5) return "./strongdog5/"; // Was /strongdog5/
-                return "./"; // Was /STRONGDOG/
+                if (page === 5) return "/strongdog5/";
+                return "/STRONGDOG/";
             }
+            
+            // explicitMappings:
+            // ../ (from play/) -> ./ (from root/)
+            // ../../ (from play/) -> ../ (from root/)
             const explicitMappings = {
                 "jman1593.github.io": {
-                    2: "./strongdog2/", // Was ../strongdog2/
+                    2: "./strongdog2/", // Original: ../strongdog2/
                 },
                 "v5-4simpleproblems.github.io": {
-                    2: "./strongdog2/", // Was ../../strongdog2/
-                    3: "./strongdog3/", // Was ../../strongdog3/
-                    4: "./strongdog4/", // Was ../../strongdog4/
-                    5: "./strongdog5/", // Was ../../strongdog5/
+                    2: "../strongdog2/", // Original: ../../strongdog2/
+                    3: "../strongdog3/", // Original: ../../strongdog3/
+                    4: "../strongdog4/", // Original: ../../strongdog4/
+                    5: "../strongdog5/", // Original: ../../strongdog5/
                 }
             };
             if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
-                // Adjusted path replacement
-                return explicitMappings[currentHost][page].replace(/^\.\.\//, "./").replace(/^\.\.\/\.\.\//, "./");
+                // Adjusted path replacement - just return the correct path
+                return explicitMappings[currentHost][page];
             }
-            if (!page || page === 1) return "./"; // Was ../
+            
+            // Original: if (!page || page === 1) return "../";
+            if (!page || page === 1) return "./"; // Correct translation (resolves to /GAMES/)
             
             // Check if siteMapping was imported correctly
+            const arr = siteMapping[currentHost];
             if (typeof siteMapping === 'undefined' || !siteMapping[currentHost]) {
                 console.warn("siteMapping not found or host not in map. Using default paths.");
-                if (page === 2) return "./strongdog2/"; // Was ../../strongdog2/
-                if (page === 3) return "./strongdog3/"; // Was ../../strongdog3/
-                if (page === 4) return "./strongdog4/"; // Was ../../strongdog4/
-                if (page === 5) return "./strongdog5/"; // Was ../../strongdog5/
-                return "./"; // Was ../
+                // Original fallbacks:
+                // if (page === 2) return "../../strongdog2/";
+                if (page === 2) return "../strongdog2/"; // Correct translation
+                // if (page === 3) return "../../strongdog3/";
+                if (page === 3) return "../strongdog3/"; // Correct translation
+                // if (page === 4) return "../../strongdog4/";
+                if (page === 4) return "../strongdog4/"; // Correct translation
+                // if (page === 5) return "../../strongdog5/";
+                if (page === 5) return "../strongdog5/"; // Correct translation
+                // return "../";
+                return "./"; // Correct translation
             }
 
             const arr = siteMapping[currentHost];
             const index = page - 2;
             if (arr[index]) {
-                 // Adjust paths from site-mapping.js
-                return arr[index].replace(/^\.\/$/, "./").replace(/^\.\.\//, "./").replace(/^\.\.\/\.\.\//, "./");
+                 // Original: return arr[index].replace(/^\.\/$/, "../");
+                 // This means paths in siteMapping are relative to play/
+                 // e.g., `../../strongdog2/` or `../strongdog2/` or `./`
+                let path = arr[index];
+                
+                // Translate the special ./ -> ../ rule
+                // Original: if path is './', return '../' (resolves to /GAMES/)
+                // My translation: if path is './', return './' (resolves to /GAMES/)
+                if (path === './') {
+                    return './';
+                }
+                
+                // Translate the paths themselves
+                if (path.startsWith('../../')) {
+                    // Original: ../../strongdog2/ (resolves to /strongdog2/)
+                    // My translation: ../strongdog2/ (resolves to /strongdog2/)
+                    return path.replace('../../', '../');
+                }
+                if (path.startsWith('../')) {
+                    // Original: ../strongdog2/ (resolves to /GAMES/strongdog2/)
+                    // My translation: ./strongdog2/ (resolves to /GAMES/strongdog2/)
+                    return path.replace('../', './');
+                }
+                // Path is probably fine as-is (e.g. absolute, or `./something` which is correct)
+                return path;
             }
 
             // Fallback defaults
-            if (page === 2) return "./strongdog2/"; // Was ../../strongdog2/
-            if (page === 3) return "./strongdog3/"; // Was ../../strongdog3/
-            if (page === 4) return "./strongdog4/"; // Was ../../strongdog4/
-            if (page === 5) return "./strongdog5/"; // Was ../../strongdog5/
-            return "./"; // Was ../../
+            // Original:
+            // if (page === 2) return "../../strongdog2/";
+            if (page === 2) return "../strongdog2/"; // Correct translation
+            // if (page === 3) return "../../strongdog3/";
+            if (page === 3) return "../strongdog3/"; // Correct translation
+            // if (page === 4) return "../../strongdog4/";
+            if (page === 4) return "../strongdog4/"; // Correct translation
+            // if (page === 5) return "../../strongdog5/";
+            if (page === 5) return "../strongdog5/"; // Correct translation
+            // return "../../";
+            return "../"; // Correct translation (../../ from play/ is /, so ../ from root/ is /)
         }
 
         async function sd_getEmbedPath(adjustedHref, originalHref, page) {
@@ -787,3 +826,4 @@
     </script>
 </body>
 </html>
+
