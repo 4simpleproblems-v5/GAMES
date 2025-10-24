@@ -32,7 +32,8 @@
                         'accent-indigo': '#4f46e5', // Unified accent color
                         'brand-border': '#252525',
                         'strongdog-orange': '#FFA500',
-                        'gn-math': '#FB2651', // Added new category color
+                        'gn-math': '#FB2651',
+                        'gameboy': '#9A2257', // Added Gameboy color
                     },
                     fontFamily: {
                         sans: ['Geist', 'sans-serif'],
@@ -166,6 +167,68 @@
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
+        /* --- Category Arrow Button Disabled State --- */
+        #prev-category:disabled,
+        #next-category:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            color: #6b7280; /* text-gray-500 */
+        }
+        #prev-category:disabled:hover,
+        #next-category:disabled:hover {
+            color: #6b7280; /* text-gray-500 */
+        }
+        
+        /* --- [NEW] Marquee Animation for Overflowing Titles --- */
+        @keyframes marquee-dynamic {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(0); } /* Pause at start */
+            80% { transform: translateX(var(--scroll-amount, -100px)); } /* Scroll to end */
+            100% { transform: translateX(var(--scroll-amount, -100px)); } /* Pause at end */
+        }
+
+        .game-title-container {
+            overflow: hidden; /* This clips the h3 */
+            position: relative; /* For fades */
+        }
+
+        /* Fades */
+        .game-title-container::before,
+        .game-title-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            /* Match the container's background */
+            background: linear-gradient(to right, rgba(0,0,0,0.9) 20%, transparent);
+        }
+        .game-title-container::after {
+            right: 0;
+            left: auto;
+            background: linear-gradient(to left, rgba(0,0,0,0.9) 20%, transparent);
+        }
+
+        .game-title-container.is-overflowing > h3 {
+            /* Remove truncation */
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
+            will-change: transform;
+            /* Apply animation */
+            animation: marquee-dynamic linear infinite alternate;
+            /* --scroll-amount and animation-duration are set by JS */
+        }
+
+        .game-title-container.is-overflowing::before,
+        .game-title-container.is-overflowing::after {
+            opacity: 1;
+        }
+        /* --- End Marquee Styles --- */
     </style>
 </head>
 
@@ -195,6 +258,7 @@
                 <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-left"></i>
                 </button>
+                <!-- Container width (w-64) must match item width in JS -->
                 <div class="overflow-hidden w-64 text-center">
                     <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
                         <!-- Category titles will be dynamically injected here -->
@@ -216,9 +280,20 @@
     <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
         <div class="relative flex items-center w-full">
             <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
-            <button id="category-cycle-btn" title="Next Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
+            <!-- [CHANGED] Renamed button ID and updated title -->
+            <button id="search-filter-btn" title="Filter by Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
                 <i class="fa-solid fa-layer-group"></i>
             </button>
+            
+            <!-- [NEW] Search Filter Dropdown -->
+            <div id="search-filter-dropdown" class="hidden absolute bottom-full w-full mb-2 bg-black/70 backdrop-blur-lg rounded-lg shadow-xl p-3 border border-brand-border">
+                <p class="text-sm text-gray-300 mb-2">Filter search by category:</p>
+                <div id="search-filter-options" class="flex flex-wrap gap-2">
+                    <!-- Filter options will be injected by JS -->
+                </div>
+            </div>
+            
+            <!-- Search Results Dropdown -->
             <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
                 <!-- Search results dropdown will be injected here -->
             </div>
@@ -256,10 +331,14 @@
         let allGames = [];
         let categories = [];
         let currentCategoryIndex = 0;
+        // [NEW] Added Gameboy Games color
         const categoryColors = {
             'StrongdogXP': 'text-strongdog-orange',
-            'GN-Math': 'text-gn-math'
+            'GN-Math': 'text-gn-math',
+            'Gameboy Games': 'text-gameboy'
         };
+        // [NEW] State for search filters
+        let searchFilterCategories = [];
         
         // --- DOM Elements ---
         const favoritesHeader = document.getElementById("favoritesHeader");
@@ -269,8 +348,13 @@
         const categorySlider = document.getElementById('category-slider');
         const prevCategoryBtn = document.getElementById('prev-category');
         const nextCategoryBtn = document.getElementById('next-category');
-        const categoryCycleBtn = document.getElementById('category-cycle-btn');
+        // [CHANGED] Renamed variable
+        const searchFilterBtn = document.getElementById('search-filter-btn');
         const gamesGridContainer = document.getElementById('games-grid-container');
+        // [NEW] Search filter dropdown elements
+        const searchFilterDropdown = document.getElementById('search-filter-dropdown');
+        const searchFilterOptions = document.getElementById('search-filter-options');
+
 
         // --- Favorites Management ---
         const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
@@ -478,12 +562,18 @@
             card.className = 'zone-item bg-card-dark rounded-lg border border-brand-border overflow-hidden';
             card.dataset.gameId = game.id;
 
+            // [CHANGED] Modified title to support marquee animation
             card.innerHTML = `
                 <div class="relative w-full cursor-pointer group">
                     <div class="aspect-w-3 aspect-h-2">
                         <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
                     </div>
-                    <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${game.name}">${game.name}</h3>
+                    
+                    <!-- [NEW] Title container for marquee -->
+                    <div class="game-title-container absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-sm font-semibold shadow-lg" style="max-width: 75%;">
+                        <h3 class="text-white truncate" title="${game.name}">${game.name}</h3>
+                    </div>
+                    
                     <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
                         <button class="play-btn rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
                             <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
@@ -538,6 +628,31 @@
 
             return card;
         }
+
+        // --- [NEW] Title Overflow Check ---
+        function checkTitleOverflow() {
+            document.querySelectorAll('.game-title-container').forEach(container => {
+                const h3 = container.querySelector('h3');
+                if (!h3) return;
+                
+                // Reset styles to check
+                container.classList.remove('is-overflowing');
+                h3.style.animationDuration = '';
+                h3.style.removeProperty('--scroll-amount');
+
+                // Check for overflow
+                if (h3.scrollWidth > container.clientWidth) {
+                    container.classList.add('is-overflowing');
+                    const overflowAmount = h3.scrollWidth - container.clientWidth;
+                    
+                    // Set dynamic animation properties
+                    const duration = (overflowAmount + 100) / 30; // 30px per second scroll speed
+                    h3.style.setProperty('--scroll-amount', `-${overflowAmount + 10}px`); // +10px padding
+                    h3.style.animationDuration = `${Math.max(3, duration)}s`; // Min 3 sec duration
+                }
+            });
+        }
+
 
         // --- Game Viewer Logic ---
         // MODIFIED: openZone now handles both game types
@@ -654,10 +769,13 @@
                 favoritesHeader.style.display = "none";
                 favoritesGameList.style.display = "none";
             }
+            // Check for title overflow in favorites
+            checkTitleOverflow();
         }
         
         // --- Category Navigation & Display ---
         function setupCategorySlider() {
+            // Each item is w-64
             categorySlider.innerHTML = categories.map(cat => 
                 `<div class="w-64 flex-shrink-0">
                     <h2 class="text-3xl font-bold ${categoryColors[cat] || 'text-white'}">
@@ -666,18 +784,29 @@
                 </div>`
             ).join('');
             updateSliderPosition();
+            updateArrowButtonStates(); // [NEW] Set initial button state
         }
 
+        // [CHANGED] Fixed slider translation logic
         function updateSliderPosition() {
-            categorySlider.style.transform = `translateX(-${currentCategoryIndex * 100 / categories.length}%)`;
+            // Each item is w-64, which is 16rem.
+            categorySlider.style.transform = `translateX(-${currentCategoryIndex * 16}rem)`;
+        }
+
+        // [NEW] Function to enable/disable arrow buttons
+        function updateArrowButtonStates() {
+            prevCategoryBtn.disabled = (currentCategoryIndex === 0);
+            nextCategoryBtn.disabled = (currentCategoryIndex === categories.length - 1);
         }
 
         function switchCategory(newIndex) {
             currentCategoryIndex = newIndex;
             updateSliderPosition();
+            updateArrowButtonStates(); // [NEW] Update buttons on switch
             renderGamesForCurrentCategory();
         }
         
+        // [CHANGED] Updated to handle search, filters, and empty categories
         async function renderGamesForCurrentCategory(searchTerm = '') {
             const categoryName = categories[currentCategoryIndex];
             
@@ -685,12 +814,36 @@
             await new Promise(resolve => setTimeout(resolve, 150)); // Wait for fade out
 
             let gamesToRender = allGames.filter(g => g.category === categoryName);
+            
+            // Check if this category is even in the search filter
+            if (!searchFilterCategories.includes(categoryName)) {
+                gamesToRender = []; // Empty the list
+            }
+            
             if(searchTerm) {
                 gamesToRender = gamesToRender.filter(g => g.name.toLowerCase().includes(searchTerm));
             }
-            renderGames(gamesToRender, gamesGridContainer);
             
+            // [NEW] Placeholder logic
+            if (gamesToRender.length === 0) {
+                let message = `No games found in this category.`;
+                if (searchTerm) {
+                    message = `No games matching "${searchTerm}" found in this category.`;
+                } else if (!searchFilterCategories.includes(categoryName)) {
+                    message = `This category is disabled in your search filter.`;
+                } else if (categoryName === 'Gameboy Games') {
+                    message = 'Gameboy Games coming soon!'; // Custom message
+                }
+                gamesGridContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 text-lg mt-8">${message}</p>`;
+                gamesGridContainer.classList.remove('opacity-0');
+                return; // Stop here
+            }
+            
+            renderGames(gamesToRender, gamesGridContainer);
             gamesGridContainer.classList.remove('opacity-0');
+            
+            // [NEW] Check for overflow after rendering
+            checkTitleOverflow();
         }
 
         // --- Search ---
@@ -703,12 +856,19 @@
         }
 
         // MODIFIED: Search logic now opens Strongdog games in the modal
+        // [CHANGED] Now filters by searchFilterCategories
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
+            
+            // This filters the main grid based on the search text
             renderGamesForCurrentCategory(text);
 
             // Update dropdown
-            const filteredDropdown = text ? allGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
+            const filteredDropdown = text ? allGames
+                .filter(g => searchFilterCategories.includes(g.category)) // [NEW] Filter by selected categories
+                .filter(g => g.name.toLowerCase().includes(text))
+                .slice(0, 5) : [];
+                
             searchResults.innerHTML = "";
             if (filteredDropdown.length === 0 || !text) {
                 searchResults.style.display = "none";
@@ -790,31 +950,96 @@
             }
 
             categories = [...new Set(allGames.map(g => g.category))];
-            categorySlider.style.width = `${categories.length * 100}%`;
+            categories.push('Gameboy Games'); // [NEW] Add new category
+            
+            // [REMOVED] This line, as it breaks the new slider logic
+            // categorySlider.style.width = `${categories.length * 100}%`;
 
             setupCategorySlider();
             renderGamesForCurrentCategory();
             renderFavorites();
 
+            // [NEW] Populate search filter dropdown
+            categories.forEach(cat => {
+                const colorClass = categoryColors[cat] || 'text-white';
+                // Get hex color from tailwind config
+                const colorHex = tailwind.config.theme.extend.colors[colorClass.replace('text-', '')] || '#ffffff';
+                
+                const btn = document.createElement('button');
+                btn.className = 'search-filter-opt text-sm px-3 py-1 rounded-md transition-colors duration-200';
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                
+                // Set initial state (selected)
+                btn.style.backgroundColor = colorHex;
+                btn.style.color = (cat === 'StrongdogXP') ? '#070707' : '#FFFFFF'; // Orange needs dark text
+                btn.dataset.selected = 'true';
+                btn.style.border = '1px solid transparent';
+                
+                btn.addEventListener('click', () => {
+                    const isSelected = btn.dataset.selected === 'true';
+                    if (isSelected) {
+                        // Deselect
+                        btn.style.backgroundColor = 'transparent';
+                        btn.style.color = 'white';
+                        btn.style.border = `1px solid ${colorHex}`;
+                        btn.dataset.selected = 'false';
+                        searchFilterCategories = searchFilterCategories.filter(c => c !== cat);
+                    } else {
+                        // Select
+                        btn.style.backgroundColor = colorHex;
+                        btn.style.color = (cat === 'StrongdogXP') ? '#070707' : '#FFFFFF';
+                        btn.style.border = '1px solid transparent';
+                        btn.dataset.selected = 'true';
+                        searchFilterCategories.push(cat);
+                    }
+                    // Re-run search
+                    handleSearch();
+                });
+                
+                searchFilterOptions.appendChild(btn);
+            });
+            searchFilterCategories = [...categories]; // Start with all selected
+
             searchInput.placeholder = `Search all games...`;
-            searchInput.addEventListener("input", handleSearch);
-            searchInput.addEventListener("focus", handleSearch);
+            searchInput.addEventListener("input", () => {
+                searchFilterDropdown.classList.add('hidden'); // Close filter on type
+                handleSearch();
+            });
+            searchInput.addEventListener("focus", () => {
+                searchFilterDropdown.classList.add('hidden'); // Close filter on focus
+                handleSearch();
+            });
             
             // --- Event Listeners ---
             const cycle = (direction) => {
                  let newIndex = currentCategoryIndex + direction;
-                 if (newIndex < 0) newIndex = categories.length - 1;
-                 if (newIndex >= categories.length) newIndex = 0;
+                 // Stop at ends - don't wrap
+                 if (newIndex < 0) newIndex = 0;
+                 if (newIndex >= categories.length) newIndex = categories.length - 1;
                  switchCategory(newIndex);
             };
 
             prevCategoryBtn.addEventListener('click', () => cycle(-1));
             nextCategoryBtn.addEventListener('click', () => cycle(1));
-            categoryCycleBtn.addEventListener('click', () => cycle(1));
+            
+            // [CHANGED] This button now opens the filter dropdown
+            searchFilterBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Stop it from closing immediately
+                searchFilterDropdown.classList.toggle('hidden');
+                searchResults.style.display = "none"; // Hide results when opening filter
+            });
 
+            // [CHANGED] Updated click-away to handle both dropdowns
             document.addEventListener("click", ev => {
-                if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
+                const bottomBar = document.getElementById('bottom-fixed-bar');
+                if (!bottomBar.contains(ev.target)) {
+                    // Clicked outside the bar
                     searchResults.style.display = "none";
+                    searchFilterDropdown.classList.add('hidden');
+                } else if (!searchFilterBtn.contains(ev.target) && !searchFilterDropdown.contains(ev.target)) {
+                    // Clicked inside bar, but not on filter button/dropdown
+                    searchFilterDropdown.classList.add('hidden');
                 }
             });
 
@@ -824,10 +1049,12 @@
             });
             document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
+
+            // [NEW] Check for title overflow on resize
+            window.addEventListener('resize', debounce(checkTitleOverflow, 150));
         }
 
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
-
