@@ -93,7 +93,7 @@
         .search-results {
             max-height: 250px;
             overflow-y: auto;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            /* [REMOVED] border-top: 1px solid rgba(255, 255, 255, 0.1); */
         }
         .search-item {
             display: flex;
@@ -179,54 +179,33 @@
             color: #6b7280; /* text-gray-500 */
         }
         
-        /* --- [NEW] Marquee Animation for Overflowing Titles --- */
-        @keyframes marquee-dynamic {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(0); } /* Pause at start */
-            80% { transform: translateX(var(--scroll-amount, -100px)); } /* Scroll to end */
-            100% { transform: translateX(var(--scroll-amount, -100px)); } /* Pause at end */
+        /* --- [NEW] Marquee Animation (from notes.html) --- */
+        @keyframes marquee-scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); } /* Scrolls one full copy */
         }
 
         .game-title-container {
             overflow: hidden; /* This clips the h3 */
             position: relative; /* For fades */
+            white-space: nowrap; /* Prevent wrapper from wrapping */
         }
 
-        /* Fades */
-        .game-title-container::before,
-        .game-title-container::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 20px;
-            z-index: 2;
-            opacity: 0;
-            transition: opacity 0.2s;
-            pointer-events: none;
-            /* Match the container's background */
-            background: linear-gradient(to right, rgba(0,0,0,0.9) 20%, transparent);
-        }
-        .game-title-container::after {
-            right: 0;
-            left: auto;
-            background: linear-gradient(to left, rgba(0,0,0,0.9) 20%, transparent);
-        }
+        /* [REMOVED] Fade styles */
 
-        .game-title-container.is-overflowing > h3 {
-            /* Remove truncation */
-            white-space: nowrap;
-            overflow: visible;
-            text-overflow: clip;
+        .marquee-content-wrapper {
+            display: inline-block;
             will-change: transform;
-            /* Apply animation */
-            animation: marquee-dynamic linear infinite alternate;
-            /* --scroll-amount and animation-duration are set by JS */
         }
 
-        .game-title-container.is-overflowing::before,
-        .game-title-container.is-overflowing::after {
-            opacity: 1;
+        .marquee-content-wrapper.is-scrolling {
+            animation: marquee-scroll linear infinite;
+            /* animation-duration is set by JS */
+        }
+
+        .marquee-content-wrapper > span {
+            display: inline-block;
+            padding-right: 3em; /* Spacing between copies */
         }
         /* --- End Marquee Styles --- */
     </style>
@@ -286,7 +265,8 @@
             </button>
             
             <!-- [NEW] Search Filter Dropdown -->
-            <div id="search-filter-dropdown" class="hidden absolute bottom-full w-full mb-2 bg-black/70 backdrop-blur-lg rounded-lg shadow-xl p-3 border border-brand-border">
+            <!-- [CHANGED] rounded-lg to rounded-xl -->
+            <div id="search-filter-dropdown" class="hidden absolute bottom-full w-full mb-2 bg-black/70 backdrop-blur-lg rounded-xl shadow-xl p-3 border border-brand-border">
                 <p class="text-sm text-gray-300 mb-2">Filter search by category:</p>
                 <div id="search-filter-options" class="flex flex-wrap gap-2">
                     <!-- Filter options will be injected by JS -->
@@ -294,7 +274,8 @@
             </div>
             
             <!-- Search Results Dropdown -->
-            <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
+            <!-- [CHANGED] Updated background, blur, and border radius to match search bar -->
+            <div class="search-results absolute bottom-full w-full mb-2 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
                 <!-- Search results dropdown will be injected here -->
             </div>
         </div>
@@ -571,7 +552,10 @@
                     
                     <!-- [NEW] Title container for marquee -->
                     <div class="game-title-container absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-sm font-semibold shadow-lg" style="max-width: 75%;">
-                        <h3 class="text-white truncate" title="${game.name}">${game.name}</h3>
+                        <!-- [CHANGED] Use marquee wrapper and span -->
+                        <div class="marquee-content-wrapper">
+                            <span class="text-white" title="${game.name}">${game.name}</span>
+                        </div>
                     </div>
                     
                     <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
@@ -629,26 +613,39 @@
             return card;
         }
 
-        // --- [NEW] Title Overflow Check ---
+        // --- [NEW] Title Overflow Check (Replaced logic) ---
         function checkTitleOverflow() {
             document.querySelectorAll('.game-title-container').forEach(container => {
-                const h3 = container.querySelector('h3');
-                if (!h3) return;
+                const wrapper = container.querySelector('.marquee-content-wrapper');
+                if (!wrapper) return;
+                const firstSpan = wrapper.querySelector('span');
+                if (!firstSpan) return;
                 
-                // Reset styles to check
-                container.classList.remove('is-overflowing');
-                h3.style.animationDuration = '';
-                h3.style.removeProperty('--scroll-amount');
+                // --- Reset ---
+                // Remove second span if it exists
+                if (wrapper.children.length > 1) {
+                    wrapper.removeChild(wrapper.lastChild);
+                }
+                wrapper.classList.remove('is-scrolling');
+                wrapper.style.animationDuration = '';
+                firstSpan.style.paddingRight = ''; // Remove padding
 
-                // Check for overflow
-                if (h3.scrollWidth > container.clientWidth) {
-                    container.classList.add('is-overflowing');
-                    const overflowAmount = h3.scrollWidth - container.clientWidth;
+                // --- Check for overflow ---
+                // Use scrollWidth vs offsetWidth for more accurate check
+                const needsScrolling = firstSpan.scrollWidth > container.offsetWidth;
+                
+                if (needsScrolling) {
+                    firstSpan.style.paddingRight = '3em'; // Add padding only if scrolling
+                    const secondSpan = firstSpan.cloneNode(true);
+                    wrapper.appendChild(secondSpan);
+                    wrapper.classList.add('is-scrolling');
                     
-                    // Set dynamic animation properties
-                    const duration = (overflowAmount + 100) / 30; // 30px per second scroll speed
-                    h3.style.setProperty('--scroll-amount', `-${overflowAmount + 10}px`); // +10px padding
-                    h3.style.animationDuration = `${Math.max(3, duration)}s`; // Min 3 sec duration
+                    // Calculate duration based on width
+                    // Get 1em size in pixels
+                    const emSize = parseFloat(getComputedStyle(firstSpan).fontSize || 16);
+                    const scrollWidth = firstSpan.scrollWidth + (3 * emSize); // 3em padding
+                    const duration = scrollWidth / 40; // 40px per second scroll speed
+                    wrapper.style.animationDuration = `${Math.max(5, duration)}s`; // Min 5 sec duration
                 }
             });
         }
@@ -1058,3 +1055,4 @@
     </script>
 </body>
 </html>
+
