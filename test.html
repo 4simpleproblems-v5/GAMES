@@ -317,6 +317,10 @@
             // Adjusted paths from playindex.html (e.g., /STRONGDOG/ -> ./)
             // This block uses absolute paths, it should be fine.
             if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
+                if (!page || page === 1) return "/STRONGDOG/";
+                if (page === 2) return "/strongdog2/";
+                if (page === 3) return "/strongdog3/";
+                if (page === 4) return "/strongdog4/";
                 if (page === 5) return "/strongdog5/";
                 return "/STRONGDOG/";
             }
@@ -360,7 +364,7 @@
                 return "./"; // Correct translation
             }
 
-            const arr = siteMapping[currentHost];
+            // *** FIXED: Removed duplicate 'const arr' declaration ***
             const index = page - 2;
             if (arr[index]) {
                  // Original: return arr[index].replace(/^\.\/$/, "../");
