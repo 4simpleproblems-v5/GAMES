@@ -1,19 +1,26 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>4SP - GAMES</title>
+    <title>4SP - Game Hub</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
 
+    <!-- Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="./navigation.js"></script> 
+    <!-- 
+      NOTE: The original file loaded ../navigation.js. 
+      Assuming index.html is in the root, this might need to be ./navigation.js 
+      I am keeping it as-is from your provided file.
+    -->
+    <script src="../navigation.js"></script>
 
+    <!-- Tailwind CSS Configuration -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -43,6 +50,7 @@
         }
     </script>
     
+    <!-- Custom Styles -->
     <style>
         /* Base styles */
         body {
@@ -130,10 +138,6 @@
             font-size: 1.3em;
             color: #ffffff;
             font-family: 'Geist', sans-serif;
-            /* Added for marquee on long titles */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         #zoneViewer .zone-header .zone-controls {
             display: flex;
@@ -162,17 +166,13 @@
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
-        /* --- ADDED: Style for disabled arrow buttons --- */
-        .arrow-btn.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
     </style>
 </head>
 
 <body class="bg-deep-black text-white min-h-screen">
     <header class="w-full p-4 flex justify-end items-center">
-        <a href="./index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
+        <!-- Changed: Updated href -->
+        <a href="../index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
     </header>
 
     <main class="mx-auto my-5 w-full max-w-screen-2xl px-4">
@@ -188,27 +188,31 @@
         </h2>
         <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
+        <!-- New Category Viewer -->
         <div id="category-viewer" class="w-full mt-12">
+            <!-- Category Title Slider -->
             <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
-                <!-- ADDED: 'arrow-btn' class -->
-                <button id="prev-category" class="arrow-btn absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
+                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="overflow-hidden w-64 text-center">
                     <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
-                        </div>
+                        <!-- Category titles will be dynamically injected here -->
+                    </div>
                 </div>
-                <!-- ADDED: 'arrow-btn' class -->
-                <button id="next-category" class="arrow-btn absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
+                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
             
+            <!-- Game Grid -->
             <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
-                </div>
+                <!-- Game cards for the selected category will be injected here -->
+            </div>
         </div>
     </main>
 
+    <!-- Bottom Fixed Search Bar -->
     <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
         <div class="relative flex items-center w-full">
             <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
@@ -216,10 +220,12 @@
                 <i class="fa-solid fa-layer-group"></i>
             </button>
             <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
-                </div>
+                <!-- Search results dropdown will be injected here -->
+            </div>
         </div>
     </div>
     
+    <!-- Game Viewer Modal -->
     <div id="zoneViewer" aria-modal="true" role="dialog">
         <div class="zone-header">
              <div class="zone-title">
@@ -231,12 +237,14 @@
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
-        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"></iframe>
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
     </div>
 
+    <!-- Main Application Logic -->
     <script type="module">
         import games from "./cards-data.js";
-        // ADDED: Import siteMapping, assuming it's in the same directory
+        // IMPORT: Added site-mapping.js. Make sure this file is in the same directory as index.html
+        // If this file is missing, the Strongdog games will not load.
         import { siteMapping } from "./site-mapping.js";
 
         // --- Configuration & Globals ---
@@ -263,11 +271,6 @@
         const nextCategoryBtn = document.getElementById('next-category');
         const categoryCycleBtn = document.getElementById('category-cycle-btn');
         const gamesGridContainer = document.getElementById('games-grid-container');
-        
-        // --- Modal DOM Elements ---
-        const zoneViewer = document.getElementById('zoneViewer');
-        const zoneFrame = document.getElementById('zoneFrame');
-        const zoneNameEl = document.getElementById('zoneNameEl');
 
         // --- Favorites Management ---
         const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
@@ -294,58 +297,75 @@
         // --- URL and Path Helpers ---
         function getAdjustedUrls(imgSrc, page) {
             if (page && page > 1) {
-                // Assumes index.html is in root, so strongdog folders are peers
                 return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
             }
-            // Assumes default images are in ./img/
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
-        
-        // --- START: Logic ported from playindex.html ---
-        // --- THIS BLOCK has been replaced with the logic from play-index.html ---
 
-        function getCurrentKeyHostOnly() {
+        // --- [NEW] Strongdog Game Path Logic ---
+        // These functions are copied from playindex.html and renamed to avoid conflicts.
+        // Paths have been adjusted from being in /play/ to being in the root.
+
+        function sd_getCurrentKeyHostOnly() {
             return window.location.host;
         }
 
-        /* Simplified getBaseURLForPage for root directory context.
-        The complex, multi-host logic is mostly removed/simplified 
-        as all references will now be relative to the root.
-        */
-        function getBaseURLForPage(page) {
-            const currentHost = getCurrentKeyHostOnly();
+        function sd_getBaseURLForPage(page) {
+            const currentHost = sd_getCurrentKeyHostOnly();
             const currentPath = window.location.pathname;
 
-            // Simplified: If the path is /strongdog/, it means the game pages are relative to that folder.
-            if (currentPath.toLowerCase().startsWith('/strongdog/')) {
-                // This original logic seems to be for different *sub-directories* of strongdog.
-                // Keeping it close to original but changing ".." to "." for root context.
-                if (!page || page === 1) return "./";
-                if (page === 2) return "../strongdog2/";
-                if (page === 3) return "../strongdog3/";
-                if (page === 4) return "../strongdog4/";
-                if (page === 5) return "../strongdog5/";
-                return "./";
+            // Adjusted paths from playindex.html (e.g., /STRONGDOG/ -> ./)
+            if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
+                if (!page || page === 1) return "./"; // Was /STRONGDOG/
+                if (page === 2) return "./strongdog2/"; // Was /strongdog2/
+                if (page === 3) return "./strongdog3/"; // Was /strongdog3/
+                if (page === 4) return "./strongdog4/"; // Was /strongdog4/
+                if (page === 5) return "./strongdog5/"; // Was /strongdog5/
+                return "./"; // Was /STRONGDOG/
             }
+            const explicitMappings = {
+                "jman1593.github.io": {
+                    2: "./strongdog2/", // Was ../strongdog2/
+                },
+                "v5-4simpleproblems.github.io": {
+                    2: "./strongdog2/", // Was ../../strongdog2/
+                    3: "./strongdog3/", // Was ../../strongdog3/
+                    4: "./strongdog4/", // Was ../../strongdog4/
+                    5: "./strongdog5/", // Was ../../strongdog5/
+                }
+            };
+            if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
+                // Adjusted path replacement
+                return explicitMappings[currentHost][page].replace(/^\.\.\//, "./").replace(/^\.\.\/\.\.\//, "./");
+            }
+            if (!page || page === 1) return "./"; // Was ../
             
-            // For general hosting, we assume all game folders are sibling to this file.
-            // Page 1 is always root context (./).
-            if (!page || page === 1) return "./";
+            // Check if siteMapping was imported correctly
+            if (typeof siteMapping === 'undefined' || !siteMapping[currentHost]) {
+                console.warn("siteMapping not found or host not in map. Using default paths.");
+                if (page === 2) return "./strongdog2/"; // Was ../../strongdog2/
+                if (page === 3) return "./strongdog3/"; // Was ../../strongdog3/
+                if (page === 4) return "./strongdog4/"; // Was ../../strongdog4/
+                if (page === 5) return "./strongdog5/"; // Was ../../strongdog5/
+                return "./"; // Was ../
+            }
 
-            // If a game uses page 2, 3, 4, 5, etc., the logic below maps them 
-            // to sibling directories like /strongdog2/, /strongdog3/, etc.
-            // I'm simplifying the old complex logic to assume this directory structure
-            // is standard in the root.
-            if (page === 2) return "../strongdog2/";
-            if (page === 3) return "../strongdog3/";
-            if (page === 4) return "../strongdog4/";
-            if (page === 5) return "../strongdog5/";
-            
-            // Fallback to the current directory (root)
-            return "../"; 
+            const arr = siteMapping[currentHost];
+            const index = page - 2;
+            if (arr[index]) {
+                 // Adjust paths from site-mapping.js
+                return arr[index].replace(/^\.\/$/, "./").replace(/^\.\.\//, "./").replace(/^\.\.\/\.\.\//, "./");
+            }
+
+            // Fallback defaults
+            if (page === 2) return "./strongdog2/"; // Was ../../strongdog2/
+            if (page === 3) return "./strongdog3/"; // Was ../../strongdog3/
+            if (page === 4) return "./strongdog4/"; // Was ../../strongdog4/
+            if (page === 5) return "./strongdog5/"; // Was ../../strongdog5/
+            return "./"; // Was ../../
         }
 
-        async function getEmbedPath(adjustedHref, originalHref, page) {
+        async function sd_getEmbedPath(adjustedHref, originalHref, page) {
             let cleanHref = adjustedHref.replace(/index\.html$/, "").replace(/base\.html$/, "").replace(/\.html$/, "");
             if (!cleanHref.endsWith("/")) cleanHref += "/";
             const pathsToTry = [cleanHref + "game/index.html", cleanHref + "game/base.html", cleanHref + "gamereal/index.html", cleanHref + "gamereal/base.html", cleanHref + "index.html", cleanHref + "base.html", ];
@@ -359,32 +379,32 @@
                     if (match) {
                         const [, , embedPath, , title] = match;
                         const resolvedPath = new URL(embedPath, adjustedHref).href;
-                        if (await fileExists(resolvedPath)) return resolvedPath;
+                        if (await sd_fileExists(resolvedPath)) return resolvedPath;
                     }
                 }
             } catch (error) {
                 console.warn("Failed to parse embed path from cards-data.js", error);
             }
             for (const path of pathsToTry) {
-                if (await fileExists(path)) return path;
+                if (await sd_fileExists(path)) return path;
             }
-            return adjustHrefPath(originalHref, page);
+            return sd_adjustHrefPath(originalHref, page);
         }
 
-        function adjustHrefPath(path, page) {
+        function sd_adjustHrefPath(path, page) {
             path = path.replace(/^\.\//, "").replace(/^\//, "");
-            const baseURL = getBaseURLForPage(page);
+            const baseURL = sd_getBaseURLForPage(page);
             let finalPath;
-            // The logic is adjusted to account for the new baseURLs being relative to the root (e.g., "./" or "strongdog2/")
-            if (baseURL === "../") {
-                finalPath = "../" + path;
+            // Adjusted logic for new base URL
+            if (baseURL === "./") {
+                finalPath = "./" + path;
             } else {
                 finalPath = baseURL.endsWith("/") ? baseURL + path : baseURL + "/" + path;
             }
             return finalPath;
         }
 
-        async function fileExists(url) {
+        async function sd_fileExists(url) {
             try {
                 const response = await fetch(url, {
                     method: "HEAD"
@@ -394,8 +414,7 @@
                 return false;
             }
         }
-        
-        // --- END: Logic ported from playindex.html ---
+        // --- [END] Strongdog Game Path Logic ---
 
 
         // --- Game Card Rendering ---
@@ -435,10 +454,36 @@
                 </div>
             `;
             
-            // MODIFIED: handlePlay now just calls openZone for all game types
-            const handlePlay = (e) => {
+            // MODIFIED: handlePlay is now async and loads Strongdog games in the modal
+            const handlePlay = async (e) => {
                 e.stopPropagation();
-                openZone(game);
+                if (isStrongdog) {
+                    // Strongdog Game Logic
+                    try {
+                        const page = game.page;
+                        const originalHref = game.href;
+                        const baseURL = sd_getBaseURLForPage(page);
+                        let adjustedHref = originalHref.replace(/^\.\//, "");
+                        adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                        
+                        // Show loading state? For now, just calculate
+                        const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
+                        
+                        const strongdogGameData = {
+                            name: game.name,
+                            url: embedPath,
+                            isStrongdog: true // Flag for openZone
+                        };
+                        openZone(strongdogGameData);
+
+                    } catch (error) {
+                        console.error(`Failed to get embed path for ${game.name}:`, error);
+                        alert(`Could not load game: ${game.name}. See console for details.`);
+                    }
+                } else {
+                    // GN-Math Game Logic
+                    openZone(game);
+                }
             };
 
             card.querySelector('.group').addEventListener('click', handlePlay);
@@ -451,116 +496,98 @@
             return card;
         }
 
-        // --- Game Viewer Logic (MODIFIED) ---
-        async function openZone(game) {
-            if (!game) {
+        // --- Game Viewer Logic ---
+        // MODIFIED: openZone now handles both game types
+        function openZone(game) {
+            if (!game || !game.url) {
                 console.error("Could not load game: Invalid game data.");
                 return;
             }
-
-            let gameUrl;
+            const gameUrl = game.url;
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
+            const zoneNameEl = document.getElementById('zoneNameEl');
             
-            // Set loading state immediately
-            zoneNameEl.textContent = `Loading ${game.name}...`;
-            zoneFrame.src = 'about:blank';
-            zoneViewer.style.display = "flex";
+            zoneNameEl.textContent = game.name;
+            zoneFrame.src = 'about:blank'; // Clear previous game
 
-            if (game.category === 'StrongdogXP') {
-                // --- Calculate Strongdog URL ---
-                try {
-                    const page = game.page;
-                    // USE THE REPLACED FUNCTIONS
-                    const baseURL = getBaseURLForPage(page);
-                    let adjustedHref = game.href.replace(/^\.\//, "");
-                    adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
-                    
-                    gameUrl = await getEmbedPath(adjustedHref, game.href, page);
-                    
-                    if (!gameUrl) {
-                        throw new Error("Could not find embed path.");
-                    }
-                } catch (error) {
-                    console.error(`Failed to get Strongdog path for "${game.name}": ${error.message}`);
-                    zoneNameEl.textContent = `Error loading ${game.name}`;
-                    return;
-                }
-                // --- End Strongdog URL logic ---
-
+            if (game.isStrongdog) {
+                // Strongdog logic: Just set the src
+                zoneFrame.src = gameUrl;
+                // Add sandbox attributes like in playindex.html
+                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
+                zoneViewer.style.display = "flex";
             } else {
-                // --- GN-Math URL logic ---
-                gameUrl = game.url;
+                // GN-Math logic: Fetch and write HTML
+                // Remove sandbox attribute if it exists from a previous Strongdog game
+                zoneFrame.removeAttribute('sandbox'); 
+                
+                fetch(`${gameUrl}?t=${Date.now()}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                        return response.text();
+                    })
+                    .then(html => {
+                        const doc = zoneFrame.contentWindow.document;
+                        doc.open();
+                        doc.write(html);
+                        doc.close();
+                        zoneViewer.style.display = "flex";
+                    })
+                    .catch(error => {
+                        console.error(`Failed to load game "${game.name}": ${error.message}.`);
+                        closeZoneViewer();
+                    });
             }
-
-            // --- Fetch and embed game content ---
-            fetch(`${gameUrl}?t=${Date.now()}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-                    return response.text();
-                })
-                .then(html => {
-                    zoneNameEl.textContent = game.name; // Set final title
-                    const doc = zoneFrame.contentWindow.document;
-                    doc.open();
-                    // Write the HTML
-                    doc.write(html);
-                    doc.close();
-                })
-                .catch(error => {
-                    console.error(`Failed to load game "${game.name}": ${error.message}.`);
-                    zoneNameEl.textContent = `Error loading ${game.name}`;
-                });
         }
 
         function closeZoneViewer() {
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
             zoneViewer.style.display = "none";
             if (zoneFrame) zoneFrame.src = 'about:blank';
         }
 
-        // MODIFIED: Made async and added logic for both game types
-        async function openGameInNewTab() {
-            const currentTitle = zoneNameEl.textContent;
-            // Find game, accommodating loading/error titles
-            const game = allGames.find(z => 
-                z.name === currentTitle || 
-                `Loading ${z.name}...` === currentTitle ||
-                `Error loading ${z.name}` === currentTitle
-            );
+        // MODIFIED: openGameInNewTab now handles both game types
+        function openGameInNewTab() {
+            const zoneNameEl = document.getElementById('zoneNameEl');
+            const game = allGames.find(z => z.name === zoneNameEl.textContent);
             if (!game) return;
 
-            let gameUrl;
+            const isStrongdog = game.category === 'StrongdogXP';
 
-            try {
-                if (game.category === 'StrongdogXP') {
-                    const page = game.page;
-                    // USE THE REPLACED FUNCTIONS
-                    const baseURL = getBaseURLForPage(page);
-                    let adjustedHref = game.href.replace(/^\.\//, "");
-                    adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
-                    gameUrl = await getEmbedPath(adjustedHref, game.href, page);
-                } else {
-                    gameUrl = game.url;
-                }
+            if (isStrongdog) {
+                // Strongdog: Re-calculate the embed path and open directly
+                const page = game.page;
+                const originalHref = game.href;
+                const baseURL = sd_getBaseURLForPage(page);
+                let adjustedHref = originalHref.replace(/^\.\//, "");
+                adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
                 
-                if (!gameUrl) throw new Error("Game URL is null");
+                // Use .then() because this click handler isn't async
+                sd_getEmbedPath(adjustedHref, originalHref, page).then(embedPath => {
+                    window.open(embedPath, "_blank");
+                }).catch(err => {
+                    console.error("Error getting Strongdog embed path for new tab:", err);
+                    alert("Could not open game in new tab. See console for details.");
+                });
 
-            } catch(error) {
-                 console.error("Error finding game URL for new tab:", error);
-                 return;
-            }
-
-
-            const newWindow = window.open("about:blank", "_blank");
-            if (newWindow) {
-                fetch(`${gameUrl}?t=${Date.now()}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        newWindow.document.open();
-                        newWindow.document.write(html);
-                        newWindow.document.close();
-                    }).catch(err => {
-                        console.error("Error opening in new tab:", err);
-                        newWindow.close();
-                    });
+            } else {
+                // Original GN-Math logic
+                const gameUrl = game.url;
+                const newWindow = window.open("about:blank", "_blank");
+                if (newWindow) {
+                    fetch(`${gameUrl}?t=${Date.now()}`)
+                        .then(response => response.text())
+                        .then(html => {
+                            newWindow.document.open();
+                            newWindow.document.write(html);
+                            newWindow.document.close();
+                        }).catch(err => {
+                            console.error("Error opening in new tab:", err);
+                            newWindow.close();
+                        });
+                }
             }
         }
 
@@ -587,35 +614,6 @@
         }
         
         // --- Category Navigation & Display ---
-
-        // ADDED: Helper to slugify category names
-        function slugify(text) {
-            return text.toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with -
-                .replace(/^-+|-+$/g, '');     // Remove leading/trailing -
-        }
-
-        // ADDED: New function to control arrow button states
-        function updateArrowVisibility() {
-            // Disable/enable prev button
-            if (currentCategoryIndex === 0) {
-                prevCategoryBtn.classList.add('disabled');
-                prevCategoryBtn.disabled = true;
-            } else {
-                prevCategoryBtn.classList.remove('disabled');
-                prevCategoryBtn.disabled = false;
-            }
-
-            // Disable/enable next button
-            if (currentCategoryIndex === categories.length - 1) {
-                nextCategoryBtn.classList.add('disabled');
-                nextCategoryBtn.disabled = true;
-            } else {
-                nextCategoryBtn.classList.remove('disabled');
-                nextCategoryBtn.disabled = false;
-            }
-        }
-
         function setupCategorySlider() {
             categorySlider.innerHTML = categories.map(cat => 
                 `<div class="w-64 flex-shrink-0">
@@ -631,27 +629,10 @@
             categorySlider.style.transform = `translateX(-${currentCategoryIndex * 100 / categories.length}%)`;
         }
 
-        // ADDED: New function to update state WITHOUT pushing to history
-        // This is used for initial load and browser back/forward (onpopstate)
-        function updateCategoryState(newIndex) {
-            if (newIndex < 0 || newIndex >= categories.length) return; // Safety check
+        function switchCategory(newIndex) {
             currentCategoryIndex = newIndex;
             updateSliderPosition();
             renderGamesForCurrentCategory();
-            updateArrowVisibility();
-        }
-        
-        // MODIFIED: This function now handles pushing to browser history
-        function switchCategory(newIndex) {
-            updateCategoryState(newIndex); // Update UI
-
-            // Update URL
-            const categoryName = categories[currentCategoryIndex];
-            const categorySlug = slugify(categoryName);
-            const url = new URL(window.location);
-            url.searchParams.set('category', categorySlug);
-            // Push state to history
-            history.pushState({ category: categorySlug }, `Category: ${categoryName}`, url);
         }
         
         async function renderGamesForCurrentCategory(searchTerm = '') {
@@ -678,6 +659,7 @@
             };
         }
 
+        // MODIFIED: Search logic now opens Strongdog games in the modal
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
             renderGamesForCurrentCategory(text);
@@ -701,21 +683,42 @@
                     imgSrc = game.imgSrc;
                 }
                 
-                // MODIFIED: All links use href='#' to open modal
-                const href = '#'; 
+                const href = '#'; // All games use the modal
                 
                 const linkEl = document.createElement("a");
                 linkEl.href = href;
                 linkEl.className = 'search-item';
                 linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
                 
-                // MODIFIED: Click listener added to ALL search items
-                linkEl.addEventListener('click', (e) => {
+                // Attach universal click listener
+                linkEl.addEventListener('click', async (e) => {
                     e.preventDefault();
-                    openZone(game);
+                    if (isStrongdog) {
+                        // Strongdog: Calculate path and open in modal
+                        try {
+                            const page = game.page;
+                            const originalHref = game.href;
+                            const baseURL = sd_getBaseURLForPage(page);
+                            let adjustedHref = originalHref.replace(/^\.\//, "");
+                            adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                            
+                            const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
+                            
+                            const strongdogGameData = {
+                                name: game.name,
+                                url: embedPath,
+                                isStrongdog: true
+                            };
+                            openZone(strongdogGameData);
+                        } catch (error) {
+                            console.error(`Failed to get embed path for ${game.name}:`, error);
+                            alert(`Could not load game: ${game.name}. See console for details.`);
+                        }
+                    } else {
+                        // GN-Math: Open directly in modal
+                        openZone(game);
+                    }
                     searchResults.style.display = "none";
-                    searchInput.value = ''; // Clear search
-                    renderGamesForCurrentCategory(); // Reset grid
                 });
                 searchResults.appendChild(linkEl);
             });
@@ -724,17 +727,6 @@
 
         // --- Data Loading and Initialization ---
         async function initializeApp() {
-            // ADDED: Check if games loaded
-            if (!games || !Array.isArray(games)) {
-                console.error("CRITICAL ERROR: 'cards-data.js' failed to load or is not a valid array. Game hub cannot initialize.");
-                // Optionally display this error to the user
-                const gameGrid = document.getElementById('games-grid-container');
-                if (gameGrid) {
-                    gameGrid.innerHTML = `<p class="col-span-full text-center text-red-500 text-lg">Failed to load game data. Please check the console (F12) for errors (404s on 'cards-data.js' or 'site-mapping.js').</p>`;
-                }
-                return; // Stop initialization
-            }
-
             const strongdogGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
             
             try {
@@ -757,20 +749,8 @@
             categories = [...new Set(allGames.map(g => g.category))];
             categorySlider.style.width = `${categories.length * 100}%`;
 
-            // --- ADDED: Read category from URL on load ---
-            const urlParams = new URLSearchParams(window.location.search);
-            const categoryParam = urlParams.get('category');
-            let initialIndex = 0;
-            if (categoryParam) {
-                const foundIndex = categories.findIndex(cat => slugify(cat) === categoryParam);
-                if (foundIndex !== -1) {
-                    initialIndex = foundIndex;
-                }
-            }
-            // --- End URL reading ---
-
             setupCategorySlider();
-            updateCategoryState(initialIndex); // Set initial state without pushing to history
+            renderGamesForCurrentCategory();
             renderFavorites();
 
             searchInput.placeholder = `Search all games...`;
@@ -778,22 +758,16 @@
             searchInput.addEventListener("focus", handleSearch);
             
             // --- Event Listeners ---
-            
-            // MODIFIED: Cycle function now stops at ends
             const cycle = (direction) => {
                  let newIndex = currentCategoryIndex + direction;
-                 
-                 // STOP at the ends, don't cycle
-                 if (newIndex < 0 || newIndex >= categories.length) {
-                     return; // Do nothing if at the boundary
-                 }
-                 
-                 switchCategory(newIndex); // switchCategory will update history
+                 if (newIndex < 0) newIndex = categories.length - 1;
+                 if (newIndex >= categories.length) newIndex = 0;
+                 switchCategory(newIndex);
             };
 
             prevCategoryBtn.addEventListener('click', () => cycle(-1));
             nextCategoryBtn.addEventListener('click', () => cycle(1));
-            categoryCycleBtn.addEventListener('click', () => cycle(1)); // This one still cycles
+            categoryCycleBtn.addEventListener('click', () => cycle(1));
 
             document.addEventListener("click", ev => {
                 if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
@@ -807,24 +781,6 @@
             });
             document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
-
-            // ADDED: Listen for browser back/forward buttons
-            window.onpopstate = (event) => {
-                const urlParams = new URLSearchParams(window.location.search);
-                const categoryParam = urlParams.get('category');
-                
-                let newIndex = 0; // Default to first category
-                if (categoryParam) {
-                    const foundIndex = categories.findIndex(cat => slugify(cat) === categoryParam);
-                    if (foundIndex !== -1) {
-                        newIndex = foundIndex;
-                    }
-                }
-
-                if (newIndex !== currentCategoryIndex) {
-                    updateCategoryState(newIndex); // Update state without pushing history
-                }
-            };
         }
 
         document.addEventListener('DOMContentLoaded', initializeApp);
