@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>4SP - DOOM</title>
+
+  <script type="text/javascript" src="js-dos-api.js"></script>
+  <script src="../url-changer.js"></script>
+  <script src="../ban-enforcer.js"></script>
+
+  
+  <link rel="stylesheet" href="../css/style.css" />
+  
+  <style>
+    :root {
+        --v4-card-bg: #fff;
+        --v4-input-bg: #f8f9fa;
+        --v4-border-light: #ddd;
+        --v4-border-softer: #eee;
+        --v4-input-border: #ccc;
+        --v4-text-primary: #333;
+        --v4-text-secondary: #555;
+        --v4-purple-accent: #6720bd;
+        --v4-purple-accent-darker: #5a1aa8;
+        --v4-purple-gradient: linear-gradient(135deg, #6720bd 0%, #8a2be2 100%);
+        --v4-font-primary: 'PrimaryFont', sans-serif;
+        --v4-font-secondary: 'SecondaryFont', sans-serif;
+        --v4-bg-gradient: linear-gradient(135deg, #f0f2f5 0%, #e8eaf0 100%);
+    }
+    
+    body.dashboard-page {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      font-family: var(--v4-font-primary);
+    }
+    .dashboard-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* --- Sidebar --- */
+    .sidebar {
+      width: 200px;
+      background: linear-gradient(180deg, #333 0%, #2a2a2a 100%);
+      color: #fff;
+      padding: 20px 10px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #444;
+      transition: width 0.5s ease-in-out;
+      position: relative;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+      z-index: 1001;
+      overflow-y: auto;
+      will-change: width;
+    }
+    .sidebar.collapsed { width: 85px; }
+    #toggleSidebar {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: none;
+      border: none; color: #fff; font-size: 1.2em; cursor: pointer; padding: 4px;
+      transition: transform 0.5s ease-in-out;
+    }
+    .sidebar.collapsed #toggleSidebar { transform: translateX(-50%) rotate(180deg); }
+
+    .sidebar nav ul { list-style: none; padding: 0; margin: 60px 0 0; }
+    .sidebar nav li { margin-bottom: 10px; }
+    .sidebar nav a {
+      display: flex; align-items: center; padding: 12px 15px; color: #fff; text-decoration: none;
+      border-radius: 8px; transition: all 0.3s ease;
+      font-family: var(--v4-font-primary); 
+      text-transform: uppercase; position: relative; overflow: hidden;
+    }
+    .sidebar nav a::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.5s;
+    }
+    .sidebar nav a:hover::before { left: 100%; }
+    .sidebar nav a.active, .sidebar nav a:hover {
+      background: var(--v4-purple-gradient); transform: translateX(5px); color: #fff;
+    }
+    .sidebar nav a .icon { font-size: 1.2em; width: 24px; text-align: center; }
+    .sidebar nav a .label { margin-left: 10px; white-space: nowrap; }
+    .sidebar.collapsed nav a { justify-content: center; padding: 10px 0; }
+    .sidebar.collapsed nav a .label { display: none; }
+    .sidebar.collapsed nav a .icon { margin-left: 0; }
+
+    /* --- Main Content Area --- */
+    .main-content {
+      flex: 1;
+      padding: 40px;
+      background: var(--v4-bg-gradient);
+      overflow-y: auto;
+      position: relative;
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      background: white;
+      padding: 20px 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid rgba(103, 32, 189, 0.1);
+    }
+    .page-title {
+      margin: 0;
+      font-size: 2.2em;
+      font-weight: bold;
+      background: var(--v4-purple-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: var(--v4-font-primary); 
+    }
+    .game-section, .controls-section {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 6px 30px rgba(0,0,0,0.08);
+        border: 1px solid rgba(103, 32, 189, 0.1);
+        margin-bottom: 30px;
+    }
+   .game-section {
+        text-align: center;
+    }
+    .game-section h3, .controls-section h3 {
+        margin: 0 0 20px 0;
+        font-size: 1.6em;
+        color: #333;
+        border-bottom: 2px solid rgba(103, 32, 189, 0.1);
+        padding-bottom: 10px;
+        font-family: var(--v4-font-primary); 
+    }
+    
+    /* --- New Controls Section Styles --- */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px 20px;
+      font-family: var(--v4-font-primary);
+      font-style: italic;
+    }
+    .control-item {
+      color: var(--v4-text-secondary);
+      font-size: 1em;
+      line-height: 1.5;
+    }
+    .control-item strong {
+      color: var(--v4-purple-accent);
+      font-weight: 600;
+      font-style: normal;
+    }
+    .control-item.full-width {
+      grid-column: 1 / -1; /* Span all columns */
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    /* --- Game Canvas & Control Button Styles --- */
+    .game-canvas-wrapper {
+        position: relative;
+        width: 960px;
+        height: 600px;
+        margin: 20px auto;
+    }
+    .custom-controls-overlay {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 100;
+        display: flex;
+        gap: 8px;
+    }
+    #DOOM > .dosbox-container,
+    #DOOM canvas {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0;
+    }
+    #DOOM > .dosbox-container > .dosbox-overlay {
+        /* Changed to a local file path */
+        background: url("DOOM.png");
+        background-size: cover;
+        background-position: center;
+    }
+    #DOOM .dosbox-start {
+        display: none !important;
+    }
+    .game-action-btn {
+        width: 36px;
+        height: 36px;
+        background-color: rgba(30, 30, 30, 0.3);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .game-action-btn:hover {
+        transform: scale(1.15);
+        background: rgba(0, 0, 0, 0.5);
+    }
+    #customPlayBtn::after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 0;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-left: 14px solid white;
+        margin-left: 4px;
+    }
+    #fullscreen_DOOM svg {
+        width: 20px;
+        height: 20px;
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+  <header class="main-header">
+    <div class="container">
+      <div class="logo">
+        <a href="../index.html"> <img src="../images/logo-dark.png" alt="4SP Logo" style="cursor:pointer;" /> </a>
+      </div>
+      <div class="auth-buttons">
+        <button class="btn btn-login" onclick="window.location.href='../index.html'">HOME</button> <button id="logoutBtn" class="btn btn-login">LOG OUT</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="dashboard-container">
+    <aside class="sidebar slide-in" id="sidebar">
+      <button id="toggleSidebar">☰</button>
+      <nav>
+        <ul>
+            <li><a href="../logged-in/dashboard.html"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+            <li><a href="../logged-in/soundboard.html"><span class="icon">🎵</span><span class="label">Soundboard</span></a></li>
+            <li><a href="../logged-in/games.html" class="active"><span class="icon">🎮</span><span class="label">Games</span></a></li>
+            <li><a href="../logged-in/apps.html"><span class="icon">✨</span><span class="label">Apps</span></a></li>
+            <li><a href="../logged-in/settings.html"><span class="icon">⚙️</span><span class="label">Settings</span></a></li>
+            <li><a href="#" id="signOutLink"><span class="icon">🔒</span><span class="label">LOG OUT</span></a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content fade-in">
+      <div class="page-header">
+        <h2 class="page-title">But Can It Run DOOM? Yes It Can.</h2>
+      </div>
+      
+      <div class="controls-section">
+        <h3>DOOM Controls</h3>
+        <div class="controls-grid">
+            <div class="control-item"><strong>Move:</strong> UP, DOWN, LEFT, RIGHT</div>
+            <div class="control-item"><strong>Use:</strong> W</div>
+            <div class="control-item"><strong>Fire:</strong> S</div>
+            <div class="control-item"><strong>Speed on:</strong> SPACE</div>
+            <div class="control-item"><strong>Strafe on:</strong> ALT</div>
+            <div class="control-item"><strong>Strafe:</strong> A, D</div>
+            <div class="control-item"><strong>Change Weapon:</strong> 1, 2, 3, 4, 5, 6, 7</div>
+            <div class="control-item"><strong>Navigate Menu:</strong> UP, DOWN, LEFT, RIGHT</div>
+        </div>
+      </div>
+
+      <div class="game-section">
+        <h3>Classic DOOM</h3>
+        <div class="game-canvas-wrapper">
+            <div id="DOOM" class="dosbox-default"></div>
+            <div class="custom-controls-overlay">
+                <button id="customPlayBtn" class="game-action-btn" title="Play Game"></button>
+                <a id="fullscreen_DOOM" href="javascript:void(0);" class="game-action-btn" title="Fullscreen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                </a>
+            </div>
+        </div>
+        <footer style="margin-top: 20px; color: #888; font-size: 0.9em;">©TheDoggyBrad Software Lab. All Rights Reserved.</footer>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="../firebase-config.js"></script>
+  
+  <script>
+    // --- JS-DOS DOOM Initialization ---
+    var dosbox_DOOM = new Dosbox({
+        id: "DOOM",
+        onload: function(dosbox) {
+            dosbox.run("DOOM-@evilution.zip", "./DOOM/DOOM.EXE");
+        }
+    });
+
+    // --- NEW: SILENT STARTUP LOGIC ---
+    const originalAudioContext = window.AudioContext || window.webkitAudioContext;
+    let modifiedAudioContexts = [];
+
+    // This function intercepts AudioContext creation and routes it through a muted GainNode.
+    function engageSilentProcessing() {
+        if (!originalAudioContext) {
+            console.warn("Web Audio API not supported. Cannot apply silent processing.");
+            return;
+        }
+
+        // We define a temporary, custom class that modifies the audio output.
+        class SilentAudioContext extends originalAudioContext {
+            constructor(options) {
+                super(options); // Create the actual AudioContext.
+
+                // Create a GainNode, which acts as a volume control.
+                const masterGain = this.createGain();
+                // Set the initial volume to 0 (silent).
+                masterGain.gain.setValueAtTime(0, this.currentTime);
+                // Connect our volume control to the actual speakers.
+                masterGain.connect(super.destination);
+
+                // IMPORTANT: We overwrite the 'destination' property.
+                // Now, when the game tries to connect its sound to the 'destination',
+                // it's actually connecting to our masterGain node instead of the speakers.
+                Object.defineProperty(this, 'destination', {
+                    value: masterGain,
+                    writable: false,
+                });
+                
+                console.log("AudioContext created with silent gain node. Audio is processing but not audible.");
+                modifiedAudioContexts.push(this);
+            }
+        }
+        
+        // Overwrite the global constructor. Any script that now tries to create
+        // an AudioContext will get our silent version instead.
+        window.AudioContext = SilentAudioContext;
+        window.webkitAudioContext = SilentAudioContext;
+        console.log("Global AudioContext has been temporarily overwritten to enforce silent startup.");
+    }
+
+    // This function restores the audio output and original browser functionality.
+    function restoreAudioOutput() {
+        if (!originalAudioContext) return;
+
+        // Turn the volume back up on all the contexts we modified.
+        modifiedAudioContexts.forEach(context => {
+            // The 'destination' is our GainNode. We access its 'gain' property.
+            if (context.destination && typeof context.destination.gain?.setValueAtTime === 'function') {
+                context.destination.gain.setValueAtTime(1, context.currentTime);
+                console.log("Restored volume for a modified AudioContext.");
+            }
+        });
+        modifiedAudioContexts = []; // Clear the array for next use.
+
+        // Restore the original AudioContext constructor to the window.
+        window.AudioContext = originalAudioContext;
+        window.webkitAudioContext = originalAudioContext;
+        console.log("Global AudioContext has been restored.");
+    }
+
+    // --- Custom Controls Logic ---
+    const customPlayBtn = document.getElementById('customPlayBtn');
+    if (customPlayBtn) {
+        customPlayBtn.addEventListener('click', () => {
+            // 1. Engage silent processing BEFORE starting the game.
+            console.log("Play button pressed. Engaging silent processing for 15 seconds.");
+            engageSilentProcessing();
+            
+            // 2. Start the game by clicking the original button.
+            // When js-dos runs, it will use our SilentAudioContext constructor.
+            const originalStartBtn = document.querySelector('#DOOM .dosbox-start');
+            if (originalStartBtn) {
+                originalStartBtn.click();
+            }
+            
+            // Hide the custom play button.
+            customPlayBtn.style.display = 'none';
+
+            // 3. Set a timer to restore audio output after 15 seconds.
+            setTimeout(() => {
+                console.log("15 seconds have passed. Restoring audio output.");
+                restoreAudioOutput();
+
+                // As a fallback, also call the js-dos unmute function in case it tracks its own state.
+                if (dosbox_DOOM && typeof dosbox_DOOM.unmute === 'function') {
+                    dosbox_DOOM.unmute();
+                }
+            }, 15000);
+        });
+    }
+
+    const fullscreenButton = document.getElementById("fullscreen_DOOM");
+    if (fullscreenButton) {
+        fullscreenButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            dosbox_DOOM.requestFullScreen();
+        });
+    }
+
+    // --- ADVANCED TITLE LOCK LOGIC ---
+    let lastValidTitle = document.title;
+    const forbiddenSubstrings = ["DOSBox"]; 
+
+    const titleObserver = new MutationObserver(() => {
+        const currentTitle = document.title;
+        const isForbidden = forbiddenSubstrings.some(substring => currentTitle.includes(substring));
+        if (isForbidden) {
+            document.title = lastValidTitle;
+        } else {
+            lastValidTitle = currentTitle;
+        }
+    });
+
+    if (document.querySelector('title')) {
+        titleObserver.observe(document.querySelector('title'), { childList: true });
+    }
+
+    // --- UNIFIED Core 4SP Dashboard and Firebase Logic ---
+    const sidebarEl = document.getElementById('sidebar');
+    const toggleSidebarBtn = document.getElementById('toggleSidebar');
+    const headerLogoutBtn = document.getElementById('logoutBtn');
+    const sidebarSignOutLink = document.getElementById('signOutLink');
+
+    function handleLogout() {
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().signOut().then(() => {
+                window.location.href = '../login.html';
+            }).catch(error => {
+                console.error('Logout error:', error);
+            });
+        }
+    }
+
+    if (headerLogoutBtn) { headerLogoutBtn.addEventListener('click', handleLogout); }
+    if (sidebarSignOutLink) { sidebarSignOutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); }); }
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged(user => {
+            if (!user) { window.location.href = '../login.html'; } 
+            else { console.log('User is authenticated:', user.email); }
+        });
+    }
+    if (toggleSidebarBtn && sidebarEl) {
+        toggleSidebarBtn.addEventListener('click', () => {
+            sidebarEl.classList.toggle('collapsed');
+        });
+    }
+  </script>
+</body>
+</html>
