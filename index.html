@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 
+      NOTE: The original file loaded ../navigation.js. 
+      Assuming index.html is in the root, this might need to be ./navigation.js 
+      I am keeping it as-is from your provided file.
+    -->
     <script src="../navigation.js"></script>
 
     <!-- Tailwind CSS Configuration -->
@@ -134,7 +139,6 @@
             color: #ffffff;
             font-family: 'Geist', sans-serif;
         }
-        /* Added: Flex layout for horizontal buttons */
         #zoneViewer .zone-header .zone-controls {
             display: flex;
             align-items: center;
@@ -239,6 +243,9 @@
     <!-- Main Application Logic -->
     <script type="module">
         import games from "./cards-data.js";
+        // IMPORT: Added site-mapping.js. Make sure this file is in the same directory as index.html
+        // If this file is missing, the Strongdog games will not load.
+        import { siteMapping } from "./site-mapping.js";
 
         // --- Configuration & Globals ---
         const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
@@ -295,6 +302,164 @@
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
 
+        // --- [NEW] Strongdog Game Path Logic ---
+        // These functions are copied from playindex.html and renamed to avoid conflicts.
+        // Paths have been adjusted from being in /play/ to being in the root.
+
+        function sd_getCurrentKeyHostOnly() {
+            return window.location.host;
+        }
+
+        function sd_getBaseURLForPage(page) {
+            const currentHost = sd_getCurrentKeyHostOnly();
+            const currentPath = window.location.pathname;
+
+            // Adjusted paths from playindex.html (e.g., /STRONGDOG/ -> ./)
+            // This block uses absolute paths, it should be fine.
+            if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
+                if (!page || page === 1) return "/STRONGDOG/";
+                if (page === 2) return "/strongdog2/";
+                if (page === 3) return "/strongdog3/";
+                if (page === 4) return "/strongdog4/";
+                if (page === 5) return "/strongdog5/";
+                return "/STRONGDOG/";
+            }
+            
+            // explicitMappings:
+            // ../ (from play/) -> ./ (from root/)
+            // ../../ (from play/) -> ../ (from root/)
+            const explicitMappings = {
+                "jman1593.github.io": {
+                    2: "./strongdog2/", // Original: ../strongdog2/
+                },
+                "v5-4simpleproblems.github.io": {
+                    2: "../strongdog2/", // Original: ../../strongdog2/
+                    3: "../strongdog3/", // Original: ../../strongdog3/
+                    4: "../strongdog4/", // Original: ../../strongdog4/
+                    5: "../strongdog5/", // Original: ../../strongdog5/
+                }
+            };
+            if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
+                // Adjusted path replacement - just return the correct path
+                return explicitMappings[currentHost][page];
+            }
+            
+            // Original: if (!page || page === 1) return "../";
+            if (!page || page === 1) return "./"; // Correct translation (resolves to /GAMES/)
+            
+            // Check if siteMapping was imported correctly
+            const arr = siteMapping[currentHost];
+            if (typeof siteMapping === 'undefined' || !siteMapping[currentHost]) {
+                console.warn("siteMapping not found or host not in map. Using default paths.");
+                // Original fallbacks:
+                // if (page === 2) return "../../strongdog2/";
+                if (page === 2) return "../strongdog2/"; // Correct translation
+                // if (page === 3) return "../../strongdog3/";
+                if (page === 3) return "../strongdog3/"; // Correct translation
+                // if (page === 4) return "../../strongdog4/";
+                if (page === 4) return "../strongdog4/"; // Correct translation
+                // if (page === 5) return "../../strongdog5/";
+                if (page === 5) return "../strongdog5/"; // Correct translation
+                // return "../";
+                return "./"; // Correct translation
+            }
+
+            // *** FIXED: Removed duplicate 'const arr' declaration ***
+            const index = page - 2;
+            if (arr[index]) {
+                 // Original: return arr[index].replace(/^\.\/$/, "../");
+                 // This means paths in siteMapping are relative to play/
+                 // e.g., `../../strongdog2/` or `../strongdog2/` or `./`
+                let path = arr[index];
+                
+                // Translate the special ./ -> ../ rule
+                // Original: if path is './', return '../' (resolves to /GAMES/)
+                // My translation: if path is './', return './' (resolves to /GAMES/)
+                if (path === './') {
+                    return './';
+                }
+                
+                // Translate the paths themselves
+                if (path.startsWith('../../')) {
+                    // Original: ../../strongdog2/ (resolves to /strongdog2/)
+                    // My translation: ../strongdog2/ (resolves to /strongdog2/)
+                    return path.replace('../../', '../');
+                }
+                if (path.startsWith('../')) {
+                    // Original: ../strongdog2/ (resolves to /GAMES/strongdog2/)
+                    // My translation: ./strongdog2/ (resolves to /GAMES/strongdog2/)
+                    return path.replace('../', './');
+                }
+                // Path is probably fine as-is (e.g. absolute, or `./something` which is correct)
+                return path;
+            }
+
+            // Fallback defaults
+            // Original:
+            // if (page === 2) return "../../strongdog2/";
+            if (page === 2) return "../strongdog2/"; // Correct translation
+            // if (page === 3) return "../../strongdog3/";
+            if (page === 3) return "../strongdog3/"; // Correct translation
+            // if (page === 4) return "../../strongdog4/";
+            if (page === 4) return "../strongdog4/"; // Correct translation
+            // if (page === 5) return "../../strongdog5/";
+            if (page === 5) return "../strongdog5/"; // Correct translation
+            // return "../../";
+            return "../"; // Correct translation (../../ from play/ is /, so ../ from root/ is /)
+        }
+
+        async function sd_getEmbedPath(adjustedHref, originalHref, page) {
+            let cleanHref = adjustedHref.replace(/index\.html$/, "").replace(/base\.html$/, "").replace(/\.html$/, "");
+            if (!cleanHref.endsWith("/")) cleanHref += "/";
+            const pathsToTry = [cleanHref + "game/index.html", cleanHref + "game/base.html", cleanHref + "gamereal/index.html", cleanHref + "gamereal/base.html", cleanHref + "index.html", cleanHref + "base.html", ];
+            try {
+                const response = await fetch(adjustedHref, {
+                    method: "GET"
+                });
+                if (response.ok) {
+                    const text = await response.text();
+                    const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/);
+                    if (match) {
+                        const [, , embedPath, , title] = match;
+                        const resolvedPath = new URL(embedPath, adjustedHref).href;
+                        if (await sd_fileExists(resolvedPath)) return resolvedPath;
+                    }
+                }
+            } catch (error) {
+                console.warn("Failed to parse embed path from cards-data.js", error);
+            }
+            for (const path of pathsToTry) {
+                if (await sd_fileExists(path)) return path;
+            }
+            return sd_adjustHrefPath(originalHref, page);
+        }
+
+        function sd_adjustHrefPath(path, page) {
+            path = path.replace(/^\.\//, "").replace(/^\//, "");
+            const baseURL = sd_getBaseURLForPage(page);
+            let finalPath;
+            // Adjusted logic for new base URL
+            if (baseURL === "./") {
+                finalPath = "./" + path;
+            } else {
+                finalPath = baseURL.endsWith("/") ? baseURL + path : baseURL + "/" + path;
+            }
+            return finalPath;
+        }
+
+        async function sd_fileExists(url) {
+            try {
+                const response = await fetch(url, {
+                    method: "HEAD"
+                });
+                return response.ok;
+            } catch {
+                return false;
+            }
+        }
+        // --- [END] Strongdog Game Path Logic ---
+
+
         // --- Game Card Rendering ---
         function createGameCard(game) {
             const isStrongdog = game.category === 'StrongdogXP';
@@ -332,11 +497,34 @@
                 </div>
             `;
             
-            const handlePlay = (e) => {
+            // MODIFIED: handlePlay is now async and loads Strongdog games in the modal
+            const handlePlay = async (e) => {
                 e.stopPropagation();
                 if (isStrongdog) {
-                    window.location.href = `./play/?id=${game.id}`;
+                    // Strongdog Game Logic
+                    try {
+                        const page = game.page;
+                        const originalHref = game.href;
+                        const baseURL = sd_getBaseURLForPage(page);
+                        let adjustedHref = originalHref.replace(/^\.\//, "");
+                        adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                        
+                        // Show loading state? For now, just calculate
+                        const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
+                        
+                        const strongdogGameData = {
+                            name: game.name,
+                            url: embedPath,
+                            isStrongdog: true // Flag for openZone
+                        };
+                        openZone(strongdogGameData);
+
+                    } catch (error) {
+                        console.error(`Failed to get embed path for ${game.name}:`, error);
+                        alert(`Could not load game: ${game.name}. See console for details.`);
+                    }
                 } else {
+                    // GN-Math Game Logic
                     openZone(game);
                 }
             };
@@ -352,6 +540,7 @@
         }
 
         // --- Game Viewer Logic ---
+        // MODIFIED: openZone now handles both game types
         function openZone(game) {
             if (!game || !game.url) {
                 console.error("Could not load game: Invalid game data.");
@@ -363,24 +552,36 @@
             const zoneNameEl = document.getElementById('zoneNameEl');
             
             zoneNameEl.textContent = game.name;
-            zoneFrame.src = 'about:blank';
+            zoneFrame.src = 'about:blank'; // Clear previous game
 
-            fetch(`${gameUrl}?t=${Date.now()}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-                    return response.text();
-                })
-                .then(html => {
-                    const doc = zoneFrame.contentWindow.document;
-                    doc.open();
-                    doc.write(html);
-                    doc.close();
-                    zoneViewer.style.display = "flex";
-                })
-                .catch(error => {
-                    console.error(`Failed to load game "${game.name}": ${error.message}.`);
-                    closeZoneViewer();
-                });
+            if (game.isStrongdog) {
+                // Strongdog logic: Just set the src
+                zoneFrame.src = gameUrl;
+                // Add sandbox attributes like in playindex.html
+                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
+                zoneViewer.style.display = "flex";
+            } else {
+                // GN-Math logic: Fetch and write HTML
+                // Remove sandbox attribute if it exists from a previous Strongdog game
+                zoneFrame.removeAttribute('sandbox'); 
+                
+                fetch(`${gameUrl}?t=${Date.now()}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                        return response.text();
+                    })
+                    .then(html => {
+                        const doc = zoneFrame.contentWindow.document;
+                        doc.open();
+                        doc.write(html);
+                        doc.close();
+                        zoneViewer.style.display = "flex";
+                    })
+                    .catch(error => {
+                        console.error(`Failed to load game "${game.name}": ${error.message}.`);
+                        closeZoneViewer();
+                    });
+            }
         }
 
         function closeZoneViewer() {
@@ -390,24 +591,46 @@
             if (zoneFrame) zoneFrame.src = 'about:blank';
         }
 
+        // MODIFIED: openGameInNewTab now handles both game types
         function openGameInNewTab() {
             const zoneNameEl = document.getElementById('zoneNameEl');
             const game = allGames.find(z => z.name === zoneNameEl.textContent);
             if (!game) return;
 
-            const gameUrl = game.url;
-            const newWindow = window.open("about:blank", "_blank");
-            if (newWindow) {
-                fetch(`${gameUrl}?t=${Date.now()}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        newWindow.document.open();
-                        newWindow.document.write(html);
-                        newWindow.document.close();
-                    }).catch(err => {
-                        console.error("Error opening in new tab:", err);
-                        newWindow.close();
-                    });
+            const isStrongdog = game.category === 'StrongdogXP';
+
+            if (isStrongdog) {
+                // Strongdog: Re-calculate the embed path and open directly
+                const page = game.page;
+                const originalHref = game.href;
+                const baseURL = sd_getBaseURLForPage(page);
+                let adjustedHref = originalHref.replace(/^\.\//, "");
+                adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                
+                // Use .then() because this click handler isn't async
+                sd_getEmbedPath(adjustedHref, originalHref, page).then(embedPath => {
+                    window.open(embedPath, "_blank");
+                }).catch(err => {
+                    console.error("Error getting Strongdog embed path for new tab:", err);
+                    alert("Could not open game in new tab. See console for details.");
+                });
+
+            } else {
+                // Original GN-Math logic
+                const gameUrl = game.url;
+                const newWindow = window.open("about:blank", "_blank");
+                if (newWindow) {
+                    fetch(`${gameUrl}?t=${Date.now()}`)
+                        .then(response => response.text())
+                        .then(html => {
+                            newWindow.document.open();
+                            newWindow.document.write(html);
+                            newWindow.document.close();
+                        }).catch(err => {
+                            console.error("Error opening in new tab:", err);
+                            newWindow.close();
+                        });
+                }
             }
         }
 
@@ -479,6 +702,7 @@
             };
         }
 
+        // MODIFIED: Search logic now opens Strongdog games in the modal
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
             renderGamesForCurrentCategory(text);
@@ -502,20 +726,43 @@
                     imgSrc = game.imgSrc;
                 }
                 
-                const href = isStrongdog ? `./play/?id=${game.id}` : '#'; // Use # for modal games
+                const href = '#'; // All games use the modal
                 
                 const linkEl = document.createElement("a");
                 linkEl.href = href;
                 linkEl.className = 'search-item';
                 linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
                 
-                if(!isStrongdog) {
-                    linkEl.addEventListener('click', (e) => {
-                        e.preventDefault();
+                // Attach universal click listener
+                linkEl.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    if (isStrongdog) {
+                        // Strongdog: Calculate path and open in modal
+                        try {
+                            const page = game.page;
+                            const originalHref = game.href;
+                            const baseURL = sd_getBaseURLForPage(page);
+                            let adjustedHref = originalHref.replace(/^\.\//, "");
+                            adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                            
+                            const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
+                            
+                            const strongdogGameData = {
+                                name: game.name,
+                                url: embedPath,
+                                isStrongdog: true
+                            };
+                            openZone(strongdogGameData);
+                        } catch (error) {
+                            console.error(`Failed to get embed path for ${game.name}:`, error);
+                            alert(`Could not load game: ${game.name}. See console for details.`);
+                        }
+                    } else {
+                        // GN-Math: Open directly in modal
                         openZone(game);
-                        searchResults.style.display = "none";
-                    });
-                }
+                    }
+                    searchResults.style.display = "none";
+                });
                 searchResults.appendChild(linkEl);
             });
             searchResults.style.display = "block";
