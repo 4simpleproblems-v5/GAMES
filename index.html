@@ -72,13 +72,13 @@
             box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
         }
 
-        /* --- New Play Button Hover CSS --- */
+        /* --- Play Button Hover CSS (Unchanged) --- */
         .play-btn .fa-solid-play { display: inline-block; }
         .play-btn .fa-regular-play { display: none; }
         .play-btn:hover .fa-solid-play { display: none; }
         .play-btn:hover .fa-regular-play { display: inline-block; }
 
-        /* --- Favorite Star Hover CSS --- */
+        /* --- Favorite Star Hover CSS (Unchanged) --- */
         .favorite-btn .fa-solid-star { display: inline-block; }
         .favorite-btn .fa-regular-star { display: none; }
         .favorite-btn:not(.favorited):hover .fa-solid-star { display: none; }
@@ -107,6 +107,36 @@
         .search-item img {
             width: 40px; height: 40px; border-radius: 8px;
             margin-right: 12px; object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        /* --- Marquee for Game Titles (Feature #3) --- */
+        .game-title-wrapper {
+            /* This is the container with max-w-[75%] and overflow-hidden */
+            position: relative;
+            height: 1.5rem; /* Ensure consistent height */
+        }
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+            /* Animation applied to the inner text */
+            animation: marquee 20s linear infinite; 
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-100% + 50%)); } /* Scrolls 50% of the text width */
+        }
+        
+        /* Pause marquee on hover */
+        .game-title-wrapper:hover .marquee-content {
+             animation-play-state: paused;
+        }
+
+        /* Disable style for category arrows (Feature #1) */
+        #prev-category:disabled, #next-category:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
         }
 
         @media (max-width: 768px) {
@@ -192,6 +222,7 @@
         <div id="category-viewer" class="w-full mt-12">
             <!-- Category Title Slider -->
             <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
+                <!-- Buttons can now be disabled via JS/DOM attribute (Feature #1) -->
                 <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-left"></i>
                 </button>
@@ -200,6 +231,7 @@
                         <!-- Category titles will be dynamically injected here -->
                     </div>
                 </div>
+                <!-- Buttons can now be disabled via JS/DOM attribute (Feature #1) -->
                 <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-colors p-2 z-10">
                     <i class="fas fa-chevron-right"></i>
                 </button>
@@ -219,8 +251,8 @@
             <button id="category-cycle-btn" title="Next Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
                 <i class="fa-solid fa-layer-group"></i>
             </button>
+            <!-- Search results dropdown will be injected here (Feature #2) -->
             <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
-                <!-- Search results dropdown will be injected here -->
             </div>
         </div>
     </div>
@@ -287,7 +319,8 @@
             }
             saveFavorites(favorites);
 
-            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
+            // Update all corresponding elements (grid cards, search results)
+            document.querySelectorAll(`[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
                 btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
             });
@@ -302,10 +335,7 @@
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
 
-        // --- [NEW] Strongdog Game Path Logic ---
-        // These functions are copied from playindex.html and renamed to avoid conflicts.
-        // Paths have been adjusted from being in /play/ to being in the root.
-
+        // --- Strongdog Game Path Logic (Unchanged) ---
         function sd_getCurrentKeyHostOnly() {
             return window.location.host;
         }
@@ -364,48 +394,29 @@
                 return "./"; // Correct translation
             }
 
-            // *** FIXED: Removed duplicate 'const arr' declaration ***
             const index = page - 2;
             if (arr[index]) {
-                 // Original: return arr[index].replace(/^\.\/$/, "../");
-                 // This means paths in siteMapping are relative to play/
-                 // e.g., `../../strongdog2/` or `../strongdog2/` or `./`
                 let path = arr[index];
                 
-                // Translate the special ./ -> ../ rule
-                // Original: if path is './', return '../' (resolves to /GAMES/)
-                // My translation: if path is './', return './' (resolves to /GAMES/)
                 if (path === './') {
                     return './';
                 }
                 
-                // Translate the paths themselves
                 if (path.startsWith('../../')) {
-                    // Original: ../../strongdog2/ (resolves to /strongdog2/)
-                    // My translation: ../strongdog2/ (resolves to /strongdog2/)
                     return path.replace('../../', '../');
                 }
                 if (path.startsWith('../')) {
-                    // Original: ../strongdog2/ (resolves to /GAMES/strongdog2/)
-                    // My translation: ./strongdog2/ (resolves to /GAMES/strongdog2/)
                     return path.replace('../', './');
                 }
-                // Path is probably fine as-is (e.g. absolute, or `./something` which is correct)
                 return path;
             }
 
             // Fallback defaults
-            // Original:
-            // if (page === 2) return "../../strongdog2/";
-            if (page === 2) return "../strongdog2/"; // Correct translation
-            // if (page === 3) return "../../strongdog3/";
-            if (page === 3) return "../strongdog3/"; // Correct translation
-            // if (page === 4) return "../../strongdog4/";
-            if (page === 4) return "../strongdog4/"; // Correct translation
-            // if (page === 5) return "../../strongdog5/";
-            if (page === 5) return "../strongdog5/"; // Correct translation
-            // return "../../";
-            return "../"; // Correct translation (../../ from play/ is /, so ../ from root/ is /)
+            if (page === 2) return "../strongdog2/"; 
+            if (page === 3) return "../strongdog3/"; 
+            if (page === 4) return "../strongdog4/"; 
+            if (page === 5) return "../strongdog5/"; 
+            return "../"; 
         }
 
         async function sd_getEmbedPath(adjustedHref, originalHref, page) {
@@ -483,7 +494,11 @@
                     <div class="aspect-w-3 aspect-h-2">
                         <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
                     </div>
-                    <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${game.name}">${game.name}</h3>
+                    <!-- Game Title Container with Marquee (Feature #3) -->
+                    <div class="game-title-wrapper absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white text-sm font-semibold shadow-lg max-w-[75%] overflow-hidden" title="${game.name}">
+                        <div class="marquee-content whitespace-nowrap">${game.name}</div>
+                    </div>
+                    
                     <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
                         <button class="play-btn rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
                             <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
@@ -497,7 +512,6 @@
                 </div>
             `;
             
-            // MODIFIED: handlePlay is now async and loads Strongdog games in the modal
             const handlePlay = async (e) => {
                 e.stopPropagation();
                 if (isStrongdog) {
@@ -515,13 +529,16 @@
                         const strongdogGameData = {
                             name: game.name,
                             url: embedPath,
-                            isStrongdog: true // Flag for openZone
+                            isStrongdog: true,
+                            category: game.category // Keep category info
                         };
                         openZone(strongdogGameData);
 
                     } catch (error) {
                         console.error(`Failed to get embed path for ${game.name}:`, error);
-                        alert(`Could not load game: ${game.name}. See console for details.`);
+                        // Using a custom modal/toast instead of alert()
+                        // Since there's no custom modal implementation, we fall back to a console error message.
+                        console.error(`Could not load game: ${game.name}. Please check the console.`);
                     }
                 } else {
                     // GN-Math Game Logic
@@ -554,7 +571,7 @@
             zoneNameEl.textContent = game.name;
             zoneFrame.src = 'about:blank'; // Clear previous game
 
-            if (game.isStrongdog) {
+            if (game.category === 'StrongdogXP') {
                 // Strongdog logic: Just set the src
                 zoneFrame.src = gameUrl;
                 // Add sandbox attributes like in playindex.html
@@ -612,7 +629,7 @@
                     window.open(embedPath, "_blank");
                 }).catch(err => {
                     console.error("Error getting Strongdog embed path for new tab:", err);
-                    alert("Could not open game in new tab. See console for details.");
+                    console.error("Could not open game in new tab. See console for details.");
                 });
 
             } else {
@@ -669,12 +686,33 @@
         }
 
         function updateSliderPosition() {
+            // Calculates the correct transform amount based on the number of categories
             categorySlider.style.transform = `translateX(-${currentCategoryIndex * 100 / categories.length}%)`;
         }
 
+        // Feature #1: Update button disabled state
+        function updateCategoryControls() {
+            const isFirst = currentCategoryIndex === 0;
+            const isLast = currentCategoryIndex === categories.length - 1;
+
+            // Disabling buttons
+            prevCategoryBtn.disabled = isFirst;
+            nextCategoryBtn.disabled = isLast;
+
+            // Visual feedback for disabled state
+            prevCategoryBtn.classList.toggle('text-gray-700', isFirst);
+            prevCategoryBtn.classList.toggle('hover:text-white', !isFirst);
+            nextCategoryBtn.classList.toggle('text-gray-700', isLast);
+            nextCategoryBtn.classList.toggle('hover:text-white', !isLast);
+        }
+
         function switchCategory(newIndex) {
+            // Boundary check: only switch if the index is valid
+            if (newIndex < 0 || newIndex >= categories.length) return;
+
             currentCategoryIndex = newIndex;
             updateSliderPosition();
+            updateCategoryControls(); // <--- Call new function here (Feature #1)
             renderGamesForCurrentCategory();
         }
         
@@ -702,10 +740,18 @@
             };
         }
 
-        // MODIFIED: Search logic now opens Strongdog games in the modal
+        // MODIFIED: Search logic now includes category, favorite, and play buttons (Feature #2)
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
-            renderGamesForCurrentCategory(text);
+            
+            // If there's text, we want the games grid to show only search results regardless of category
+            if (text) {
+                const gamesToRender = allGames.filter(g => g.name.toLowerCase().includes(text));
+                renderGames(gamesToRender, gamesGridContainer);
+            } else {
+                // If the search bar is empty, revert to showing games for the current category
+                renderGamesForCurrentCategory(); 
+            }
 
             // Update dropdown
             const filteredDropdown = text ? allGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
@@ -726,43 +772,73 @@
                     imgSrc = game.imgSrc;
                 }
                 
-                const href = '#'; // All games use the modal
+                const isFavorite = getFavorites().includes(game.id);
                 
-                const linkEl = document.createElement("a");
-                linkEl.href = href;
+                const linkEl = document.createElement("div"); // Changed from <a> to <div> to better host action buttons
                 linkEl.className = 'search-item';
-                linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
+                linkEl.dataset.gameId = game.id;
                 
-                // Attach universal click listener
-                linkEl.addEventListener('click', async (e) => {
+                // Entire search result container
+                linkEl.innerHTML = `
+                    <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'">
+                    <div class="flex-grow min-w-0 flex flex-col justify-center">
+                        <div class="flex items-center justify-between w-full">
+                            <!-- Game Name -->
+                            <span class="truncate text-white text-base max-w-[calc(100%-120px)]">${game.name}</span>
+                            <!-- Category Name (Feature #2) -->
+                            <span class="text-xs ${categoryColors[game.category] || 'text-gray-400'} ml-3 flex-shrink-0 font-semibold">${game.category}</span>
+                        </div>
+                    </div>
+                    <!-- Action Buttons (Feature #2) -->
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-4">
+                        <button class="favorite-btn search-fav-btn rounded-full text-white text-lg transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                            <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                            <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                        </button>
+                        <button class="play-btn search-play-btn rounded-full text-white text-lg transition duration-200 focus:outline-none" title="Play Game">
+                            <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
+                            <i class="fa-regular fa-circle-play fa-regular-play text-accent-indigo transition-colors"></i>
+                        </button>
+                    </div>
+                `;
+
+                // Logic to open game when clicking the non-button area of the result
+                const handlePlayAction = async (e) => {
                     e.preventDefault();
+                    
+                    // Strongdog: Calculate path and open in modal
                     if (isStrongdog) {
-                        // Strongdog: Calculate path and open in modal
                         try {
-                            const page = game.page;
-                            const originalHref = game.href;
-                            const baseURL = sd_getBaseURLForPage(page);
-                            let adjustedHref = originalHref.replace(/^\.\//, "");
-                            adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
-                            
-                            const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
-                            
-                            const strongdogGameData = {
-                                name: game.name,
-                                url: embedPath,
-                                isStrongdog: true
-                            };
-                            openZone(strongdogGameData);
+                            const embedPath = await sd_getEmbedPath(sd_adjustHrefPath(game.href, game.page), game.href, game.page);
+                            openZone({ name: game.name, url: embedPath, category: game.category });
                         } catch (error) {
                             console.error(`Failed to get embed path for ${game.name}:`, error);
-                            alert(`Could not load game: ${game.name}. See console for details.`);
+                            console.error(`Could not load game: ${game.name}. Please check the console.`);
                         }
                     } else {
                         // GN-Math: Open directly in modal
                         openZone(game);
                     }
                     searchResults.style.display = "none";
+                };
+
+                // Attach Play listener to the whole element, but stop propagation on buttons
+                linkEl.addEventListener('click', handlePlayAction);
+                
+                // Play button listener (stops propagation, but performs same action)
+                linkEl.querySelector('.search-play-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    handlePlayAction(e);
                 });
+                
+                // Favorite button listener
+                linkEl.querySelector('.search-fav-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleFavorite(game.id);
+                    // Update the visual state of this specific favorite button
+                    e.currentTarget.classList.toggle('favorited', getFavorites().includes(game.id));
+                });
+
                 searchResults.appendChild(linkEl);
             });
             searchResults.style.display = "block";
@@ -793,6 +869,7 @@
             categorySlider.style.width = `${categories.length * 100}%`;
 
             setupCategorySlider();
+            updateCategoryControls(); // <--- Initial call to set disabled state (Feature #1)
             renderGamesForCurrentCategory();
             renderFavorites();
 
@@ -803,8 +880,7 @@
             // --- Event Listeners ---
             const cycle = (direction) => {
                  let newIndex = currentCategoryIndex + direction;
-                 if (newIndex < 0) newIndex = categories.length - 1;
-                 if (newIndex >= categories.length) newIndex = 0;
+                 // Boundary check is now inside switchCategory
                  switchCategory(newIndex);
             };
 
@@ -813,6 +889,7 @@
             categoryCycleBtn.addEventListener('click', () => cycle(1));
 
             document.addEventListener("click", ev => {
+                // Hide search results if clicking outside the search bar area
                 if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
                     searchResults.style.display = "none";
                 }
