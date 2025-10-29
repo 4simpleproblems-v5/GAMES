@@ -590,7 +590,7 @@
                         const strongdogGameData = {
                             name: game.name,
                             url: embedPath,
-                            isStrongdog: true // Flag for openZone
+                            category: game.category // Keep original category for openZone
                         };
                         openZone(strongdogGameData);
 
@@ -628,11 +628,9 @@
             zoneNameEl.textContent = game.name;
             zoneFrame.src = 'about:blank'; // Clear previous game
             
-            // Strongdog and 'Others' games use a direct URL
-            const isStrongdog = game.category === 'StrongdogXP';
-            const isOthers = game.category === 'Others'; 
+            const isURLBasedGame = game.category === 'StrongdogXP' || game.category === 'Others'; 
 
-            if (isStrongdog || isOthers) {
+            if (isURLBasedGame) {
                 zoneFrame.src = gameUrl;
                 // Add sandbox attributes like in playindex.html
                 // For 'Others' games, this is necessary for things like Eaglercraft
@@ -669,15 +667,50 @@
             if (zoneFrame) zoneFrame.src = 'about:blank';
         }
 
-        // MODIFIED: openGameInNewTab now handles Strongdog and 'Others' game types
+        /**
+         * MODIFIED: openGameInNewTab now checks the live iframe src first 
+         * to "just grab the frame" for URL-based games.
+         */
         function openGameInNewTab() {
+            const zoneFrame = document.getElementById('zoneFrame');
             const zoneNameEl = document.getElementById('zoneNameEl');
             const game = allGames.find(z => z.name === zoneNameEl.textContent);
+
             if (!game) return;
 
             const isStrongdog = game.category === 'StrongdogXP';
             const isOthers = game.category === 'Others';
 
+            // 1. Check if the current frame is loaded with a direct URL (Strongdog / Others)
+            // This directly implements the request to "just grab the frame" without recalculation.
+            if (zoneFrame.src && zoneFrame.src !== 'about:blank' && !zoneFrame.src.startsWith('data:')) {
+                window.open(zoneFrame.src, "_blank");
+                return;
+            } 
+
+            // 2. If the src is about:blank (i.e., it's a GN-Math game loaded via document.write), 
+            //    we must re-fetch and write the HTML to the new window.
+            if (game.category === 'GN-Math') {
+                const gameUrl = game.url;
+                const newWindow = window.open("about:blank", "_blank");
+                if (newWindow) {
+                    fetch(`${gameUrl}?t=${Date.now()}`)
+                        .then(response => response.text())
+                        .then(html => {
+                            newWindow.document.open();
+                            newWindow.document.write(html);
+                            newWindow.document.close();
+                        }).catch(err => {
+                            console.error("Error opening in new tab:", err);
+                            newWindow.close();
+                        });
+                }
+                return;
+            }
+            
+            // 3. Fallback for URL-based games (Strongdog/Others) that might have failed to load 
+            //    or where the frame src is 'about:blank' due to an edge case. 
+            //    We use the original robust logic to ensure it opens regardless.
             if (isStrongdog) {
                 // Strongdog: Re-calculate the embed path and open directly
                 const page = game.page;
@@ -693,27 +726,9 @@
                     console.error("Error getting Strongdog embed path for new tab:", err);
                     alert("Could not open game in new tab. See console for details.");
                 });
-
             } else if (isOthers) {
                 // 'Others': Use the game's direct URL
                 window.open(game.url, "_blank");
-
-            } else {
-                // Original GN-Math logic
-                const gameUrl = game.url;
-                const newWindow = window.open("about:blank", "_blank");
-                if (newWindow) {
-                    fetch(`${gameUrl}?t=${Date.now()}`)
-                        .then(response => response.text())
-                        .then(html => {
-                            newWindow.document.open();
-                            newWindow.document.write(html);
-                            newWindow.document.close();
-                        }).catch(err => {
-                            console.error("Error opening in new tab:", err);
-                            newWindow.close();
-                        });
-                }
             }
         }
 
@@ -888,7 +903,7 @@
                             const strongdogGameData = {
                                 name: game.name,
                                 url: embedPath,
-                                isStrongdog: true
+                                category: game.category
                             };
                             openZone(strongdogGameData);
                         } catch (error) {
@@ -940,8 +955,8 @@
             if (!categories.includes('Gameboy Games')) categories.push('Gameboy Games'); // ADDED: Manually add new category
             if (!categories.includes('Others')) categories.push('Others');
 
-            // Optional: Reorder categories for better presentation (e.g., 'Others' first)
-            const preferredOrder = ['Others', 'StrongdogXP', 'GN-Math', 'Gameboy Games'];
+            // MODIFIED: Reorder categories to put 'Others' last
+            const preferredOrder = ['StrongdogXP', 'GN-Math', 'Gameboy Games', 'Others'];
             categories = preferredOrder.filter(cat => categories.includes(cat));
 
             setupCategorySlider();
