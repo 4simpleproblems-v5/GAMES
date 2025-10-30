@@ -161,11 +161,11 @@
             display: flex;
             align-items: center;
         }
-        /* MODIFIED: Added 'a' to the selectors to style the new download button */
+        /* MODIFIED: Added 'a' and '#gtaControlsBtnZone' */
         #zoneViewer .zone-header .zone-controls button,
-        #zoneViewer .zone-header .zone-controls a {
+        #zoneViewer .zone-header .zone-controls a,
+        #zoneViewer .zone-header .zone-controls #gtaControlsBtnZone {
             margin-left: 8px;
-            width: 40px;
             height: 40px;
             background-color: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(5px);
@@ -180,9 +180,18 @@
             justify-content: center;
             transition: background-color 0.2s ease-in-out;
             text-decoration: none; /* For 'a' tag */
+            width: 40px; /* Default width */
         }
+        /* Style for the wider Controls button */
+        #zoneViewer .zone-header .zone-controls #gtaControlsBtnZone {
+             width: auto;
+             padding-left: 0.75rem; /* 12px */
+             padding-right: 0.75rem; /* 12px */
+        }
+        
         #zoneViewer .zone-header .zone-controls button:hover,
-        #zoneViewer .zone-header .zone-controls a:hover {
+        #zoneViewer .zone-header .zone-controls a:hover,
+        #zoneViewer .zone-header .zone-controls #gtaControlsBtnZone:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
@@ -219,6 +228,165 @@
         }
         .eagler-dropdown-link:hover {
             background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* --- ADDED: GTA Controls Dropdown Menu --- */
+        #gtaControlsMenu {
+            white-space: normal; /* Allow text wrapping */
+            background-color: rgba(30, 30, 30, 0.9); /* More solid glass */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        #gtaControlsMenu p {
+            line-height: 1.4;
+            color: #d1d5db; /* gray-300 */
+            margin: 0.25rem 0;
+        }
+        #gtaControlsMenu p strong {
+            color: #ffffff; /* white */
+            min-width: 100px;
+            display: inline-block;
+        }
+         #gtaControlsMenu strong.block {
+            color: #AAAAAA; /* other-grey */
+         }
+
+        /* --- ADDED: First-Time Intro Modal Styles --- */
+        /* Overlay to darken the screen and prevent interaction */
+        #intro-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9998; /* Below the banner, but above content */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        /* The banner container, mimics cookie banner from home.html */
+        #intro-banner-container {
+            display: none; /* Hidden by default */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            padding: 1rem; /* 16px */
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Aligns banner to bottom */
+            height: 100%; /* Full screen height */
+            pointer-events: none; /* Allows clicks "through" the container */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* The actual banner content, which is scrollable */
+        #intro-banner {
+            background-color: rgba(10, 10, 10, 0.95); /* Near-black from home.html */
+            color: white;
+            padding: 1.5rem; /* 24px */
+            border-radius: 1.5rem; /* 24px (rounded-3xl) */
+            border: 1px solid #404040; /* border-gray-700 */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            width: 100%;
+            max-width: 48rem; /* max-w-3xl */
+            max-height: 80vh; /* Max 80% of viewport height */
+            overflow-y: auto; /* Force scrolling */
+            pointer-events: auto; /* Re-enable pointer events for the banner */
+            transform: translateY(20px); /* Start slightly off-screen */
+            transition: transform 0.3s ease-out;
+        }
+
+        /* Demo UI for Favorites */
+        .demo-fav-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            padding: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            font-size: 1.25rem;
+            color: #facc15; /* yellow-400 */
+        }
+        .demo-fav-btn .fa-regular-star {
+            color: white;
+        }
+
+        /* Demo UI for Category Slider & Cursor Animation */
+        #demo-category-slider-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 3rem; /* 48px */
+            max-width: 18rem; /* 288px */
+            margin: 1rem auto;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem; /* 12px */
+            padding: 0 2.5rem; /* Space for arrows */
+            overflow: hidden;
+        }
+        
+        .demo-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem; /* 24px */
+            color: #6b7280; /* gray-500 */
+        }
+        #demo-arrow-left { left: 0.5rem; /* 8px */ }
+        #demo-arrow-right { right: 0.5rem; /* 8px */ }
+
+        #demo-category-slider {
+            display: flex;
+            width: 200%; /* Two categories */
+            animation: slideCategory 8s ease-in-out infinite;
+        }
+        .demo-category-title {
+            width: 50%;
+            flex-shrink: 0;
+            text-align: center;
+            font-size: 1.5rem; /* 24px */
+            font-weight: 400; /* font-bold */
+        }
+
+        #demo-cursor {
+            position: absolute;
+            font-size: 1.5rem; /* 24px */
+            color: white;
+            z-index: 10;
+            /* Initial position: 50% horizontal, 100px vertical */
+            top: 100px; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            animation: glideAndClick 8s ease-in-out infinite;
+        }
+
+        /* Animation for the demo cursor */
+        @keyframes glideAndClick {
+            0%, 100% { top: 100px; left: 50%; opacity: 0; } /* Start/End: center, faded out */
+            10% { top: 100px; left: 50%; opacity: 1; } /* Fade in at center */
+            25% { top: 24px; left: calc(100% - 20px); } /* Glide to right arrow */
+            30% { transform: scale(0.8); } /* Click down */
+            35% { transform: scale(1); } /* Click up */
+            40% { top: 24px; left: calc(100% - 20px); } /* Hold at right */
+            55% { top: 24px; left: 20px; } /* Glide to left arrow */
+            60% { transform: scale(0.8); } /* Click down */
+            65% { transform: scale(1); } /* Click up */
+            70% { top: 24px; left: 20px; } /* Hold at left */
+            85% { top: 100px; left: 50%; opacity: 1; } /* Glide to center */
+            95% { top: 100px; left: 50%; opacity: 0; } /* Fade out */
+        }
+
+        /* Animation for the demo category slider */
+        @keyframes slideCategory {
+            0%, 25% { transform: translateX(0%); } /* Start on StrongdogXP */
+            35%, 55% { transform: translateX(-50%); } /* Slide to GN-Math */
+            65%, 100% { transform: translateX(0%); } /* Slide back to StrongdogXP */
         }
 
     </style>
@@ -279,14 +447,117 @@
              </div>
              <div class="zone-controls">
                 <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                <!-- REMOVED: Open in New Tab Button
                 <button id="newTabBtnZone" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></button>
-                <!-- ADDED: Download button, hidden by default -->
+                -->
+                <!-- Download button, hidden by default -->
                 <a id="downloadBtnZone" title="Download" class="hidden" href="#"><i class="fas fa-download"></i></a>
+                
+                <!-- ADDED: GTA Controls Button & Menu -->
+                <div id="gtaControlsContainer" class="relative hidden">
+                    <button id="gtaControlsBtnZone" title="Controls">
+                        <i class="fas fa-gamepad mr-2"></i>Controls
+                    </button>
+                    <div id="gtaControlsMenu" class="hidden absolute top-full right-0 mt-2 w-80 bg-card-dark border border-brand-border rounded-lg shadow-xl p-4 z-10 text-sm">
+                        <h4 class="font-bold text-white mb-2">🎮 Carnage 3D Controls</h4>
+                        <div class="space-y-1">
+                            <strong class="block text-gray-300">Common Actions</strong>
+                            <p><strong>Next Weapon:</strong> X / LeftBumper</p>
+                            <p><strong>Prev Weapon:</strong> Z / RightBumper</p>
+                            
+                            <strong class="block text-gray-300 mt-2">Movement & Driving</strong>
+                            <p><strong>Run / Accelerate:</strong> Up Arrow / Up</p>
+                            <p><strong>Walk / Reverse:</strong> Down Arrow / Down</p>
+                            <p><strong>Turn/Steer:</strong> Left / Right Arrows</p>
+                            
+                            <strong class="block text-gray-300 mt-2">Player Actions</strong>
+                            <p><strong>Shoot:</strong> LCtrl / B</p>
+                            <p><strong>Enter/Leave Car:</strong> Enter / X</p>
+                            <p><strong>Enter (Passenger):</strong> F / A</p>
+                            <p><strong>Jump / Handbrake:</strong> Space / LTrigger / Y</p>
+                            <p><strong>Special / Horn:</strong> Tab / A (Horn)</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
         <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
     </div>
+
+    <!-- ADDED: First-Time Intro Modal HTML -->
+    <div id="intro-overlay"></div>
+    <div id="intro-banner-container">
+        <div id="intro-banner">
+            <h3 class="text-2xl font-bold mb-4 text-center">Welcome to the 4SP Game Hub!</h3>
+            
+            <p class="text-base text-gray-300 mb-6 text-center">
+                Here are a couple of features to help you get started.
+            </p>
+
+            <!-- Feature 1: Favorites -->
+            <div class="mb-8 p-4 bg-black/30 rounded-xl border border-brand-border">
+                <h4 class="text-xl font-semibold mb-3 text-yellow-400">1. Favorite Your Games</h4>
+                <p class="text-gray-300 mb-4">
+                    Click the star icon on any game card to add it to your "Favorites" list, which will appear at the top of the page for quick access.
+                </p>
+                <div class="flex items-center space-x-4 p-4 bg-card-dark rounded-lg">
+                    <span class="demo-fav-btn">
+                        <i class="fa-regular fa-star"></i>
+                    </span>
+                    <span class="text-gray-400">&rarr;</span>
+                    <span class="demo-fav-btn">
+                        <i class="fa-solid fa-star"></i>
+                    </span>
+                    <span class="text-white">Click to Favorite!</span>
+                </div>
+            </div>
+
+            <!-- Feature 2: Category Navigation -->
+            <div class="mb-8 p-4 bg-black/30 rounded-xl border border-brand-border">
+                <h4 class="text-xl font-semibold mb-3 text-blue-400">2. Browse Categories</h4>
+                <p class="text-gray-300 mb-4">
+                    Use the arrows next to the category title to cycle through all available game collections. You can also use your keyboard's
+                    <i class="fas fa-arrow-left"></i> and <i class="fas fa-arrow-right"></i> keys.
+                </p>
+                
+                <!-- Demo Animation -->
+                <div id="demo-category-slider-container">
+                    <!-- The animated cursor -->
+                    <i id="demo-cursor" class="fas fa-mouse-pointer"></i>
+                    
+                    <!-- The slider UI -->
+                    <i id="demo-arrow-left" class="fas fa-chevron-left demo-arrow"></i>
+                    <div id="demo-category-slider">
+                        <div class="demo-category-title" style="color: #FFA500;">
+                            <strong>StrongdogXP</strong>
+                        </div>
+                        <div class="demo-category-title" style="color: #FB2651;">
+                            <strong>GN-Math</strong>
+                        </div>
+                    </div>
+                    <i id="demo-arrow-right" class="fas fa-chevron-right demo-arrow"></i>
+                </div>
+            </div>
+
+            <!-- Spacer to force scrolling -->
+            <div class="h-64"></div>
+            <p class="text-center text-gray-500 text-sm">
+                (Scroll down to continue)
+            </p>
+            <div class="h-64"></div>
+
+            <!-- Dismiss Button -->
+            <div class="mt-6 text-center">
+                <button id="accept-intro-button" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-normal rounded-xl text-white bg-accent-indigo hover:bg-indigo-700 transition duration-150 transform hover:scale-[1.02]">
+                    Got it, Let's Go!
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- END Intro Modal -->
+
 
     <script type="module">
         import games from "./cards-data.js";
@@ -294,7 +565,7 @@
         // If this file is missing, the Strongdog games will not load.
         import { siteMapping } from "./site-mapping.js";
         
-        // ADDED: Others Category Data
+        // --- ADDED: Others Category Data ---
         const othersGames = [
             {
                 id: "other-eaglercraft",
@@ -302,7 +573,6 @@
                 imgSrc: "./images/eaglercraft.png", // Updated to local relative path
                 description: "The classic survival and building game with authentic block-based physics and multiplayer support, accessible directly in the browser.",
                 category: "Others",
-                // MODIFIED: Base URL is now just a placeholder, logic will use specific URLs
                 url: "./others-games/eaglercraft-1.12.2.html" 
             },
             {
@@ -311,7 +581,16 @@
                 imgSrc: "./images/doom.png", // Updated to local relative path
                 description: "The legendary first-person shooter that pioneered the genre, focusing on blasting through hordes of demons in a timeless, adrenaline-fueled classic.",
                 category: "Others",
-                url: "https://doom.4sp.games/" // Example URL (Placeholder)
+                url: "https://doom.4sp.games/"
+            },
+            // --- NEW GAME ADDED ---
+            {
+                id: "other-gta",
+                name: "Grand Theft Auto (Carnage3D)",
+                imgSrc: "./images/gta.png", // Assumed path, update if needed
+                description: "The original top-down mayhem. Steal cars, complete missions, and cause chaos in three iconic cities.",
+                category: "Others",
+                url: "../grandtheftauto/web/carnage3D.html"
             }
         ];
 
@@ -328,7 +607,6 @@
             'StrongdogXP': 'text-strongdog-orange',
             'GN-Math': 'text-gn-math',
             'Gameboy Games': 'text-gameboy',
-            // ADDED: New color mapping for 'Others'
             'Others': 'text-other-grey', 
         };
         
@@ -365,7 +643,7 @@
             renderFavorites();
         }
 
-        // --- URL and Path Helpers (No changes needed here) ---
+        // --- URL and Path Helpers (No changes) ---
         function getAdjustedUrls(imgSrc, page) {
             if (page && page > 1) {
                 return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
@@ -373,7 +651,7 @@
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
         
-        // --- Strongdog Game Path Logic (No changes needed here) ---
+        // --- Strongdog Game Path Logic (No changes) ---
 
         function sd_getCurrentKeyHostOnly() {
             return window.location.host;
@@ -383,8 +661,6 @@
             const currentHost = sd_getCurrentKeyHostOnly();
             const currentPath = window.location.pathname;
 
-            // Adjusted paths from playindex.html (e.g., /STRONGDOG/ -> ./)
-            // This block uses absolute paths, it should be fine.
             if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
                 if (!page || page === 1) return "/STRONGDOG/";
                 if (page === 2) return "/strongdog2/";
@@ -394,87 +670,56 @@
                 return "/STRONGDOG/";
             }
             
-            // explicitMappings:
-            // ../ (from play/) -> ./ (from root/)
-            // ../../ (from play/) -> ../ (from root/)
             const explicitMappings = {
                 "jman1593.github.io": {
-                    2: "./strongdog2/", // Original: ../strongdog2/
+                    2: "./strongdog2/",
                 },
                 "v5-4simpleproblems.github.io": {
-                    2: "../strongdog2/", // Original: ../../strongdog2/
-                    3: "../strongdog3/", // Original: ../../strongdog3/
-                    4: "../strongdog4/", // Original: ../../strongdog4/
-                    5: "../strongdog5/", // Original: ../../strongdog5/
+                    2: "../strongdog2/",
+                    3: "../strongdog3/",
+                    4: "../strongdog4/",
+                    5: "../strongdog5/",
                 }
             };
             if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
-                // Adjusted path replacement - just return the correct path
                 return explicitMappings[currentHost][page];
             }
             
-            // Original: if (!page || page === 1) return "../";
-            if (!page || page === 1) return "./"; // Correct translation (resolves to /GAMES/)
+            if (!page || page === 1) return "./"; 
             
-            // Check if siteMapping was imported correctly
             const arr = siteMapping[currentHost];
             if (typeof siteMapping === 'undefined' || !siteMapping[currentHost]) {
                 console.warn("siteMapping not found or host not in map. Using default paths.");
-                // Original fallbacks:
-                // if (page === 2) return "../../strongdog2/";
-                if (page === 2) return "../strongdog2/"; // Correct translation
-                // if (page === 3) return "../../strongdog3/";
-                if (page === 3) return "../strongdog3/"; // Correct translation
-                // if (page === 4) return "../../strongdog4/";
-                if (page === 4) return "../strongdog4/"; // Correct translation
-                // if (page === 5) return "../../strongdog5/";
-                if (page === 5) return "../strongdog5/"; // Correct translation
-                // return "../";
-                return "./"; // Correct translation
+                if (page === 2) return "../strongdog2/";
+                if (page === 3) return "../strongdog3/";
+                if (page === 4) return "../strongdog4/";
+                if (page === 5) return "../strongdog5/";
+                return "./";
             }
 
-            // *** FIXED: Removed duplicate 'const arr' declaration ***
             const index = page - 2;
             if (arr[index]) {
-                 // Original: return arr[index].replace(/^\.\/$/, "../");
-                 // This means paths in siteMapping are relative to play/
-                 // e.g., `../../strongdog2/` or `../strongdog2/` or `./`
                 let path = arr[index];
                 
-                // Translate the special ./ -> ../ rule
-                // Original: if path is './', return '../' (resolves to /GAMES/)
-                // My translation: if path is './', return './' (resolves to /GAMES/)
                 if (path === './') {
                     return './';
                 }
                 
-                // Translate the paths themselves
                 if (path.startsWith('../../')) {
-                    // Original: ../../strongdog2/ (resolves to /strongdog2/)
-                    // My translation: ../strongdog2/ (resolves to /strongdog2/)
                     return path.replace('../../', '../');
                 }
                 if (path.startsWith('../')) {
-                    // Original: ../strongdog2/ (resolves to /GAMES/strongdog2/)
-                    // My translation: ./strongdog2/ (resolves to /GAMES/strongdog2/)
                     return path.replace('../', './');
                 }
-                // Path is probably fine as-is (e.g. absolute, or `./something` which is correct)
                 return path;
             }
 
             // Fallback defaults
-            // Original:
-            // if (page === 2) return "../../strongdog2/";
-            if (page === 2) return "../strongdog2/"; // Correct translation
-            // if (page === 3) return "../../strongdog3/";
-            if (page === 3) return "../strongdog3/"; // Correct translation
-            // if (page === 4) return "../../strongdog4/";
-            if (page === 4) return "../strongdog4/"; // Correct translation
-            // if (page === 5) return "../../strongdog5/";
-            if (page === 5) return "../strongdog5/"; // Correct translation
-            // return "../../";
-            return "../"; // Correct translation (../../ from play/ is /, so ../ from root/ is /)
+            if (page === 2) return "../strongdog2/";
+            if (page === 3) return "../strongdog3/";
+            if (page === 4) return "../strongdog4/";
+            if (page === 5) return "../strongdog5/";
+            return "../";
         }
 
         async function sd_getEmbedPath(adjustedHref, originalHref, page) {
@@ -507,7 +752,6 @@
             path = path.replace(/^\.\//, "").replace(/^\//, "");
             const baseURL = sd_getBaseURLForPage(page);
             let finalPath;
-            // Adjusted logic for new base URL
             if (baseURL === "./") {
                 finalPath = "./" + path;
             } else {
@@ -529,7 +773,7 @@
         // --- [END] Strongdog Game Path Logic ---
 
 
-        // --- ADDED: WebAssembly Support Check ---
+        // --- WebAssembly Support Check ---
         function supportsWasm() {
             try {
                 if (typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function") {
@@ -547,11 +791,10 @@
 
         // --- Game Card Rendering ---
         
-        // MODIFIED: This function now handles the Eaglercraft version logic
+        // MODIFIED: This function now handles Eaglercraft and GTA
         function createOthersGameCard(game) {
             const isFavorite = getFavorites().includes(game.id);
             const card = document.createElement("div");
-            // MODIFIED: Removed 'overflow-hidden' to allow dropdown to appear
             card.className = 'other-zone-item bg-card-dark rounded-xl border border-brand-border col-span-full shadow-lg';
             card.dataset.gameId = game.id;
 
@@ -582,7 +825,7 @@
                     `;
                 }
             } else {
-                // --- Other games (like DOOM) ---
+                // --- Other games (like DOOM and GTA) ---
                 gameButtonsHtml = `
                     <button class="play-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Play Game">
                         <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
@@ -594,8 +837,8 @@
             // --- Card HTML ---
             card.innerHTML = `
                 <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
-                    <!-- MODIFIED: Added 'rounded-xl' to the image itself -->
-                    <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=4SP+Featured'" class="w-full h-full object-cover absolute inset-0 rounded-xl">
+                    <!-- MODIFIED: Added 'rounded-xl' and onerror placeholder -->
+                    <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=${encodeURIComponent(game.name)}'" class="w-full h-full object-cover absolute inset-0 rounded-xl">
                     <div class="image-overlay absolute inset-0 transition-colors duration-200"></div>
                     <div class="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between">
                         <div class="flex items-start justify-between w-full">
@@ -623,10 +866,9 @@
                 if (game.id !== 'other-eaglercraft') {
                     openZone(game);
                 }
-                // For Eaglercraft, do nothing on bg click, user must select a version.
             });
 
-            // Standard Play Button (for DOOM)
+            // Standard Play Button (for DOOM and GTA)
             const playBtn = card.querySelector('.play-btn');
             if (playBtn) {
                 playBtn.addEventListener('click', (e) => {
@@ -655,12 +897,10 @@
                     const dropdown = versionBtn.nextElementSibling;
                     const isShown = dropdown.classList.contains('show');
                     
-                    // Close all other dropdowns
                     document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
                         d.classList.remove('show');
                     });
                     
-                    // Toggle this one
                     if (!isShown) {
                         dropdown.classList.add('show');
                     }
@@ -675,10 +915,9 @@
                     e.stopPropagation();
                     const newUrl = link.dataset.url;
                     openZone({
-                        ...game, // spread game data
-                        url: newUrl // override url
+                        ...game, 
+                        url: newUrl 
                     });
-                    // Hide dropdown after selection
                     link.closest('.eagler-dropdown').classList.remove('show');
                 });
             });
@@ -694,8 +933,6 @@
 
 
         function createGameCard(game, forceSmallCard = false) {
-            // Check for the new special category
-            // MODIFIED: Check forceSmallCard
             if (game.category === 'Others' && !forceSmallCard) {
                 return createOthersGameCard(game);
             }
@@ -707,7 +944,6 @@
                 const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
                 imgSrc = adjustedImgSrc;
             } else {
-                // MODIFIED: Handle 'Others' category when forced small
                 imgSrc = game.imgSrc;
             }
             
@@ -736,11 +972,9 @@
                 </div>
             `;
             
-            // MODIFIED: handlePlay is now async and loads Strongdog/Others games in the modal
             const handlePlay = async (e) => {
                 e.stopPropagation();
                 if (isStrongdog) {
-                    // Strongdog Game Logic
                     try {
                         const page = game.page;
                         const originalHref = game.href;
@@ -748,13 +982,12 @@
                         let adjustedHref = originalHref.replace(/^\.\//, "");
                         adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
                         
-                        // Show loading state? For now, just calculate
                         const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
                         
                         const strongdogGameData = {
                             name: game.name,
                             url: embedPath,
-                            category: game.category // Keep original category for openZone
+                            category: game.category
                         };
                         openZone(strongdogGameData);
 
@@ -764,15 +997,14 @@
                     }
                 } else if (game.category === 'Others') {
                     // 'Others' game (forced small card, e.g., in Favorites)
-                    // We must determine *which* eaglercraft to open.
-                    // Default to non-WASM for simplicity in favorites.
+                    // Default to non-WASM for Eaglercraft simplicity in favorites.
                     if (game.id === 'other-eaglercraft') {
                         openZone({
                             ...game,
                             url: './others-games/eaglercraft-1.12.2.html'
                         });
                     } else {
-                        // For DOOM
+                        // For DOOM and GTA
                         openZone(game);
                     }
                 } else {
@@ -791,41 +1023,44 @@
             return card;
         }
 
-        // --- Game Viewer Logic (Modified to handle 'Others' games which use direct URL) ---
+        // --- Game Viewer Logic (MODIFIED for GTA Controls) ---
         function openZone(game) {
             if (!game || !game.url) {
                 console.error("Could not load game: Invalid game data.");
                 return;
             }
 
-            // Add URL hash
             const categoryHash = encodeURIComponent(game.category.replace(/\s+/g, '-'));
             const gameHash = encodeURIComponent(game.id);
             window.location.hash = `${categoryHash}&${gameHash}`;
 
-            // Handle Download Button
+            // --- Handle control buttons ---
             const downloadBtn = document.getElementById('downloadBtnZone');
+            const gtaControlsContainer = document.getElementById('gtaControlsContainer');
+            
+            // Hide all special buttons first
+            downloadBtn.classList.add('hidden');
+            gtaControlsContainer.classList.add('hidden');
+            
             if (game.id === 'other-eaglercraft' || game.id === 'other-doom') {
+                // Show download button for Eaglercraft and Doom
                 downloadBtn.href = game.url;
                 if (game.id === 'other-eaglercraft') {
-                    // This is a relative URL, so the download attribute should work.
-                    // We link to the specific version being opened.
                     downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
                     downloadBtn.removeAttribute('target');
                 } else {
-                    // This is an external URL (doom.4sp.games), download attr won't work.
-                    // Make it act like a new tab link.
                     downloadBtn.removeAttribute('download');
                     downloadBtn.target = '_blank';
                 }
                 downloadBtn.classList.remove('hidden');
-            } else {
-                downloadBtn.classList.add('hidden');
-                downloadBtn.href = '#';
-                downloadBtn.removeAttribute('download');
-                downloadBtn.removeAttribute('target');
+            } else if (game.id === 'other-gta') {
+                // Show controls button for GTA
+                gtaControlsContainer.classList.remove('hidden');
             }
+            // --- End control buttons ---
 
+
+            // --- MODIFIED: Unload images ---
             // Unload images to reduce lag
             document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
                 if (img.src && !img.dataset.originalSrc) { // Only store if src exists and not already stored
@@ -849,13 +1084,21 @@
 
             if (isURLBasedGame) {
                 zoneFrame.src = gameUrl;
-                // Add sandbox attributes like in playindex.html
-                // For 'Others' games, this is necessary for things like Eaglercraft
                 zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
+                
+                // --- ADDED: Eaglercraft focus logic ---
+                zoneFrame.onload = () => {
+                    try {
+                        zoneFrame.contentWindow.focus();
+                    } catch (e) {
+                        console.warn("Could not focus iframe content, possibly cross-origin.", e);
+                    }
+                };
                 zoneViewer.style.display = "flex";
+                zoneFrame.focus(); // Try immediate focus
+
             } else {
-                // GN-Math logic: Fetch and write HTML
-                // Remove sandbox attribute if it exists from a previous Strongdog/Others game
+                // GN-Math logic
                 zoneFrame.removeAttribute('sandbox'); 
                 
                 fetch(`${gameUrl}?t=${Date.now()}`)
@@ -878,19 +1121,24 @@
         }
 
         function closeZoneViewer() {
-            // Clear URL hash
             window.history.pushState("", document.title, window.location.pathname + window.location.search);
 
-            // Reload images
+            // --- MODIFIED: Force-reload all images that have a stored src ---
             document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
-                if (img.dataset.originalSrc && !img.src) { // Only restore if src is empty
-                    img.src = img.dataset.originalSrc;
+                if (img.dataset.originalSrc) { // If we ever stored a src
+                    img.src = img.dataset.originalSrc; // Force-set it
                 }
             });
 
-            // Hide download button
+            // Hide special buttons
             const downloadBtn = document.getElementById('downloadBtnZone');
+            const gtaControlsContainer = document.getElementById('gtaControlsContainer');
+            const gtaControlsMenu = document.getElementById('gtaControlsMenu');
+            
             downloadBtn.classList.add('hidden');
+            gtaControlsContainer.classList.add('hidden');
+            gtaControlsMenu.classList.add('hidden'); // Ensure menu is closed
+            
             downloadBtn.href = '#';
             downloadBtn.removeAttribute('download');
             downloadBtn.removeAttribute('target');
@@ -900,74 +1148,31 @@
             zoneViewer.style.display = "none";
             if (zoneFrame) {
                 zoneFrame.src = 'about:blank';
-                zoneFrame.dataset.activeUrl = ''; // Clear the stored URL
+                zoneFrame.dataset.activeUrl = '';
+                zoneFrame.onload = null; // Clear onload handler
             }
         }
 
         /**
-         * MODIFIED: Rebuilt function to open games in about:blank, with a fallback.
+         * MODIFIED: Rebuilt function to open games in an about:blank page
+         * that contains a fullscreen iframe.
          */
+        /* REMOVED: openGameInNewTab function is no longer needed
         function openGameInNewTab() {
-            const zoneFrame = document.getElementById('zoneFrame');
-            const zoneNameEl = document.getElementById('zoneNameEl');
-            const game = allGames.find(z => z.name === zoneNameEl.textContent);
-
-            if (!game) {
-                console.error("Could not find game data for new tab.");
-                return;
-            }
-            
-            const gameUrl = zoneFrame.dataset.activeUrl; // Get the URL that was *actually* loaded
-            
-            if (!gameUrl) {
-                console.error("Could not find active game URL to open in new tab.");
-                return;
-            }
-
-            // This logic now works for ALL game types (GN-Math, Strongdog, Others)
-            // It attempts to fetch the game and write it to an about:blank page.
-            const newWindow = window.open("about:blank", "_blank");
-            if (newWindow) {
-                // Add cache-busting for GN-Math games, as they are single files that might update.
-                let fetchUrl = gameUrl;
-                if (game.category === 'GN-Math') {
-                    fetchUrl = `${gameUrl}?t=${Date.now()}`;
-                }
-
-                fetch(fetchUrl)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`HTTP error ${response.status} for ${fetchUrl}`);
-                        return response.text();
-                    })
-                    .then(html => {
-                        newWindow.document.open();
-                        newWindow.document.write(html);
-                        newWindow.document.close();
-                    })
-                    .catch(err => {
-                        console.error("Error fetching game for about:blank, falling back to direct URL:", err);
-                        // Fallback: If fetch fails (e.g., cross-origin for DOOM, or file not found),
-                        // close the blank window and just open the URL directly.
-                        newWindow.close();
-                        window.open(gameUrl, "_blank"); // Open the URL in a new tab normally
-                    });
-            }
+            // ... all previous code removed ...
         }
+        */
 
 
         // --- Game List Rendering ---
-        
-        // MODIFIED: renderGames now sets the grid structure based on the category
         function renderGames(gamesToRender, targetElement, forceSmallCard = false) {
             targetElement.innerHTML = '';
-            const categoryName = categories[currentCategoryIndex];
+            // Use currentCategoryIndex, but check if we're forcing small cards (like for favorites)
+            const categoryName = (forceSmallCard || categories.length === 0) ? '' : categories[currentCategoryIndex];
             
-            // Set grid columns based on category
-            if (categoryName === 'Others' && !forceSmallCard) {
-                // Use a standard 1-column layout for the full-width cards
+            if (categoryName === 'Others') {
                 targetElement.className = 'games-grid grid grid-cols-1 gap-6 mt-6 transition-opacity duration-300 ease-in-out';
             } else {
-                // Use the default responsive layout for other categories
                 targetElement.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out';
             }
 
@@ -980,12 +1185,10 @@
             const favoriteIds = getFavorites();
             if (favoriteIds.length > 0) {
                 favoritesHeader.style.display = "block";
-                // NOTE: Favorites view uses the default grid layout regardless of category
                 favoritesGameList.style.display = "grid"; 
                 favoritesGameList.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4';
 
                 const favoriteGames = allGames.filter(game => favoriteIds.includes(game.id));
-                // MODIFIED: Pass 'true' to force small cards for all items in the favorites list
                 renderGames(favoriteGames, favoritesGameList, true);
             } else {
                 favoritesHeader.style.display = "none";
@@ -993,10 +1196,9 @@
             }
         }
         
-        // --- Category Navigation & Display (No changes needed here) ---
+        // --- Category Navigation & Display (No changes) ---
 
         function updateArrowVisibility() {
-            // Disable left arrow if at the start (index 0)
             prevCategoryBtn.disabled = currentCategoryIndex === 0;
             prevCategoryBtn.classList.toggle('text-gray-700', currentCategoryIndex === 0);
             prevCategoryBtn.classList.toggle('opacity-30', currentCategoryIndex === 0);
@@ -1004,7 +1206,6 @@
             prevCategoryBtn.classList.toggle('hover:text-white', currentCategoryIndex !== 0);
             prevCategoryBtn.classList.toggle('opacity-100', currentCategoryIndex !== 0);
 
-            // Disable right arrow if at the end (last index)
             const atEnd = currentCategoryIndex === categories.length - 1;
             nextCategoryBtn.disabled = atEnd;
             nextCategoryBtn.classList.toggle('text-gray-700', atEnd);
@@ -1026,7 +1227,6 @@
         }
 
         function updateSliderPosition() {
-            // Updated to use 100% divided by categories.length to ensure proper width alignment
             const categoryWidth = 100 / categories.length; 
             categorySlider.style.transform = `translateX(-${currentCategoryIndex * categoryWidth}%)`;
             categorySlider.style.width = `${categories.length * 100}%`;
@@ -1043,24 +1243,21 @@
             const categoryName = categories[currentCategoryIndex];
             
             gamesGridContainer.classList.add('opacity-0');
-            await new Promise(resolve => setTimeout(resolve, 150)); // Wait for fade out
+            await new Promise(resolve => setTimeout(resolve, 150)); 
 
             let gamesToRender = allGames.filter(g => g.category === categoryName);
             if(searchTerm) {
                 gamesToRender = gamesToRender.filter(g => g.name.toLowerCase().includes(searchTerm));
             }
 
-            // --- ADDED BLOCK: Show message if category is empty ---
             if (gamesToRender.length === 0 && !searchTerm) {
                 gamesGridContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-8 text-lg">No games in this category yet.</p>`;
                 gamesGridContainer.classList.remove('opacity-0');
-                // Reset to default grid class in case the previous category was 'Others'
                 gamesGridContainer.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out';
-                return; // Skip rendering
+                return;
             }
-            // --- END ADDED BLOCK ---
 
-            renderGames(gamesToRender, gamesGridContainer, false); // MODIFIED: Pass 'false' for standard rendering
+            renderGames(gamesToRender, gamesGridContainer, false);
             
             gamesGridContainer.classList.remove('opacity-0');
         }
@@ -1074,12 +1271,10 @@
             };
         }
 
-        // MODIFIED: Search logic now opens Strongdog/Others games in the modal
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
             renderGamesForCurrentCategory(text);
 
-            // Update dropdown
             const filteredDropdown = text ? allGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
             searchResults.innerHTML = "";
             if (filteredDropdown.length === 0 || !text) {
@@ -1099,18 +1294,16 @@
                     imgSrc = game.imgSrc;
                 }
                 
-                const href = '#'; // All games use the modal
+                const href = '#';
                 
                 const linkEl = document.createElement("a");
                 linkEl.href = href;
                 linkEl.className = 'search-item';
-                linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https.placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
+                linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
                 
-                // Attach universal click listener
                 linkEl.addEventListener('click', async (e) => {
                     e.preventDefault();
                     if (isStrongdog) {
-                        // Strongdog: Calculate path and open in modal
                         try {
                             const page = game.page;
                             const originalHref = game.href;
@@ -1131,8 +1324,7 @@
                             alert(`Could not load game: ${game.name}. See console for details.`);
                         }
                     } else if (isOthers) {
-                        // Others: Open directly in modal
-                        // MODIFIED: Eaglercraft search result should open default, non-WASM
+                        // MODIFIED: Eaglercraft search result opens default, non-WASM
                         if (game.id === 'other-eaglercraft') {
                             openZone({
                                 ...game,
@@ -1143,7 +1335,7 @@
                         }
 
                     } else {
-                        // GN-Math: Open directly in modal
+                        // GN-Math
                         openZone(game);
                     }
                     searchResults.style.display = "none";
@@ -1168,27 +1360,22 @@
                     category: 'GN-Math',
                     url: g.url.replace("{HTML_URL}", GN_HTML_URL_BASE)
                 }));
-                // MODIFIED: Combine all games including 'Others'
                 allGames = [...strongdogGames, ...gnMathGames, ...othersGames];
             } catch (error) {
                 console.error("Failed to load GN-Math games:", error);
-                allGames = [...strongdogGames, ...othersGames]; // Fallback
+                allGames = [...strongdogGames, ...othersGames];
             }
 
-            // MODIFIED: Create categories dynamically and insert the new ones
             categories = [...new Set(allGames.map(g => g.category))];
             
-            // Ensure categories are in a preferred order (move 'Others' to the front if desired, 
-            // but for simplicity, we'll keep the current ordering and just ensure all are present)
-            if (!categories.includes('Gameboy Games')) categories.push('Gameboy Games'); // ADDED: Manually add new category
+            if (!categories.includes('Gameboy Games')) categories.push('Gameboy Games');
             if (!categories.includes('Others')) categories.push('Others');
 
-            // MODIFIED: Reorder categories to put 'Others' last
             const preferredOrder = ['StrongdogXP', 'GN-Math', 'Gameboy Games', 'Others'];
             categories = preferredOrder.filter(cat => categories.includes(cat));
 
             setupCategorySlider();
-            updateArrowVisibility(); // ADDED: Set initial arrow state
+            updateArrowVisibility();
             renderGamesForCurrentCategory();
             renderFavorites();
 
@@ -1197,10 +1384,8 @@
             searchInput.addEventListener("focus", handleSearch);
             
             // --- Event Listeners ---
-            // MODIFIED: Cycle function no longer wraps
             const cycle = (direction) => {
                  let newIndex = currentCategoryIndex + direction;
-                 // Check bounds and only switch if valid
                  if (newIndex >= 0 && newIndex < categories.length) {
                      switchCategory(newIndex);
                  }
@@ -1209,26 +1394,21 @@
             prevCategoryBtn.addEventListener('click', () => cycle(-1));
             nextCategoryBtn.addEventListener('click', () => cycle(1));
             categoryCycleBtn.addEventListener('click', () => {
-                // MODIFIED: Cycle button now wraps around
                  let newIndex = currentCategoryIndex + 1;
                  if (newIndex >= categories.length) newIndex = 0;
                  switchCategory(newIndex);
             });
 
-            // ADDED: Keyboard arrow key navigation
             document.addEventListener('keydown', (e) => {
-                // Don't switch categories if user is typing in the search bar
                 if (document.activeElement === searchInput) return;
 
                 if (e.key === 'ArrowLeft') {
                     e.preventDefault();
-                    // Check if not disabled (at start)
                     if (currentCategoryIndex > 0) {
                         cycle(-1);
                     }
                 } else if (e.key === 'ArrowRight') {
                     e.preventDefault();
-                    // Check if not disabled (at end)
                     if (currentCategoryIndex < categories.length - 1) {
                         cycle(1);
                     }
@@ -1240,23 +1420,97 @@
                     searchResults.style.display = "none";
                 }
                 
-                // ADDED: Close Eaglercraft dropdowns if clicking outside
                 if (!ev.target.closest('.eagler-version-btn') && !ev.target.closest('.eagler-dropdown')) {
                     document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
                         d.classList.remove('show');
                     });
                 }
+                
+                // --- ADDED: Close GTA Controls Menu if clicking outside ---
+                if (!ev.target.closest('#gtaControlsContainer')) {
+                     document.getElementById('gtaControlsMenu').classList.add('hidden');
+                }
+            });
+
+            // --- ADDED: GTA Controls Button Listener ---
+            document.getElementById('gtaControlsBtnZone').addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent click from bubbling to document
+                document.getElementById('gtaControlsMenu').classList.toggle('hidden');
             });
 
             document.getElementById('fullscreenBtnZone')?.addEventListener('click', () => {
                 const zoneFrame = document.getElementById('zoneFrame');
                 if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
             });
+            /* REMOVED: Event listener for new tab button
             document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
+            */
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
         }
 
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        // --- ADDED: Intro Modal Logic ---
+        const INTRO_KEY = 'fsp-game-hub-intro-seen-v1';
+        const introOverlay = document.getElementById('intro-overlay');
+        const introBannerContainer = document.getElementById('intro-banner-container');
+        const introBanner = document.getElementById('intro-banner');
+        const acceptIntroButton = document.getElementById('accept-intro-button');
+        const TRANSITION_DURATION_MS = 300;
+
+        const hideIntroBanner = () => {
+            // 1. Start fade-out
+            introOverlay.style.opacity = '0';
+            introBannerContainer.style.opacity = '0';
+            introBanner.style.transform = 'translateY(20px)';
+
+            // 2. Wait for transition to finish before setting display: none
+            setTimeout(() => {
+                introOverlay.style.display = 'none';
+                introBannerContainer.style.display = 'none';
+                // Set consent in localStorage
+                localStorage.setItem(INTRO_KEY, 'true');
+                // Allow scrolling
+                document.body.style.overflow = '';
+            }, TRANSITION_DURATION_MS);
+        };
+
+        const showIntroBanner = () => {
+            // 1. Set display to block
+            introOverlay.style.display = 'block';
+            introBannerContainer.style.display = 'flex';
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+
+            // 2. Schedule opacity/transform change to trigger transition
+            setTimeout(() => {
+                introOverlay.style.opacity = '1';
+                introBannerContainer.style.opacity = '1';
+                introBanner.style.transform = 'translateY(0)';
+            }, 10); // 10ms delay to ensure display:block renders first
+        };
+        
+        // Add event listener for the button
+        if (acceptIntroButton) {
+            acceptIntroButton.addEventListener('click', hideIntroBanner);
+        }
+
+        // --- End Intro Modal Logic ---
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ADDED: Check for intro modal ---
+            if (localStorage.getItem(INTRO_KEY) !== 'true') {
+                // If consent not found, show the banner
+                showIntroBanner();
+            } else {
+                // If consent IS found, ensure overlay is hidden
+                introOverlay.style.display = 'none';
+                introBannerContainer.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+            
+            // Initialize the rest of the app
+            initializeApp();
+        });
     </script>
 </body>
 </html>
