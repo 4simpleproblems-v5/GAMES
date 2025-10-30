@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- The user's original navigation.js script -->
     <script src="../navigation.js"></script>
 
     <script>
@@ -293,101 +292,14 @@
             -webkit-backdrop-filter: blur(16px);
             width: 100%;
             max-width: 48rem; /* max-w-3xl */
-            max-height: 80vh; /* Max 80% of viewport height */
-            overflow-y: auto; /* Force scrolling */
+            /* REMOVED: max-height: 80vh; */
+            /* REMOVED: overflow-y: auto; */
             pointer-events: auto; /* Re-enable pointer events for the banner */
             transform: translateY(20px); /* Start slightly off-screen */
             transition: transform 0.3s ease-out;
         }
 
-        /* Demo UI for Favorites */
-        .demo-fav-btn {
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 9999px;
-            padding: 0.5rem;
-            display: inline-flex;
-            align-items: center;
-            font-size: 1.25rem;
-            color: #facc15; /* yellow-400 */
-        }
-        .demo-fav-btn .fa-regular-star {
-            color: white;
-        }
-
-        /* Demo UI for Category Slider & Cursor Animation */
-        #demo-category-slider-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 3rem; /* 48px */
-            max-width: 18rem; /* 288px */
-            margin: 1rem auto;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 0.75rem; /* 12px */
-            padding: 0 2.5rem; /* Space for arrows */
-            overflow: hidden;
-        }
-        
-        .demo-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem; /* 24px */
-            color: #6b7280; /* gray-500 */
-        }
-        #demo-arrow-left { left: 0.5rem; /* 8px */ }
-        #demo-arrow-right { right: 0.5rem; /* 8px */ }
-
-        #demo-category-slider {
-            display: flex;
-            width: 200%; /* Two categories */
-            animation: slideCategory 8s ease-in-out infinite;
-        }
-        .demo-category-title {
-            width: 50%;
-            flex-shrink: 0;
-            text-align: center;
-            font-size: 1.5rem; /* 24px */
-            font-weight: 400; /* font-bold */
-        }
-
-        #demo-cursor {
-            position: absolute;
-            font-size: 1.5rem; /* 24px */
-            color: white;
-            z-index: 10;
-            /* Initial position: 50% horizontal, 100px vertical */
-            top: 100px; 
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            animation: glideAndClick 8s ease-in-out infinite;
-        }
-
-        /* Animation for the demo cursor */
-        @keyframes glideAndClick {
-            0%, 100% { top: 100px; left: 50%; opacity: 0; } /* Start/End: center, faded out */
-            10% { top: 100px; left: 50%; opacity: 1; } /* Fade in at center */
-            25% { top: 24px; left: calc(100% - 20px); } /* Glide to right arrow */
-            30% { transform: scale(0.8); } /* Click down */
-            35% { transform: scale(1); } /* Click up */
-            40% { top: 24px; left: calc(100% - 20px); } /* Hold at right */
-            55% { top: 24px; left: 20px; } /* Glide to left arrow */
-            60% { transform: scale(0.8); } /* Click down */
-            65% { transform: scale(1); } /* Click up */
-            70% { top: 24px; left: 20px; } /* Hold at left */
-            85% { top: 100px; left: 50%; opacity: 1; } /* Glide to center */
-            95% { top: 100px; left: 50%; opacity: 0; } /* Fade out */
-        }
-
-        /* Animation for the demo category slider */
-        @keyframes slideCategory {
-            0%, 25% { transform: translateX(0%); } /* Start on StrongdogXP */
-            35%, 55% { transform: translateX(-50%); } /* Slide to GN-Math */
-            65%, 100% { transform: translateX(0%); } /* Slide back to StrongdogXP */
-        }
+        /* REMOVED: All demo UI styles */
 
     </style>
 </head>
@@ -447,13 +359,8 @@
              </div>
              <div class="zone-controls">
                 <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
-                <!-- REMOVED: Open in New Tab Button
-                <button id="newTabBtnZone" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></button>
-                -->
-                <!-- Download button, hidden by default -->
                 <a id="downloadBtnZone" title="Download" class="hidden" href="#"><i class="fas fa-download"></i></a>
                 
-                <!-- ADDED: GTA Controls Button & Menu -->
                 <div id="gtaControlsContainer" class="relative hidden">
                     <button id="gtaControlsBtnZone" title="Controls">
                         <i class="fas fa-gamepad mr-2"></i>Controls
@@ -486,79 +393,22 @@
         <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
     </div>
 
-    <!-- ADDED: First-Time Intro Modal HTML -->
     <div id="intro-overlay"></div>
     <div id="intro-banner-container">
         <div id="intro-banner">
             <h3 class="text-2xl font-bold mb-4 text-center">Welcome to the 4SP Game Hub!</h3>
             
             <p class="text-base text-gray-300 mb-6 text-center">
-                Here are a couple of features to help you get started.
+                This is a curated collection of games. Click the star on any game to favorite it, or use the arrows to browse categories.
             </p>
 
-            <!-- Feature 1: Favorites -->
-            <div class="mb-8 p-4 bg-black/30 rounded-xl border border-brand-border">
-                <h4 class="text-xl font-semibold mb-3 text-yellow-400">1. Favorite Your Games</h4>
-                <p class="text-gray-300 mb-4">
-                    Click the star icon on any game card to add it to your "Favorites" list, which will appear at the top of the page for quick access.
-                </p>
-                <div class="flex items-center space-x-4 p-4 bg-card-dark rounded-lg">
-                    <span class="demo-fav-btn">
-                        <i class="fa-regular fa-star"></i>
-                    </span>
-                    <span class="text-gray-400">&rarr;</span>
-                    <span class="demo-fav-btn">
-                        <i class="fa-solid fa-star"></i>
-                    </span>
-                    <span class="text-white">Click to Favorite!</span>
-                </div>
-            </div>
-
-            <!-- Feature 2: Category Navigation -->
-            <div class="mb-8 p-4 bg-black/30 rounded-xl border border-brand-border">
-                <h4 class="text-xl font-semibold mb-3 text-blue-400">2. Browse Categories</h4>
-                <p class="text-gray-300 mb-4">
-                    Use the arrows next to the category title to cycle through all available game collections. You can also use your keyboard's
-                    <i class="fas fa-arrow-left"></i> and <i class="fas fa-arrow-right"></i> keys.
-                </p>
-                
-                <!-- Demo Animation -->
-                <div id="demo-category-slider-container">
-                    <!-- The animated cursor -->
-                    <i id="demo-cursor" class="fas fa-mouse-pointer"></i>
-                    
-                    <!-- The slider UI -->
-                    <i id="demo-arrow-left" class="fas fa-chevron-left demo-arrow"></i>
-                    <div id="demo-category-slider">
-                        <div class="demo-category-title" style="color: #FFA500;">
-                            <strong>StrongdogXP</strong>
-                        </div>
-                        <div class="demo-category-title" style="color: #FB2651;">
-                            <strong>GN-Math</strong>
-                        </div>
-                    </div>
-                    <i id="demo-arrow-right" class="fas fa-chevron-right demo-arrow"></i>
-                </div>
-            </div>
-
-            <!-- Spacer to force scrolling -->
-            <div class="h-64"></div>
-            <p class="text-center text-gray-500 text-sm">
-                (Scroll down to continue)
-            </p>
-            <div class="h-64"></div>
-
-            <!-- Dismiss Button -->
-            <div class="mt-6 text-center">
-                <button id="accept-intro-button" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-normal rounded-xl text-white bg-accent-indigo hover:bg-indigo-700 transition duration-150 transform hover:scale-[1.02]">
+            <div class="mt-6 text-left">
+                <button id="accept-intro-button" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 border text-base font-normal rounded-xl text-white transition duration-150 transform hover:scale-[1.02] border-white bg-black hover:bg-gray-900">
                     Got it, Let's Go!
                 </button>
             </div>
         </div>
     </div>
-    <!-- END Intro Modal -->
-
-
     <script type="module">
         import games from "./cards-data.js";
         // IMPORT: Added site-mapping.js. Make sure this file is in the same directory as index.html
@@ -805,8 +655,7 @@
                 if (supportsWasm()) {
                     // WASM Supported: Show dropdown button
                     gameButtonsHtml = `
-                        <div class="relative"> <!-- Container for dropdown positioning -->
-                            <button class="eagler-version-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Select Version">
+                        <div class="relative"> <button class="eagler-version-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Select Version">
                                 <i class="fa-solid fa-chevron-up text-other-grey transition-colors"></i>
                             </button>
                             <div class="eagler-dropdown">
@@ -837,7 +686,6 @@
             // --- Card HTML ---
             card.innerHTML = `
                 <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
-                    <!-- MODIFIED: Added 'rounded-xl' and onerror placeholder -->
                     <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=${encodeURIComponent(game.name)}'" class="w-full h-full object-cover absolute inset-0 rounded-xl">
                     <div class="image-overlay absolute inset-0 transition-colors duration-200"></div>
                     <div class="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between">
@@ -845,9 +693,7 @@
                             <h3 class="text-4xl font-bold text-white truncate drop-shadow-lg" style="max-width: 80%;" title="${game.name}">${game.name}</h3>
                             <div class="flex items-center space-x-3">
                                 
-                                ${gameButtonsHtml} <!-- Injected buttons -->
-
-                                <button class="favorite-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                                ${gameButtonsHtml} <button class="favorite-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
                                     <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
                                     <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
                                 </button>
@@ -1514,4 +1360,3 @@
     </script>
 </body>
 </html>
-
