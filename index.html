@@ -161,23 +161,6 @@
             display: flex;
             align-items: center;
         }
-        #zoneViewer .zone-header .zone-controls button {
-            margin-left: 8px;
-            width: 40px;
-            height: 40px;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px); /* Safari support */
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 0.5rem; /* squircle */
-            cursor: pointer;
-            font-size: 1em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s ease-in-out;
-        }
         /* MODIFIED: Added 'a' to the selectors to style the new download button */
         #zoneViewer .zone-header .zone-controls button,
         #zoneViewer .zone-header .zone-controls a {
@@ -712,6 +695,7 @@
 
         function createGameCard(game, forceSmallCard = false) {
             // Check for the new special category
+            // MODIFIED: Check forceSmallCard
             if (game.category === 'Others' && !forceSmallCard) {
                 return createOthersGameCard(game);
             }
@@ -723,6 +707,7 @@
                 const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
                 imgSrc = adjustedImgSrc;
             } else {
+                // MODIFIED: Handle 'Others' category when forced small
                 imgSrc = game.imgSrc;
             }
             
@@ -751,7 +736,7 @@
                 </div>
             `;
             
-            // MODIFIED: handlePlay is now async and loads Strongdog games in the modal
+            // MODIFIED: handlePlay is now async and loads Strongdog/Others games in the modal
             const handlePlay = async (e) => {
                 e.stopPropagation();
                 if (isStrongdog) {
@@ -771,7 +756,42 @@
                             url: embedPath,
                             category: game.category // Keep original category for openZone
                         };
-            // --- Game Viewer Logic (Modified to handle 'Others' games which use direct URL) ---
+                        openZone(strongdogGameData);
+
+                    } catch (error) {
+                        console.error(`Failed to get embed path for ${game.name}:`, error);
+                        alert(`Could not load game: ${game.name}. See console for details.`);
+                    }
+                } else if (game.category === 'Others') {
+                    // 'Others' game (forced small card, e.g., in Favorites)
+                    // We must determine *which* eaglercraft to open.
+                    // Default to non-WASM for simplicity in favorites.
+                    if (game.id === 'other-eaglercraft') {
+                        openZone({
+                            ...game,
+                            url: './others-games/eaglercraft-1.12.2.html'
+                        });
+                    } else {
+                        // For DOOM
+                        openZone(game);
+                    }
+                } else {
+                    // GN-Math Game Logic
+                    openZone(game);
+                }
+            };
+
+            card.querySelector('.group').addEventListener('click', handlePlay);
+            card.querySelector('.play-btn').addEventListener('click', handlePlay);
+            card.querySelector('.favorite-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleFavorite(game.id);
+            });
+
+            return card;
+        }
+
+        // --- Game Viewer Logic (Modified to handle 'Others' games which use direct URL) ---
         function openZone(game) {
             if (!game || !game.url) {
                 console.error("Could not load game: Invalid game data.");
@@ -789,6 +809,7 @@
                 downloadBtn.href = game.url;
                 if (game.id === 'other-eaglercraft') {
                     // This is a relative URL, so the download attribute should work.
+                    // We link to the specific version being opened.
                     downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
                     downloadBtn.removeAttribute('target');
                 } else {
@@ -942,7 +963,7 @@
             const categoryName = categories[currentCategoryIndex];
             
             // Set grid columns based on category
-            if (categoryName === 'Others') {
+            if (categoryName === 'Others' && !forceSmallCard) {
                 // Use a standard 1-column layout for the full-width cards
                 targetElement.className = 'games-grid grid grid-cols-1 gap-6 mt-6 transition-opacity duration-300 ease-in-out';
             } else {
@@ -1239,5 +1260,4 @@
     </script>
 </body>
 </html>
-
 
