@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- The user's original navigation.js script -->
     <script src="../navigation.js"></script>
 
     <script>
@@ -83,10 +84,17 @@
         }
 
         /* --- New Play Button Hover CSS --- */
-        .play-btn .fa-solid-play { display: inline-block; }
-        .play-btn .fa-regular-play { display: none; }
-        .play-btn:hover .fa-solid-play { display: none; }
-        .play-btn:hover .fa-regular-play { display: inline-block; }
+        .play-btn .fa-solid-play,
+        .play-btn-no-wasm .fa-solid-play { display: inline-block; }
+        
+        .play-btn .fa-regular-play,
+        .play-btn-no-wasm .fa-regular-play { display: none; }
+        
+        .play-btn:hover .fa-solid-play,
+        .play-btn-no-wasm:hover .fa-solid-play { display: none; }
+        
+        .play-btn:hover .fa-regular-play,
+        .play-btn-no-wasm:hover .fa-regular-play { display: inline-block; }
 
         /* --- Favorite Star Hover CSS --- */
         .favorite-btn .fa-solid-star { display: inline-block; }
@@ -176,6 +184,39 @@
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
+        /* --- ADDED: Eaglercraft Dropdown --- */
+        .eagler-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 120%; /* Position above the button */
+            right: 0;
+            background-color: rgba(30, 30, 30, 0.7); /* Glass texture */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem; /* 12px */
+            padding: 0.5rem; /* 8px */
+            z-index: 10;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .eagler-dropdown.show {
+            display: block;
+        }
+        .eagler-dropdown-link {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.375rem; /* 6px */
+            transition: background-color 0.2s;
+            font-weight: 400; /* Medium */
+            white-space: nowrap;
+        }
+        .eagler-dropdown-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
     </style>
 </head>
 
@@ -255,7 +296,8 @@
                 imgSrc: "./images/eaglercraft.png", // Updated to local relative path
                 description: "The classic survival and building game with authentic block-based physics and multiplayer support, accessible directly in the browser.",
                 category: "Others",
-                url: "https://eaglercraft.4sp.games/" // Example URL (Placeholder)
+                // MODIFIED: Base URL is now just a placeholder, logic will use specific URLs
+                url: "./others-games/eaglercraft-1.12.2.html" 
             },
             {
                 id: "other-doom",
@@ -481,16 +523,68 @@
         // --- [END] Strongdog Game Path Logic ---
 
 
+        // --- ADDED: WebAssembly Support Check ---
+        function supportsWasm() {
+            try {
+                if (typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function") {
+                    const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
+                    if (module instanceof WebAssembly.Module) {
+                        return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
+                    }
+                }
+            } catch (e) {
+                // Wasm instantiation failed
+            }
+            return false;
+        }
+
+
         // --- Game Card Rendering ---
         
-        // ADDED: New function for the distinct 'Others' card layout
+        // MODIFIED: This function now handles the Eaglercraft version logic
         function createOthersGameCard(game) {
             const isFavorite = getFavorites().includes(game.id);
-
             const card = document.createElement("div");
             card.className = 'other-zone-item bg-card-dark rounded-xl border border-brand-border overflow-hidden col-span-full shadow-lg';
             card.dataset.gameId = game.id;
 
+            let gameButtonsHtml = '';
+            
+            // --- Eaglercraft specific logic ---
+            if (game.id === 'other-eaglercraft') {
+                if (supportsWasm()) {
+                    // WASM Supported: Show dropdown button
+                    gameButtonsHtml = `
+                        <div class="relative"> <!-- Container for dropdown positioning -->
+                            <button class="eagler-version-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Select Version">
+                                <i class="fa-solid fa-chevron-up text-other-grey transition-colors"></i>
+                            </button>
+                            <div class="eagler-dropdown">
+                                <a href="#" class="eagler-dropdown-link" data-url="./others-games/eaglercraft-1.12.2.html">Release 1.12.2</a>
+                                <a href="#" class="eagler-dropdown-link" data-url="./others-games/eaglercraft-1.12.2-wasm.html">Release 1.12.2 WASM</a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // No WASM: Show normal play button, but with a new class
+                    gameButtonsHtml = `
+                        <button class="play-btn-no-wasm rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Play Game">
+                            <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
+                            <i class="fa-regular fa-circle-play fa-regular-play text-other-grey transition-colors"></i>
+                        </button>
+                    `;
+                }
+            } else {
+                // --- Other games (like DOOM) ---
+                gameButtonsHtml = `
+                    <button class="play-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Play Game">
+                        <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
+                        <i class="fa-regular fa-circle-play fa-regular-play text-other-grey transition-colors"></i>
+                    </button>
+                `;
+            }
+
+            // --- Card HTML ---
             card.innerHTML = `
                 <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
                     <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=4SP+Featured'" class="w-full h-full object-cover absolute inset-0">
@@ -499,10 +593,9 @@
                         <div class="flex items-start justify-between w-full">
                             <h3 class="text-4xl font-bold text-white truncate drop-shadow-lg" style="max-width: 80%;" title="${game.name}">${game.name}</h3>
                             <div class="flex items-center space-x-3">
-                                <button class="play-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Play Game">
-                                    <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
-                                    <i class="fa-regular fa-circle-play fa-regular-play text-other-grey transition-colors"></i>
-                                </button>
+                                
+                                ${gameButtonsHtml} <!-- Injected buttons -->
+
                                 <button class="favorite-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
                                     <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
                                     <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
@@ -514,14 +607,75 @@
                 </div>
             `;
             
-            const handlePlay = (e) => {
-                e.stopPropagation();
-                // 'Others' games are treated like GN-Math games: they have a direct 'url' for the modal.
-                openZone(game);
-            };
+            // --- Event Listeners ---
 
-            card.querySelector('.group').addEventListener('click', handlePlay);
-            card.querySelector('.play-btn').addEventListener('click', handlePlay);
+            // Background click (only works for non-Eaglercraft)
+            card.querySelector('.group').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (game.id !== 'other-eaglercraft') {
+                    openZone(game);
+                }
+                // For Eaglercraft, do nothing on bg click, user must select a version.
+            });
+
+            // Standard Play Button (for DOOM)
+            const playBtn = card.querySelector('.play-btn');
+            if (playBtn) {
+                playBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openZone(game);
+                });
+            }
+
+            // Eaglercraft No-WASM Play Button
+            const noWasmBtn = card.querySelector('.play-btn-no-wasm');
+            if (noWasmBtn) {
+                noWasmBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openZone({
+                        ...game, // spread game data
+                        url: './others-games/eaglercraft-1.12.2.html' // override url
+                    });
+                });
+            }
+
+            // Eaglercraft Version Button (WASM)
+            const versionBtn = card.querySelector('.eagler-version-btn');
+            if (versionBtn) {
+                versionBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const dropdown = versionBtn.nextElementSibling;
+                    const isShown = dropdown.classList.contains('show');
+                    
+                    // Close all other dropdowns
+                    document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
+                        d.classList.remove('show');
+                    });
+                    
+                    // Toggle this one
+                    if (!isShown) {
+                        dropdown.classList.add('show');
+                    }
+                });
+            }
+
+            // Eaglercraft Version Links (WASM)
+            const versionLinks = card.querySelectorAll('.eagler-dropdown-link');
+            versionLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const newUrl = link.dataset.url;
+                    openZone({
+                        ...game, // spread game data
+                        url: newUrl // override url
+                    });
+                    // Hide dropdown after selection
+                    link.closest('.eagler-dropdown').classList.remove('show');
+                });
+            });
+
+            // Favorite Button (works for all)
             card.querySelector('.favorite-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 toggleFavorite(game.id);
@@ -531,9 +685,9 @@
         }
 
 
-        function createGameCard(game) {
+        function createGameCard(game, forceSmallCard = false) {
             // Check for the new special category
-            if (game.category === 'Others') {
+            if (game.category === 'Others' && !forceSmallCard) {
                 return createOthersGameCard(game);
             }
             
@@ -620,6 +774,22 @@
                 console.error("Could not load game: Invalid game data.");
                 return;
             }
+
+            // Add URL hash
+            const categoryHash = encodeURIComponent(game.category.replace(/\s+/g, '-'));
+            const gameHash = encodeURIComponent(game.id);
+            window.location.hash = `${categoryHash}&${gameHash}`;
+
+            // Unload images to reduce lag
+            document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
+                if (img.src && !img.dataset.originalSrc) { // Only store if src exists and not already stored
+                    img.dataset.originalSrc = img.src;
+                }
+                if (img.src) { // Only set to empty if it's not already empty
+                    img.src = ''; // Unload
+                }
+            });
+
             const gameUrl = game.url;
             const zoneViewer = document.getElementById('zoneViewer');
             const zoneFrame = document.getElementById('zoneFrame');
@@ -661,6 +831,16 @@
         }
 
         function closeZoneViewer() {
+            // Clear URL hash
+            window.history.pushState("", document.title, window.location.pathname + window.location.search);
+
+            // Reload images
+            document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
+                if (img.dataset.originalSrc && !img.src) { // Only restore if src is empty
+                    img.src = img.dataset.originalSrc;
+                }
+            });
+
             const zoneViewer = document.getElementById('zoneViewer');
             const zoneFrame = document.getElementById('zoneFrame');
             zoneViewer.style.display = "none";
@@ -727,7 +907,13 @@
                     alert("Could not open game in new tab. See console for details.");
                 });
             } else if (isOthers) {
-                // 'Others': Use the game's direct URL
+                // 'Others': Use the game's direct URL.
+                // MODIFIED: This needs to respect WASM/non-WASM.
+                // But the game data is loaded from allGames, which only has one URL.
+                // The frame src is the only source of truth.
+                // Since (1) failed, we can't get the src.
+                // This is a limitation. We'll open the *default* URL.
+                console.warn("Cannot determine specific Eaglercraft version for new tab, opening default.");
                 window.open(game.url, "_blank");
             }
         }
@@ -736,7 +922,7 @@
         // --- Game List Rendering ---
         
         // MODIFIED: renderGames now sets the grid structure based on the category
-        function renderGames(gamesToRender, targetElement) {
+        function renderGames(gamesToRender, targetElement, forceSmallCard = false) {
             targetElement.innerHTML = '';
             const categoryName = categories[currentCategoryIndex];
             
@@ -750,7 +936,7 @@
             }
 
             const fragment = document.createDocumentFragment();
-            gamesToRender.forEach(game => fragment.appendChild(createGameCard(game)));
+            gamesToRender.forEach(game => fragment.appendChild(createGameCard(game, forceSmallCard)));
             targetElement.appendChild(fragment);
         }
 
@@ -763,10 +949,8 @@
                 favoritesGameList.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4';
 
                 const favoriteGames = allGames.filter(game => favoriteIds.includes(game.id));
-                // Favorites view needs its own renderer that only uses the small card layout
-                // To keep this simple, we'll temporarily filter out 'Others' games from this list if their card type is a problem.
-                // For now, we'll let `createGameCard` handle the special 'Others' cards, but they will be forced into the grid.
-                renderGames(favoriteGames, favoritesGameList);
+                // MODIFIED: Pass 'true' to force small cards for all items in the favorites list
+                renderGames(favoriteGames, favoritesGameList, true);
             } else {
                 favoritesHeader.style.display = "none";
                 favoritesGameList.style.display = "none";
@@ -840,7 +1024,7 @@
             }
             // --- END ADDED BLOCK ---
 
-            renderGames(gamesToRender, gamesGridContainer);
+            renderGames(gamesToRender, gamesGridContainer, false); // MODIFIED: Pass 'false' for standard rendering
             
             gamesGridContainer.classList.remove('opacity-0');
         }
@@ -884,7 +1068,7 @@
                 const linkEl = document.createElement("a");
                 linkEl.href = href;
                 linkEl.className = 'search-item';
-                linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
+                linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https.placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
                 
                 // Attach universal click listener
                 linkEl.addEventListener('click', async (e) => {
@@ -912,7 +1096,15 @@
                         }
                     } else if (isOthers) {
                         // Others: Open directly in modal
-                        openZone(game);
+                        // MODIFIED: Eaglercraft search result should open default, non-WASM
+                        if (game.id === 'other-eaglercraft') {
+                            openZone({
+                                ...game,
+                                url: './others-games/eaglercraft-1.12.2.html'
+                            });
+                        } else {
+                            openZone(game);
+                        }
 
                     } else {
                         // GN-Math: Open directly in modal
@@ -1011,6 +1203,13 @@
                 if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
                     searchResults.style.display = "none";
                 }
+                
+                // ADDED: Close Eaglercraft dropdowns if clicking outside
+                if (!ev.target.closest('.eagler-version-btn') && !ev.target.closest('.eagler-dropdown')) {
+                    document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
+                        d.classList.remove('show');
+                    });
+                }
             });
 
             document.getElementById('fullscreenBtnZone')?.addEventListener('click', () => {
@@ -1025,3 +1224,4 @@
     </script>
 </body>
 </html>
+
