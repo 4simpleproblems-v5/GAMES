@@ -178,7 +178,28 @@
             justify-content: center;
             transition: background-color 0.2s ease-in-out;
         }
-        #zoneViewer .zone-header .zone-controls button:hover {
+        /* MODIFIED: Added 'a' to the selectors to style the new download button */
+        #zoneViewer .zone-header .zone-controls button,
+        #zoneViewer .zone-header .zone-controls a {
+            margin-left: 8px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px); /* Safari support */
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem; /* squircle */
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease-in-out;
+            text-decoration: none; /* For 'a' tag */
+        }
+        #zoneViewer .zone-header .zone-controls button:hover,
+        #zoneViewer .zone-header .zone-controls a:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
@@ -276,6 +297,8 @@
              <div class="zone-controls">
                 <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
                 <button id="newTabBtnZone" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></button>
+                <!-- ADDED: Download button, hidden by default -->
+                <a id="downloadBtnZone" title="Download" class="hidden" href="#"><i class="fas fa-download"></i></a>
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
@@ -545,7 +568,8 @@
         function createOthersGameCard(game) {
             const isFavorite = getFavorites().includes(game.id);
             const card = document.createElement("div");
-            card.className = 'other-zone-item bg-card-dark rounded-xl border border-brand-border overflow-hidden col-span-full shadow-lg';
+            // MODIFIED: Removed 'overflow-hidden' to allow dropdown to appear
+            card.className = 'other-zone-item bg-card-dark rounded-xl border border-brand-border col-span-full shadow-lg';
             card.dataset.gameId = game.id;
 
             let gameButtonsHtml = '';
@@ -587,7 +611,8 @@
             // --- Card HTML ---
             card.innerHTML = `
                 <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
-                    <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=4SP+Featured'" class="w-full h-full object-cover absolute inset-0">
+                    <!-- MODIFIED: Added 'rounded-xl' to the image itself -->
+                    <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=4SP+Featured'" class="w-full h-full object-cover absolute inset-0 rounded-xl">
                     <div class="image-overlay absolute inset-0 transition-colors duration-200"></div>
                     <div class="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between">
                         <div class="flex items-start justify-between w-full">
@@ -746,29 +771,7 @@
                             url: embedPath,
                             category: game.category // Keep original category for openZone
                         };
-                        openZone(strongdogGameData);
-
-                    } catch (error) {
-                        console.error(`Failed to get embed path for ${game.name}:`, error);
-                        alert(`Could not load game: ${game.name}. See console for details.`);
-                    }
-                } else {
-                    // GN-Math Game Logic
-                    openZone(game);
-                }
-            };
-
-            card.querySelector('.group').addEventListener('click', handlePlay);
-            card.querySelector('.play-btn').addEventListener('click', handlePlay);
-            card.querySelector('.favorite-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleFavorite(game.id);
-            });
-
-            return card;
-        }
-
-        // --- Game Viewer Logic (Modified to handle 'Others' games which use direct URL) ---
+            // --- Game Viewer Logic (Modified to handle 'Others' games which use direct URL) ---
         function openZone(game) {
             if (!game || !game.url) {
                 console.error("Could not load game: Invalid game data.");
@@ -779,6 +782,28 @@
             const categoryHash = encodeURIComponent(game.category.replace(/\s+/g, '-'));
             const gameHash = encodeURIComponent(game.id);
             window.location.hash = `${categoryHash}&${gameHash}`;
+
+            // Handle Download Button
+            const downloadBtn = document.getElementById('downloadBtnZone');
+            if (game.id === 'other-eaglercraft' || game.id === 'other-doom') {
+                downloadBtn.href = game.url;
+                if (game.id === 'other-eaglercraft') {
+                    // This is a relative URL, so the download attribute should work.
+                    downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
+                    downloadBtn.removeAttribute('target');
+                } else {
+                    // This is an external URL (doom.4sp.games), download attr won't work.
+                    // Make it act like a new tab link.
+                    downloadBtn.removeAttribute('download');
+                    downloadBtn.target = '_blank';
+                }
+                downloadBtn.classList.remove('hidden');
+            } else {
+                downloadBtn.classList.add('hidden');
+                downloadBtn.href = '#';
+                downloadBtn.removeAttribute('download');
+                downloadBtn.removeAttribute('target');
+            }
 
             // Unload images to reduce lag
             document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
@@ -797,6 +822,7 @@
             
             zoneNameEl.textContent = game.name;
             zoneFrame.src = 'about:blank'; // Clear previous game
+            zoneFrame.dataset.activeUrl = game.url; // Store the URL that will be loaded
             
             const isURLBasedGame = game.category === 'StrongdogXP' || game.category === 'Others'; 
 
@@ -841,80 +867,69 @@
                 }
             });
 
+            // Hide download button
+            const downloadBtn = document.getElementById('downloadBtnZone');
+            downloadBtn.classList.add('hidden');
+            downloadBtn.href = '#';
+            downloadBtn.removeAttribute('download');
+            downloadBtn.removeAttribute('target');
+
             const zoneViewer = document.getElementById('zoneViewer');
             const zoneFrame = document.getElementById('zoneFrame');
             zoneViewer.style.display = "none";
-            if (zoneFrame) zoneFrame.src = 'about:blank';
+            if (zoneFrame) {
+                zoneFrame.src = 'about:blank';
+                zoneFrame.dataset.activeUrl = ''; // Clear the stored URL
+            }
         }
 
         /**
-         * MODIFIED: openGameInNewTab now checks the live iframe src first 
-         * to "just grab the frame" for URL-based games.
+         * MODIFIED: Rebuilt function to open games in about:blank, with a fallback.
          */
         function openGameInNewTab() {
             const zoneFrame = document.getElementById('zoneFrame');
             const zoneNameEl = document.getElementById('zoneNameEl');
             const game = allGames.find(z => z.name === zoneNameEl.textContent);
 
-            if (!game) return;
-
-            const isStrongdog = game.category === 'StrongdogXP';
-            const isOthers = game.category === 'Others';
-
-            // 1. Check if the current frame is loaded with a direct URL (Strongdog / Others)
-            // This directly implements the request to "just grab the frame" without recalculation.
-            if (zoneFrame.src && zoneFrame.src !== 'about:blank' && !zoneFrame.src.startsWith('data:')) {
-                window.open(zoneFrame.src, "_blank");
-                return;
-            } 
-
-            // 2. If the src is about:blank (i.e., it's a GN-Math game loaded via document.write), 
-            //    we must re-fetch and write the HTML to the new window.
-            if (game.category === 'GN-Math') {
-                const gameUrl = game.url;
-                const newWindow = window.open("about:blank", "_blank");
-                if (newWindow) {
-                    fetch(`${gameUrl}?t=${Date.now()}`)
-                        .then(response => response.text())
-                        .then(html => {
-                            newWindow.document.open();
-                            newWindow.document.write(html);
-                            newWindow.document.close();
-                        }).catch(err => {
-                            console.error("Error opening in new tab:", err);
-                            newWindow.close();
-                        });
-                }
+            if (!game) {
+                console.error("Could not find game data for new tab.");
                 return;
             }
             
-            // 3. Fallback for URL-based games (Strongdog/Others) that might have failed to load 
-            //    or where the frame src is 'about:blank' due to an edge case. 
-            //    We use the original robust logic to ensure it opens regardless.
-            if (isStrongdog) {
-                // Strongdog: Re-calculate the embed path and open directly
-                const page = game.page;
-                const originalHref = game.href;
-                const baseURL = sd_getBaseURLForPage(page);
-                let adjustedHref = originalHref.replace(/^\.\//, "");
-                adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
-                
-                // Use .then() because this click handler isn't async
-                sd_getEmbedPath(adjustedHref, originalHref, page).then(embedPath => {
-                    window.open(embedPath, "_blank");
-                }).catch(err => {
-                    console.error("Error getting Strongdog embed path for new tab:", err);
-                    alert("Could not open game in new tab. See console for details.");
-                });
-            } else if (isOthers) {
-                // 'Others': Use the game's direct URL.
-                // MODIFIED: This needs to respect WASM/non-WASM.
-                // But the game data is loaded from allGames, which only has one URL.
-                // The frame src is the only source of truth.
-                // Since (1) failed, we can't get the src.
-                // This is a limitation. We'll open the *default* URL.
-                console.warn("Cannot determine specific Eaglercraft version for new tab, opening default.");
-                window.open(game.url, "_blank");
+            const gameUrl = zoneFrame.dataset.activeUrl; // Get the URL that was *actually* loaded
+            
+            if (!gameUrl) {
+                console.error("Could not find active game URL to open in new tab.");
+                return;
+            }
+
+            // This logic now works for ALL game types (GN-Math, Strongdog, Others)
+            // It attempts to fetch the game and write it to an about:blank page.
+            const newWindow = window.open("about:blank", "_blank");
+            if (newWindow) {
+                // Add cache-busting for GN-Math games, as they are single files that might update.
+                let fetchUrl = gameUrl;
+                if (game.category === 'GN-Math') {
+                    fetchUrl = `${gameUrl}?t=${Date.now()}`;
+                }
+
+                fetch(fetchUrl)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error ${response.status} for ${fetchUrl}`);
+                        return response.text();
+                    })
+                    .then(html => {
+                        newWindow.document.open();
+                        newWindow.document.write(html);
+                        newWindow.document.close();
+                    })
+                    .catch(err => {
+                        console.error("Error fetching game for about:blank, falling back to direct URL:", err);
+                        // Fallback: If fetch fails (e.g., cross-origin for DOOM, or file not found),
+                        // close the blank window and just open the URL directly.
+                        newWindow.close();
+                        window.open(gameUrl, "_blank"); // Open the URL in a new tab normally
+                    });
             }
         }
 
@@ -1224,4 +1239,5 @@
     </script>
 </body>
 </html>
+
 
