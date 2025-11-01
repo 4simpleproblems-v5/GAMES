@@ -196,8 +196,9 @@
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
-        /* --- ADDED: Eaglercraft Dropdown --- */
-        .eagler-dropdown {
+        /* --- ADDED: Generic Version & Favorite Dropdowns --- */
+        .version-select-dropdown,
+        .favorite-select-dropdown {
             display: none;
             position: absolute;
             bottom: 120%; /* Position above the button */
@@ -212,11 +213,15 @@
             min-width: 200px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .eagler-dropdown.show {
+        .version-select-dropdown.show,
+        .favorite-select-dropdown.show {
             display: block;
         }
-        .eagler-dropdown-link {
-            display: block;
+        
+        .version-select-link,
+        .favorite-select-link {
+            display: flex;
+            align-items: center;
             padding: 0.5rem 0.75rem;
             color: white;
             text-decoration: none;
@@ -225,10 +230,36 @@
             font-weight: 400; /* Medium */
             white-space: nowrap;
         }
-        .eagler-dropdown-link:hover {
+        .version-select-link:hover,
+        .favorite-select-link:hover {
             background-color: rgba(255, 255, 255, 0.15);
         }
         
+        /* Specifics for favorite dropdown */
+        .favorite-select-link .fa-solid-star {
+            transition: color 0.2s;
+            margin-right: 0.75rem; /* 12px */
+        }
+        .favorite-select-link.is-favorited .fa-solid-star {
+            color: #facc15; /* yellow-400 */
+        }
+        .favorite-select-link:not(.is-favorited) .fa-solid-star {
+            color: #6b7280; /* gray-500 */
+        }
+        .favorite-select-link:not(.is-favorited):hover .fa-solid-star {
+            color: #d1d5db; /* gray-300 */
+        }
+        
+        /* Logo styling for dropdowns */
+        .version-dropdown-logo {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.5rem; /* 8px */
+            border-radius: 4px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
         /* --- ADDED: GTA Controls Dropdown Menu --- */
         #gtaControlsMenu {
             white-space: normal; /* Allow text wrapping */
@@ -415,32 +446,62 @@
         // If this file is missing, the Strongdog games will not load.
         import { siteMapping } from "./site-mapping.js";
         
-        // --- ADDED: Others Category Data ---
+        // --- MODIFIED: Others Category Data ---
         const othersGames = [
             {
                 id: "other-eaglercraft",
                 name: "Eaglercraft",
-                imgSrc: "./images/eaglercraft.png", // Updated to local relative path
+                imgSrc: "./images/eaglercraft.png",
                 description: "The classic survival and building game with authentic block-based physics and multiplayer support, accessible directly in the browser.",
                 category: "Others",
-                url: "./others-games/eaglercraft-1.12.2.html" 
+                // `url` removed, moved into versions
+                versions: [
+                    {
+                        id: "other-eaglercraft-1.12.2",
+                        name: "Release 1.12.2",
+                        url: "./others-games/eaglercraft-1.12.2.html",
+                        logo: null,
+                        wasm: false
+                    },
+                    {
+                        id: "other-eaglercraft-1.12.2-wasm",
+                        name: "Release 1.12.2 WASM",
+                        url: "./others-games/eaglercraft-1.12.2-wasm.html",
+                        logo: null,
+                        wasm: true
+                    }
+                ]
             },
             {
                 id: "other-doom",
                 name: "DOOM",
-                imgSrc: "./images/doom.png", // Updated to local relative path
+                imgSrc: "./images/doom.png",
                 description: "The legendary first-person shooter that pioneered the genre, focusing on blasting through hordes of demons in a timeless, adrenaline-fueled classic.",
                 category: "Others",
                 url: "https://doom.4sp.games/"
+                // No `versions` array, will be treated as a simple game
             },
-            // --- NEW GAME ADDED ---
             {
                 id: "other-gta",
-                name: "Grand Theft Auto (Carnage3D)",
-                imgSrc: "./images/gta.png", // Assumed path, update if needed
+                name: "Grand Theft Auto", // MODIFIED: Generalized name
+                imgSrc: "./images/gta.png",
                 description: "The original top-down mayhem. Steal cars, complete missions, and cause chaos in three iconic cities.",
                 category: "Others",
-                url: "../grandtheftauto/web/carnage3D.html"
+                // `url` removed, moved into versions
+                versions: [
+                    {
+                        id: "other-gta-carnage3d",
+                        name: "Carnage3D",
+                        url: "../grandtheftauto/web/carnage3D.html",
+                        logo: "carnage3d-logo.png" // ADDED
+                    },
+                    {
+                        id: "other-gta-classic",
+                        name: "Grand Theft Auto",
+                        url: "../grandtheftauto/web/index.html", // ASSUMED PATH for the other version
+                        logo: "grandtheftauto-logo.png" // ADDED
+                    }
+                ]
             }
         ];
 
@@ -475,6 +536,12 @@
         const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
         const saveFavorites = (favs) => localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
         
+        /**
+         * MODIFIED: This function ONLY handles data.
+         * It updates localStorage and re-renders the separate favorites list.
+         * All *in-card* UI updates are now handled by the click event listener
+         * that calls this function.
+         */
         function toggleFavorite(gameId) {
             let favorites = getFavorites();
             const isFavorited = favorites.includes(gameId);
@@ -486,10 +553,7 @@
             }
             saveFavorites(favorites);
 
-            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn, .other-zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
-                btn.classList.toggle('favorited', !isFavorited);
-                btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
-            });
+            // Re-render the separate favorites list at the top
             renderFavorites();
         }
 
@@ -641,40 +705,54 @@
 
         // --- Game Card Rendering ---
         
-        // MODIFIED: This function now handles Eaglercraft and GTA
+        /**
+         * MODIFIED: This function was completely refactored to handle
+         * games with and without a `versions` array.
+         * It now generates version-select dropdowns and favorite-select dropdowns.
+         */
         function createOthersGameCard(game) {
-            const isFavorite = getFavorites().includes(game.id);
             const card = document.createElement("div");
             card.className = 'other-zone-item bg-card-dark rounded-xl border border-brand-border col-span-full shadow-lg';
-            card.dataset.gameId = game.id;
+            card.dataset.gameId = game.id; // Use base game ID
 
+            const hasVersions = game.versions && game.versions.length > 0;
+            const favorites = getFavorites();
+
+            // --- 1. Build Play Button(s) HTML ---
             let gameButtonsHtml = '';
-            
-            // --- Eaglercraft specific logic ---
-            if (game.id === 'other-eaglercraft') {
-                if (supportsWasm()) {
-                    // WASM Supported: Show dropdown button
-                    gameButtonsHtml = `
-                        <div class="relative"> <button class="eagler-version-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Select Version">
-                                <i class="fa-solid fa-chevron-up text-other-grey transition-colors"></i>
-                            </button>
-                            <div class="eagler-dropdown">
-                                <a href="#" class="eagler-dropdown-link" data-url="./others-games/eaglercraft-1.12.2.html">Release 1.12.2</a>
-                                <a href="#" class="eagler-dropdown-link" data-url="./others-games/eaglercraft-1.12.2-wasm.html">Release 1.12.2 WASM</a>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // No WASM: Show normal play button, but with a new class
+            if (hasVersions) {
+                const hasWasmVersion = game.versions.some(v => v.wasm);
+                if (hasWasmVersion && !supportsWasm()) {
+                    // Eaglercraft No-WASM case
                     gameButtonsHtml = `
                         <button class="play-btn-no-wasm rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Play Game">
                             <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
                             <i class="fa-regular fa-circle-play fa-regular-play text-other-grey transition-colors"></i>
                         </button>
                     `;
+                } else {
+                    // Standard Dropdown (GTA, or Eaglercraft w/ WASM)
+                    gameButtonsHtml = `
+                        <div class="relative">
+                            <button class="version-select-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Select Version">
+                                <i class="fa-solid fa-chevron-up text-other-grey transition-colors"></i>
+                            </button>
+                            <div class="version-select-dropdown">
+                                ${game.versions.map(v => `
+                                    <a href="#" class="version-select-link" 
+                                       data-url="${v.url}" 
+                                       data-version-id="${v.id}" 
+                                       data-version-name="${v.name}">
+                                        ${v.logo ? `<img src="${v.logo}" class="version-dropdown-logo" alt="${v.name} logo">` : ''}
+                                        <span>${v.name}</span>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
                 }
             } else {
-                // --- Other games (like DOOM and GTA) ---
+                // Simple Play Button (e.g., DOOM)
                 gameButtonsHtml = `
                     <button class="play-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Play Game">
                         <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
@@ -683,7 +761,42 @@
                 `;
             }
 
-            // --- Card HTML ---
+            // --- 2. Build Favorite Button HTML ---
+            let favoriteButtonHtml = '';
+            if (hasVersions) {
+                const isAnyVersionFavorited = game.versions.some(v => favorites.includes(v.id));
+                favoriteButtonHtml = `
+                    <div class="relative">
+                        <button class="favorite-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none ${isAnyVersionFavorited ? 'favorited' : ''}" title="Favorite a version">
+                            <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                            <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                        </button>
+                        <div class="favorite-select-dropdown">
+                            ${game.versions.map(v => {
+                                const isFavorited = favorites.includes(v.id);
+                                return `
+                                    <a href="#" class="favorite-select-link ${isFavorited ? 'is-favorited' : ''}" data-version-id="${v.id}">
+                                        <i class="fa-solid fa-star"></i>
+                                        ${v.logo ? `<img src="${v.logo}" class="version-dropdown-logo" alt="${v.name} logo">` : ''}
+                                        <span>${v.name}</span>
+                                    </a>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Simple Favorite Button (e.g., DOOM)
+                const isFavorite = favorites.includes(game.id);
+                favoriteButtonHtml = `
+                    <button class="favorite-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                        <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                        <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                    </button>
+                `;
+            }
+
+            // --- 3. Card HTML ---
             card.innerHTML = `
                 <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
                     <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=${encodeURIComponent(game.name)}'" class="w-full h-full object-cover absolute inset-0 rounded-xl">
@@ -692,11 +805,8 @@
                         <div class="flex items-start justify-between w-full">
                             <h3 class="text-4xl font-bold text-white truncate drop-shadow-lg" style="max-width: 80%;" title="${game.name}">${game.name}</h3>
                             <div class="flex items-center space-x-3">
-                                
-                                ${gameButtonsHtml} <button class="favorite-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
-                                    <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
-                                    <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
-                                </button>
+                                ${gameButtonsHtml}
+                                ${favoriteButtonHtml}
                             </div>
                         </div>
                         <p class="text-lg text-white font-medium drop-shadow-lg" style="max-width: 50%;">${game.description}</p>
@@ -704,17 +814,17 @@
                 </div>
             `;
             
-            // --- Event Listeners ---
+            // --- 4. Event Listeners ---
 
-            // Background click (only works for non-Eaglercraft)
-            card.querySelector('.group').addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (game.id !== 'other-eaglercraft') {
+            // Background click (only for simple games like DOOM)
+            if (!hasVersions) {
+                card.querySelector('.group').addEventListener('click', (e) => {
+                    e.stopPropagation();
                     openZone(game);
-                }
-            });
+                });
+            }
 
-            // Standard Play Button (for DOOM and GTA)
+            // Standard Play Button (for DOOM)
             const playBtn = card.querySelector('.play-btn');
             if (playBtn) {
                 playBtn.addEventListener('click', (e) => {
@@ -726,24 +836,30 @@
             // Eaglercraft No-WASM Play Button
             const noWasmBtn = card.querySelector('.play-btn-no-wasm');
             if (noWasmBtn) {
-                noWasmBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openZone({
-                        ...game, // spread game data
-                        url: './others-games/eaglercraft-1.12.2.html' // override url
+                const nonWasmVersion = game.versions.find(v => !v.wasm);
+                if (nonWasmVersion) {
+                    noWasmBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openZone({
+                            ...game, // spread base game data
+                            id: nonWasmVersion.id,
+                            name: nonWasmVersion.name,
+                            url: nonWasmVersion.url
+                        });
                     });
-                });
+                }
             }
 
-            // Eaglercraft Version Button (WASM)
-            const versionBtn = card.querySelector('.eagler-version-btn');
+            // Version Select Button (WASM/GTA)
+            const versionBtn = card.querySelector('.version-select-btn');
             if (versionBtn) {
                 versionBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const dropdown = versionBtn.nextElementSibling;
                     const isShown = dropdown.classList.contains('show');
                     
-                    document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
+                    // Close all other dropdowns
+                    document.querySelectorAll('.version-select-dropdown.show, .favorite-select-dropdown.show').forEach(d => {
                         d.classList.remove('show');
                     });
                     
@@ -753,25 +869,84 @@
                 });
             }
 
-            // Eaglercraft Version Links (WASM)
-            const versionLinks = card.querySelectorAll('.eagler-dropdown-link');
+            // Version Select Links (WASM/GTA)
+            const versionLinks = card.querySelectorAll('.version-select-link');
             versionLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     const newUrl = link.dataset.url;
+                    const versionId = link.dataset.versionId;
+                    const versionName = link.dataset.versionName;
+                    
                     openZone({
                         ...game, 
+                        id: versionId, // Use specific version ID for hash
+                        name: versionName, // Use specific version name for modal
                         url: newUrl 
                     });
-                    link.closest('.eagler-dropdown').classList.remove('show');
+                    link.closest('.version-select-dropdown').classList.remove('show');
                 });
             });
 
-            // Favorite Button (works for all)
-            card.querySelector('.favorite-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleFavorite(game.id);
+            // Favorite Button (Simple, for DOOM)
+            const simpleFavBtn = card.querySelector('.favorite-btn:not([class*="relative"])');
+            if (simpleFavBtn) {
+                simpleFavBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const btn = e.currentTarget;
+                    
+                    toggleFavorite(game.id); // Update data
+                    
+                    // Update UI
+                    const isFavorited = getFavorites().includes(game.id);
+                    btn.classList.toggle('favorited', isFavorited);
+                    btn.title = isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
+                });
+            }
+
+            // Favorite Button (Dropdown, for Eagler/GTA)
+            const dropdownFavBtn = card.querySelector('.favorite-btn[class*="relative"]');
+            if (dropdownFavBtn) {
+                dropdownFavBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const btn = e.currentTarget;
+                    const dropdown = btn.nextElementSibling;
+                    const isShown = dropdown.classList.contains('show');
+                    
+                    // Close all other dropdowns
+                    document.querySelectorAll('.version-select-dropdown.show, .favorite-select-dropdown.show').forEach(d => {
+                        d.classList.remove('show');
+                    });
+                    
+                    if (!isShown) {
+                        dropdown.classList.add('show');
+                    }
+                });
+            }
+            
+            // Favorite Dropdown Links
+            const favDropdownLinks = card.querySelectorAll('.favorite-select-link');
+            favDropdownLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const versionId = link.dataset.versionId;
+                    
+                    toggleFavorite(versionId); // Update data
+                    
+                    // --- Update UI ---
+                    const favorites = getFavorites();
+                    const isFavorited = favorites.includes(versionId);
+                    
+                    // 1. Update the link itself
+                    link.classList.toggle('is-favorited', isFavorited);
+                    
+                    // 2. Update the main star button
+                    const mainFavBtn = link.closest('.relative').querySelector('.favorite-btn');
+                    const anyVersionFavorited = game.versions.some(v => favorites.includes(v.id));
+                    mainFavBtn.classList.toggle('favorited', anyVersionFavorited);
+                });
             });
 
             return card;
@@ -793,6 +968,7 @@
                 imgSrc = game.imgSrc;
             }
             
+            // MODIFIED: game.id could be a version ID, so getFavorites works
             const isFavorite = getFavorites().includes(game.id);
 
             const card = document.createElement("div");
@@ -833,7 +1009,8 @@
                         const strongdogGameData = {
                             name: game.name,
                             url: embedPath,
-                            category: game.category
+                            category: game.category,
+                            id: game.id // Pass ID for hashing
                         };
                         openZone(strongdogGameData);
 
@@ -842,17 +1019,10 @@
                         alert(`Could not load game: ${game.name}. See console for details.`);
                     }
                 } else if (game.category === 'Others') {
-                    // 'Others' game (forced small card, e.g., in Favorites)
-                    // Default to non-WASM for Eaglercraft simplicity in favorites.
-                    if (game.id === 'other-eaglercraft') {
-                        openZone({
-                            ...game,
-                            url: './others-games/eaglercraft-1.12.2.html'
-                        });
-                    } else {
-                        // For DOOM and GTA
-                        openZone(game);
-                    }
+                    // MODIFIED: Removed special Eaglercraft logic.
+                    // This now correctly handles versioned games (like from Favorites)
+                    // and simple games (like DOOM, if it were in favorites).
+                    openZone(game);
                 } else {
                     // GN-Math Game Logic
                     openZone(game);
@@ -861,9 +1031,18 @@
 
             card.querySelector('.group').addEventListener('click', handlePlay);
             card.querySelector('.play-btn').addEventListener('click', handlePlay);
+            
+            // MODIFIED: Added inline UI update on click
             card.querySelector('.favorite-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
-                toggleFavorite(game.id);
+                const btn = e.currentTarget;
+                
+                toggleFavorite(game.id); // Update data
+                
+                // Update UI
+                const isFavorited = getFavorites().includes(game.id);
+                btn.classList.toggle('favorited', isFavorited);
+                btn.title = isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
             });
 
             return card;
@@ -871,13 +1050,13 @@
 
         // --- Game Viewer Logic (MODIFIED for GTA Controls) ---
         function openZone(game) {
-            if (!game || !game.url) {
-                console.error("Could not load game: Invalid game data.");
+            if (!game || !game.url || !game.id) { // Added game.id check
+                console.error("Could not load game: Invalid game data.", game);
                 return;
             }
 
             const categoryHash = encodeURIComponent(game.category.replace(/\s+/g, '-'));
-            const gameHash = encodeURIComponent(game.id);
+            const gameHash = encodeURIComponent(game.id); // MODIFIED: This now uses version ID if applicable
             window.location.hash = `${categoryHash}&${gameHash}`;
 
             // --- Handle control buttons ---
@@ -888,10 +1067,15 @@
             downloadBtn.classList.add('hidden');
             gtaControlsContainer.classList.add('hidden');
             
-            if (game.id === 'other-eaglercraft' || game.id === 'other-doom') {
+            // MODIFIED: Check for base ID or version ID
+            const isEagler = game.id.startsWith('other-eaglercraft');
+            const isDoom = game.id === 'other-doom';
+            const isGta = game.id.startsWith('other-gta');
+
+            if (isEagler || isDoom) {
                 // Show download button for Eaglercraft and Doom
                 downloadBtn.href = game.url;
-                if (game.id === 'other-eaglercraft') {
+                if (isEagler) {
                     downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
                     downloadBtn.removeAttribute('target');
                 } else {
@@ -899,7 +1083,7 @@
                     downloadBtn.target = '_blank';
                 }
                 downloadBtn.classList.remove('hidden');
-            } else if (game.id === 'other-gta') {
+            } else if (isGta) {
                 // Show controls button for GTA
                 gtaControlsContainer.classList.remove('hidden');
             }
@@ -1027,6 +1211,10 @@
             targetElement.appendChild(fragment);
         }
 
+        /**
+         * MODIFIED: This function now builds a list of game objects
+         * from *both* simple game IDs and versioned game IDs.
+         */
         function renderFavorites() {
             const favoriteIds = getFavorites();
             if (favoriteIds.length > 0) {
@@ -1034,7 +1222,35 @@
                 favoritesGameList.style.display = "grid"; 
                 favoritesGameList.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4';
 
-                const favoriteGames = allGames.filter(game => favoriteIds.includes(game.id));
+                const favoriteGames = [];
+                favoriteIds.forEach(favId => {
+                    // 1. Check for a simple game (Strongdog, GN-Math, or simple 'Others' like DOOM)
+                    let simpleGame = allGames.find(g => g.id === favId && !g.versions);
+                    if (simpleGame) {
+                        favoriteGames.push(simpleGame);
+                        return;
+                    }
+                    
+                    // 2. Check for a versioned game (Eaglercraft, GTA)
+                    for (const baseGame of allGames) {
+                        if (baseGame.versions) {
+                            const version = baseGame.versions.find(v => v.id === favId);
+                            if (version) {
+                                // Create a new "game" object for this specific version
+                                favoriteGames.push({
+                                    ...baseGame, // Get category, description, imgSrc from base
+                                    id: version.id, // CRITICAL: Use version's ID
+                                    name: `${baseGame.name} (${version.name})`, // Combine names for display
+                                    url: version.url, // CRITICAL: Use version's URL
+                                    versions: undefined // This is a specific version, not a base game
+                                });
+                                break; // Found, move to next favId
+                            }
+                        }
+                    }
+                });
+
+                // Render using `forceSmallCard = true`
                 renderGames(favoriteGames, favoritesGameList, true);
             } else {
                 favoritesHeader.style.display = "none";
@@ -1121,16 +1337,56 @@
             const text = searchInput.value.toLowerCase().trim();
             renderGamesForCurrentCategory(text);
 
-            const filteredDropdown = text ? allGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
+            // MODIFIED: Search now also searches versions
+            const filteredDropdown = [];
+            const textLower = text.toLowerCase();
+
+            if (text) {
+                allGames.forEach(game => {
+                    if (game.versions) {
+                        // Search base game name
+                        if (game.name.toLowerCase().includes(textLower)) {
+                            // Add all versions
+                            game.versions.forEach(v => {
+                                filteredDropdown.push({
+                                    ...game,
+                                    id: v.id,
+                                    name: `${game.name} (${v.name})`,
+                                    url: v.url
+                                });
+                            });
+                        } else {
+                            // Search version names
+                            game.versions.forEach(v => {
+                                if (v.name.toLowerCase().includes(textLower)) {
+                                    filteredDropdown.push({
+                                        ...game,
+                                        id: v.id,
+                                        name: `${game.name} (${v.name})`,
+                                        url: v.url
+                                    });
+                                }
+                            });
+                        }
+                    } else {
+                        // Simple game
+                        if (game.name.toLowerCase().includes(textLower)) {
+                            filteredDropdown.push(game);
+                        }
+                    }
+                });
+            }
+            
+            const uniqueResults = [...new Map(filteredDropdown.map(item => [item.id, item])).values()].slice(0, 5);
+
             searchResults.innerHTML = "";
-            if (filteredDropdown.length === 0 || !text) {
+            if (uniqueResults.length === 0 || !text) {
                 searchResults.style.display = "none";
                 return;
             }
             
-            filteredDropdown.forEach(game => {
+            uniqueResults.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
-                const isOthers = game.category === 'Others';
                 
                 let imgSrc;
                 if (isStrongdog) {
@@ -1159,29 +1415,16 @@
                             
                             const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
                             
-                            const strongdogGameData = {
-                                name: game.name,
-                                url: embedPath,
-                                category: game.category
-                            };
+                            const strongdogGameData = { ...game, url: embedPath };
                             openZone(strongdogGameData);
                         } catch (error) {
                             console.error(`Failed to get embed path for ${game.name}:`, error);
                             alert(`Could not load game: ${game.name}. See console for details.`);
                         }
-                    } else if (isOthers) {
-                        // MODIFIED: Eaglercraft search result opens default, non-WASM
-                        if (game.id === 'other-eaglercraft') {
-                            openZone({
-                                ...game,
-                                url: './others-games/eaglercraft-1.12.2.html'
-                            });
-                        } else {
-                            openZone(game);
-                        }
-
                     } else {
-                        // GN-Math
+                        // This works for GN-Math and all 'Others' games (simple or versioned)
+                        // because the `game` object from `uniqueResults` has the correct
+                        // `id`, `name`, and `url` for the *specific version*.
                         openZone(game);
                     }
                     searchResults.style.display = "none";
@@ -1266,8 +1509,10 @@
                     searchResults.style.display = "none";
                 }
                 
-                if (!ev.target.closest('.eagler-version-btn') && !ev.target.closest('.eagler-dropdown')) {
-                    document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
+                // MODIFIED: Close all dropdowns when clicking away
+                if (!ev.target.closest('.version-select-btn') && !ev.target.closest('.version-select-dropdown') &&
+                    !ev.target.closest('.favorite-btn') && !ev.target.closest('.favorite-select-dropdown')) {
+                    document.querySelectorAll('.version-select-dropdown.show, .favorite-select-dropdown.show').forEach(d => {
                         d.classList.remove('show');
                     });
                 }
