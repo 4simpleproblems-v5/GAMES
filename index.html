@@ -333,18 +333,11 @@
             transition: transform 0.3s ease-out;
         }
 
-        /* --- ADDED: Sticky Category Switcher Bar --- */
-        #sticky-category-bar {
-            position: sticky;
-            top: 0;
-            z-index: 1000; /* High z-index to stay above content */
-            background-color: rgba(7, 7, 7, 0.95); /* deep-black with slight transparency */
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-bottom: 1px solid #252525; /* brand-border */
-            padding-top: 1rem; /* 16px */
-            padding-bottom: 1rem; /* 16px */
+        /* Category slider z-index */
+        #category-slider-container {
+            z-index: 5;
         }
+
     </style>
 </head>
 
@@ -353,23 +346,7 @@
         <a href="../index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
     </header>
 
-    <div id="sticky-category-bar" class="w-full">
-        <div id="category-viewer" class="mx-auto w-full max-w-screen-2xl px-4">
-            <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
-                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <div class="overflow-hidden w-64 text-center">
-                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
-                    </div>
-                </div>
-                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4 pt-0">
+    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4">
         <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl">
             <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
                 <strong>Welcome to the 4SP Game Hub!</strong><br>
@@ -382,7 +359,22 @@
         </h2>
         <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
-        <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
+        <div id="category-viewer" class="w-full mt-12">
+            <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
+                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="overflow-hidden w-64 text-center">
+                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
+                        </div>
+                </div>
+                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
+                </div>
         </div>
     </main>
 
