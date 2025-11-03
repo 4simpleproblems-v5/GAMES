@@ -226,7 +226,6 @@
         .favorite-select-link {
             display: flex;
             align-items: center;
-            justify-content: flex-end; /* Align image to the right */
             padding: 0.35rem 0.5rem; /* Adjusted padding */
             color: white;
             text-decoration: none;
@@ -236,8 +235,12 @@
             white-space: nowrap;
         }
         /* MODIFIED: Changed justify-content */
+        .version-select-link {
+            justify-content: center; /* Center content */
+        }
+        /* MODIFIED: Changed justify-content */
         .favorite-select-link {
-            justify-content: space-between; 
+            justify-content: flex-start; /* Star on left, content fills rest */
         }
         
         .version-select-link:hover,
@@ -250,6 +253,7 @@
             transition: color 0.2s;
             margin-right: 0.5rem; /* Adjusted margin */
             font-size: 1.25rem; /* Slightly larger star */
+            flex-shrink: 0; /* Prevent star from shrinking */
         }
         .favorite-select-link.is-favorited .fa-solid-star {
             color: #facc15; /* yellow-400 */
@@ -502,14 +506,14 @@
                         id: "other-eaglercraft-1.12.2",
                         name: "Release 1.12.2",
                         url: "./others-games/eaglercraft-1.12.2.html",
-                        logo: "eaglercraft-logo.png", // MODIFIED
+                        logo: null, // MODIFIED
                         wasm: false
                     },
                     {
                         id: "other-eaglercraft-1.12.2-wasm",
                         name: "Release 1.12.2 WASM",
                         url: "./others-games/eaglercraft-1.12.2-wasm.html",
-                        logo: "eaglercraft-logo.png", // MODIFIED
+                        logo: null, // MODIFIED
                         wasm: true
                     }
                 ]
@@ -787,7 +791,8 @@
                                        data-url="${v.url}" 
                                        data-version-id="${v.id}" 
                                        data-version-name="${v.name}">
-                                        ${v.logo ? `<img src="${v.logo}" class="version-dropdown-logo" alt="${v.name} logo">` : ''}
+                                        ${v.logo ? `<img src="${v.logo}" class="version-dropdown-logo ${v.name !== 'Carnage3D' ? 'mr-2' : ''}" alt="${v.name} logo">` : ''}
+                                        ${v.name !== 'Carnage3D' ? `<span class="whitespace-nowrap">${v.name}</span>` : ''}
                                     </a>
                                 `).join('')}
                             </div>
@@ -820,7 +825,10 @@
                                 return `
                                     <a href="#" class="favorite-select-link ${isFavorited ? 'is-favorited' : ''}" data-version-id="${v.id}" data-base-game-id="${game.id}">
                                         <i class="fa-solid fa-star"></i>
-                                        ${v.logo ? `<img src="${v.logo}" class="version-dropdown-logo" alt="${v.name} logo">` : ''}
+                                        <div class="flex items-center justify-center flex-grow">
+                                            ${v.logo ? `<img src="${v.logo}" class="version-dropdown-logo ${v.name !== 'Carnage3D' ? 'mr-2' : ''}" alt="${v.name} logo">` : ''}
+                                            ${v.name !== 'Carnage3D' ? `<span class="whitespace-nowrap">${v.name}</span>` : ''}
+                                        </div>
                                     </a>
                                 `;
                             }).join('')}
@@ -1093,7 +1101,7 @@
                         openZone(strongdogGameData);
 
                     } catch (error) {
-                        console.error(`Failed to get embedPath for ${game.name}:`, error);
+                        console.error(`Failed to get embed path for ${game.name}:`, error);
                         alert(`Could not load game: ${game.name}. See console for details.`);
                     }
                 } else {
@@ -1156,14 +1164,10 @@
                 downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
                 downloadBtn.removeAttribute('target');
                 downloadBtn.classList.remove('hidden');
-            } else if (isDoom) { // ADDED: Special block for DOOM
+            } else if (isDoom) { // MODIFIED: Special block for DOOM
                 // Show DOOM controls
                 doomControlsContainer.classList.remove('hidden');
-                // Show download button for Doom
-                downloadBtn.href = game.url;
-                downloadBtn.removeAttribute('download');
-                downloadBtn.target = '_blank';
-                downloadBtn.classList.remove('hidden');
+                // Download button is NOT shown
             } else if (isGtaCarnage3D) { // Only show for Carnage3D version
                 // Show controls button for GTA Carnage3D
                 gtaControlsContainer.classList.remove('hidden');
@@ -1197,12 +1201,16 @@
                 zoneFrame.src = gameUrl;
                 zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
                 
-                // --- ADDED: Eaglercraft focus logic ---
+                // --- MODIFIED: Eaglercraft/Cross-origin focus logic ---
                 zoneFrame.onload = () => {
                     try {
                         zoneFrame.contentWindow.focus();
+                        // ADDED: Try to add click listener, will fail for cross-origin but that's ok
+                        zoneFrame.contentWindow.document.addEventListener('click', () => {
+                            zoneFrame.contentWindow.focus();
+                        });
                     } catch (e) {
-                        console.warn("Could not focus iframe content, possibly cross-origin.", e);
+                        console.warn("Could not attach focus listeners to iframe content, possibly cross-origin.", e);
                     }
                 };
                 zoneViewer.style.display = "flex";
@@ -1222,6 +1230,17 @@
                         doc.open();
                         doc.write(html);
                         doc.close();
+                        
+                        // ADDED: Focus logic for same-origin GN-Math games
+                        try {
+                            zoneFrame.contentWindow.focus();
+                            doc.addEventListener('click', () => {
+                                zoneFrame.contentWindow.focus();
+                            });
+                        } catch(e) {
+                             console.warn("Could not attach focus listeners to GN-Math game.", e);
+                        }
+                        
                         zoneViewer.style.display = "flex";
                     })
                     .catch(error => {
