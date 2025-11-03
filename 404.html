@@ -1,250 +1,187 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>4SP - 404</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <script src="../panic-key.js"></script>
-    <script src="../url-changer.js"></script>
+    <title>4SP - 404 Error</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-black': '#070707',
+                        'card-dark': '#111111',
+                        'accent-indigo': '#4f46e5', // Unified accent color
+                        'brand-border': '#252525',
+                    },
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl': '1rem',
+                    },
+                }
+            }
+        }
+    </script>
+    
     <style>
-        @font-face {
-            font-family: 'PrimaryFont';
-            /* You'll need to provide the actual font file here */
-            /* src: url('fonts/primary.woff') format('woff'); */
-        }
-
-        :root {
-            --ff: 'PrimaryFont', Arial, sans-serif;
-            --bg: #2e2e2e;
-            --purple: #6720BD;
-        }
-
         body {
-            font-family: var(--ff);
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg);
-            color: #e0e0e0;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            font-family: 'Geist', 'sans-serif';
+            font-weight: 300;
+            background-color: #070707;
         }
-
-        .navbar {
-            background-color: rgba(50, 50, 50, 0.9);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-weight: 700;
-            font-size: 2.5rem;
-            letter-spacing: 1px;
-            transition: transform 0.3s ease;
-            text-decoration: none;
-            color: white;
-        }
-
-        .logo .xp {
-            color: var(--purple);
-            text-shadow: 0 0 10px rgba(103, 32, 189, 0.5);
-        }
-
-        .menu-icon {
-            font-size: 2.5rem;
-            cursor: pointer;
-            color: white;
-            transition: transform 0.3s ease, color 0.3s ease;
-        }
-
-        .slide-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 400px;
-            backdrop-filter: blur(10px);
-            color: white;
-            box-shadow: 5px 0 20px rgba(0, 0, 0, 0.7);
-            z-index: 1003;
-            transition: transform 0.5s ease;
-            transform: translateX(-100%);
-            padding: 20px;
-            overflow-y: auto;
-            box-sizing: border-box;
-            background: linear-gradient(to bottom right,
-                    rgba(43, 43, 43, 0.599),
-                    rgba(53, 53, 53, 0.599),
-                    rgba(80, 80, 80, 0.599));
-        }
-
-        .slide-menu.active {
-            transform: translateX(0);
-        }
-
-        .categories {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding-top: 30px;
-        }
-
-        .categories>a {
-            padding: 17px;
-            background: linear-gradient(45deg, #333, #444);
-            border-radius: 15px;
-            text-decoration: none;
-            color: white;
-            transition: transform 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
-            text-align: center;
-            font-size: 1.2rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .categories>a:hover {
-            background: linear-gradient(45deg, #6720BD, #8a2be2);
-            box-shadow: 0 6px 20px rgba(103, 32, 189, 0.5);
-        }
-
-        .categories>a::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(0, 0, 0, 0.1);
-            transition: all 0.5s ease;
-        }
-
-        .categories>a:hover::after {
-            width: 500px;
-            height: 500px;
-        }
-
-        /* Styles for the 404 content */
-        .content-wrapper {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .error-code {
-            font-size: 10rem;
-            font-weight: 700;
-            margin: 0;
-            color: var(--purple);
-            text-shadow:
-                0 0 8px rgba(103, 32, 189, 0.8),
-                0 0 20px rgba(103, 32, 189, 0.6),
-                0 0 40px rgba(103, 32, 189, 0.4);
-        }
-
-        .error-message {
-            font-size: 1.5rem;
-            margin-top: 0;
-            margin-bottom: 30px;
-            color: #e0e0e0;
-        }
-        
-        .action-button {
-            padding: 12px 25px;
-            background: linear-gradient(45deg, #6720BD, #8a2be2);
-            border: none;
-            border-radius: 15px;
-            text-decoration: none;
-            color: white;
-            font-size: 1.1rem;
-            font-family: var(--ff);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(103, 32, 189, 0.4);
-        }
-
-        .action-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(103, 32, 189, 0.6);
-        }
-
-
-        @media (max-width: 768px) {
-            .slide-menu {
-                width: 280px;
-            }
-             .error-code {
-                font-size: 8rem;
-            }
-            .error-message {
-                font-size: 1.2rem;
-            }
+        /* Ensure specific font weights for headings/semibold elements are maintained */
+        h1, h2, h3, .font-bold, .font-semibold, strong {
+            font-weight: 400 !important;
         }
     </style>
 </head>
 
-<body>
-    <div class="navbar">
-        <div class="menu-icon" id="menuIcon">☰</div>
-        <a href="../index.html" class="logo">strongdog<span class="xp">XP</span></a>
-        <div></div>
-    </div>
+<body class="bg-deep-black text-white min-h-screen">
+    <header class="w-full p-4 flex justify-end items-center">
+        <!-- Assuming the 404 is at the same level as index.html -->
+        <a href="index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
+    </header>
 
-    <div class="slide-menu" id="slideMenu">
-        <div class="categories">
-            <a href="https://4simpleproblems.github.io/logged-in/games.html" class="option-link">Back to 4SP</a>
-            <a href="../index.html" class="option-link">Back to StrongdogXP</a>
-            <a href="../save/index.html" class="option-link">Save Manager</a>
-            <a href="https://discord.gg/pWjfQ4Sz5c" class="option-link">
-                Discord Server
+    <main class="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4">
+        <div class="bg-card-dark rounded-xl border border-brand-border p-8 sm:p-12 text-center max-w-2xl w-full shadow-2xl">
+            
+            <!-- Restored text-accent-indigo color for the 404 number -->
+            <p class="text-8xl sm:text-9xl font-normal text-accent-indigo mb-4">
+                404
+            </p>
+            
+            <!-- Empty H1 for the JavaScript Typewriter effect -->
+            <!-- Adjusted height to prevent layout shift during typing/deleting -->
+            <h1 class="text-3xl sm:text-4xl font-semibold text-white mb-4 h-12 flex justify-center items-center">
+                <!-- Text container and Blinking Cursor -->
+                <!-- Cursor is now explicitly text-white -->
+                <span id="typewriter-text"></span><span id="cursor" class="text-white">|</span>
+            </h1>
+            
+            <p class="text-gray-400 mb-8 text-lg">
+                It looks like the link you followed has led you to an uncharted part of the server. The requested resource could not be located.
+            </p>
+            
+            <a href="index.html" class="inline-flex items-center justify-center px-8 py-3 border text-base font-normal rounded-xl text-white transition duration-200 transform hover:scale-[1.02] border-accent-indigo bg-accent-indigo/20 hover:bg-accent-indigo/40">
+                <i class="fas fa-home mr-2"></i> Return to 4SP Game Hub
             </a>
+            
         </div>
-    </div>
-    
-    <div class="content-wrapper">
-        <div>
-            <h1 class="error-code">404</h1>
-            <p class="error-message">Oops! The page you were looking for could not be found.</p>
-            <a href="../index.html" class="action-button">Go Home</a>
-        </div>
-    </div>
-
+    </main>
 
     <script>
-        // Script for the slide-out menu
-        document.addEventListener("DOMContentLoaded", function () {
-            const menuIcon = document.getElementById("menuIcon");
-            const slideMenu = document.getElementById("slideMenu");
+        // --- Typewriter effect logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const textElement = document.getElementById('typewriter-text');
+            const cursorElement = document.getElementById('cursor');
 
-            menuIcon.addEventListener("click", function (event) {
-                event.stopPropagation();
-                slideMenu.classList.toggle('active');
-            });
+            const sentences = [
+                "You got lost in the void!",
+                "Error: Path not found. Try again.",
+                "The page is currently unplugged.",
+                "Your gravity well collapsed here.",
+                "Lost signal. Check connection.",
+                "This server took a coffee break.",
+                "Beyond the digital horizon.",
+                "Access denied by cosmic rays.",
+                "404: The page is in another castle.",
+                "We missed that jump point.",
+                "Rerouting... just kidding.",
+                "This link has expired, sorry.",
+                "The server is playing hide-and-seek.",
+                "Did you type that right?",
+                "Out of bounds error detected.",
+                "Warp drive failed to engage.",
+                "Just an empty room here.",
+                "A glitch in the matrix.",
+                "The page went on vacation.",
+                "This is not the page you seek.",
+            ];
+            
+            // Base speed constants
+            const BASE_TYPING_SPEED = 100; // Slower base typing speed
+            const DELETING_SPEED = 30; // Deleting remains fast
+            const DELAY_AFTER_TYPE = 2500; // ms (Wait longer after full sentence)
+            const DELAY_AFTER_DELETE = 700; // ms
 
-            window.addEventListener("click", function (event) {
-                if (event.target !== menuIcon && !slideMenu.contains(event.target)) {
-                    slideMenu.classList.remove('active');
+            let sentenceIndex = 0;
+            let charIndex = 0;
+            let isTyping = true;
+            
+            // Function to get a human-like typing delay with random pauses
+            const getRandomTypingDelay = (char) => {
+                // Base delay is between BASE_TYPING_SPEED and BASE_TYPING_SPEED + 50ms
+                let delay = BASE_TYPING_SPEED + Math.random() * 50;
+
+                // Longer pause after punctuation or capitalization (simulating thinking/finger shift)
+                if (char === ' ' && Math.random() < 0.2) { // 20% chance of a short pause after a space
+                    delay += 50;
+                } else if (/[.,?!:]/.test(char)) { // Longer pause after punctuation
+                    delay += 150 + Math.random() * 150;
+                } else if (/[A-Z]/.test(char)) { // Slight pause after capital letters
+                    delay += 20;
+                } else if (Math.random() < 0.05) { // 5% chance of a noticeable "finger fumble" pause
+                    delay += 300; 
                 }
-            });
+                
+                return delay;
+            };
+
+            // Simple blinking cursor animation
+            const BLANK_CURSOR = '\u200B'; // Zero Width Space to prevent jumpiness
+            
+            const blinkCursor = () => {
+                // Cycle between '|' and the invisible character
+                cursorElement.textContent = cursorElement.textContent === '|' ? BLANK_CURSOR : '|';
+            };
+            setInterval(blinkCursor, 400);
+
+            const typeSentence = () => {
+                const currentSentence = sentences[sentenceIndex % sentences.length];
+
+                if (isTyping) {
+                    // Typing phase
+                    if (charIndex < currentSentence.length) {
+                        const currentChar = currentSentence.charAt(charIndex);
+                        textElement.textContent += currentChar;
+                        charIndex++;
+                        // Use the dynamic delay for human typing
+                        setTimeout(typeSentence, getRandomTypingDelay(currentChar));
+                    } else {
+                        // Done typing, wait for the longer delay
+                        isTyping = false;
+                        setTimeout(typeSentence, DELAY_AFTER_TYPE);
+                    }
+                } else {
+                    // Deleting phase (fast and consistent)
+                    if (charIndex > 0) {
+                        textElement.textContent = currentSentence.substring(0, charIndex - 1);
+                        charIndex--;
+                        setTimeout(typeSentence, DELETING_SPEED);
+                    } else {
+                        // Done deleting, move to next sentence
+                        isTyping = true;
+                        sentenceIndex++;
+                        setTimeout(typeSentence, DELAY_AFTER_DELETE);
+                    }
+                }
+            };
+            
+            // Start the loop
+            typeSentence();
         });
     </script>
 </body>
-
 </html>
