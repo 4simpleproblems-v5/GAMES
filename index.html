@@ -160,10 +160,11 @@
             display: flex;
             align-items: center;
         }
-        /* MODIFIED: Added 'a' and '#gtaControlsBtnZone' */
+        /* MODIFIED: Added 'a', '#gtaControlsBtnZone', AND '#doomControlsBtnZone' */
         #zoneViewer .zone-header .zone-controls button,
         #zoneViewer .zone-header .zone-controls a,
-        #zoneViewer .zone-header .zone-controls #gtaControlsBtnZone {
+        #zoneViewer .zone-header .zone-controls #gtaControlsBtnZone,
+        #zoneViewer .zone-header .zone-controls #doomControlsBtnZone {
             margin-left: 8px;
             height: 40px;
             background-color: rgba(255, 255, 255, 0.1);
@@ -182,7 +183,8 @@
             width: 40px; /* Default width */
         }
         /* Style for the wider Controls button */
-        #zoneViewer .zone-header .zone-controls #gtaControlsBtnZone {
+        #zoneViewer .zone-header .zone-controls #gtaControlsBtnZone,
+        #zoneViewer .zone-header .zone-controls #doomControlsBtnZone {
              width: auto;
              padding-left: 0.75rem; /* 12px */
              padding-right: 0.75rem; /* 12px */
@@ -190,7 +192,8 @@
         
         #zoneViewer .zone-header .zone-controls button:hover,
         #zoneViewer .zone-header .zone-controls a:hover,
-        #zoneViewer .zone-header .zone-controls #gtaControlsBtnZone:hover {
+        #zoneViewer .zone-header .zone-controls #gtaControlsBtnZone:hover,
+        #zoneViewer .zone-header .zone-controls #doomControlsBtnZone:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
@@ -232,6 +235,11 @@
             font-weight: 400; /* Medium */
             white-space: nowrap;
         }
+        /* MODIFIED: Changed justify-content */
+        .favorite-select-link {
+            justify-content: space-between; 
+        }
+        
         .version-select-link:hover,
         .favorite-select-link:hover {
             background-color: rgba(255, 255, 255, 0.15);
@@ -254,9 +262,11 @@
         }
         
         /* Logo styling for dropdowns */
+        /* MODIFIED: Removed fixed width/height, added max-height and auto width */
         .version-dropdown-logo {
-            width: 32px; /* h-8 */
-            height: 32px; /* w-8 */
+            max-height: 32px; /* h-8 */
+            width: auto; /* w-8 */
+            max-width: 100px; /* Prevent oversized logos */
             object-fit: contain; /* ADDED: Ensure logo fits without cropping */
             background-color: rgba(0,0,0,0.3); /* ADDED: background to make logos stand out */
             border-radius: 4px;
@@ -264,23 +274,31 @@
         }
 
         /* --- ADDED: GTA Controls Dropdown Menu --- */
-        #gtaControlsMenu {
+        /* MODIFIED: Added #doomControlsMenu */
+        #gtaControlsMenu,
+        #doomControlsMenu {
             white-space: normal; /* Allow text wrapping */
             background-color: rgba(30, 30, 30, 0.9); /* More solid glass */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
-        #gtaControlsMenu p {
+        /* MODIFIED: Added #doomControlsMenu */
+        #gtaControlsMenu p,
+        #doomControlsMenu p {
             line-height: 1.4;
             color: #d1d5db; /* gray-300 */
             margin: 0.25rem 0;
         }
-        #gtaControlsMenu p strong {
+        /* MODIFIED: Added #doomControlsMenu */
+        #gtaControlsMenu p strong,
+        #doomControlsMenu p strong {
             color: #ffffff; /* white */
             min-width: 100px;
             display: inline-block;
         }
-         #gtaControlsMenu strong.block {
+        /* MODIFIED: Added #doomControlsMenu */
+         #gtaControlsMenu strong.block,
+         #doomControlsMenu strong.block {
             color: #AAAAAA; /* other-grey */
          }
 
@@ -424,6 +442,24 @@
                     </div>
                 </div>
                 
+                <div id="doomControlsContainer" class="relative hidden">
+                    <button id="doomControlsBtnZone" title="Controls" class="px-3">
+                        <i class="fas fa-gamepad mr-2"></i>Controls
+                    </button>
+                    <div id="doomControlsMenu" class="hidden absolute top-full right-0 mt-2 w-80 bg-card-dark border border-brand-border rounded-lg shadow-xl p-4 z-10 text-sm">
+                        <h4 class="font-bold text-white mb-2">🎮 DOOM Controls</h4>
+                        <div class="space-y-1">
+                            <strong class="block text-gray-300">Movement & Actions</strong>
+                            <p><strong>Move:</strong> UP, DOWN, LEFT, RIGHT</p>
+                            <p><strong>Use:</strong> W</p>
+                            <p><strong>Fire:</strong> S</p>
+                            <p><strong>Speed on:</strong> SPACE</p>
+                            <p><strong>Strafe on:</strong> ALT</p>
+                            <p><strong>Strafe:</strong> A, D</p>
+                            <p><strong>Change Weapon:</strong> 1, 2, 3, 4, 5, 6, 7</p>
+                        </div>
+                    </div>
+                </div>
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
@@ -466,14 +502,14 @@
                         id: "other-eaglercraft-1.12.2",
                         name: "Release 1.12.2",
                         url: "./others-games/eaglercraft-1.12.2.html",
-                        logo: null,
+                        logo: "eaglercraft-logo.png", // MODIFIED
                         wasm: false
                     },
                     {
                         id: "other-eaglercraft-1.12.2-wasm",
                         name: "Release 1.12.2 WASM",
                         url: "./others-games/eaglercraft-1.12.2-wasm.html",
-                        logo: null,
+                        logo: "eaglercraft-logo.png", // MODIFIED
                         wasm: true
                     }
                 ]
@@ -484,7 +520,7 @@
                 imgSrc: "./images/doom.png",
                 description: "The legendary first-person shooter that pioneered the genre, focusing on blasting through hordes of demons in a timeless, adrenaline-fueled classic.",
                 category: "Others",
-                url: "https://doom.4sp.games/"
+                url: "../DOOM/index.html" // MODIFIED
                 // No `versions` array, will be treated as a simple game
             },
             {
@@ -1057,7 +1093,7 @@
                         openZone(strongdogGameData);
 
                     } catch (error) {
-                        console.error(`Failed to get embed path for ${game.name}:`, error);
+                        console.error(`Failed to get embedPath for ${game.name}:`, error);
                         alert(`Could not load game: ${game.name}. See console for details.`);
                     }
                 } else {
@@ -1095,30 +1131,38 @@
             const categoryHash = encodeURIComponent(game.category.replace(/\s+/g, '-'));
             const gameHash = encodeURIComponent(game.id); // MODIFIED: This now uses version ID if applicable
             window.location.hash = `${categoryHash}&${gameHash}`;
+            // MODIFIED: Store active game ID on the frame itself
+            document.getElementById('zoneFrame').dataset.activeGameId = game.id;
+
 
             // --- Handle control buttons ---
             const downloadBtn = document.getElementById('downloadBtnZone');
             const gtaControlsContainer = document.getElementById('gtaControlsContainer');
+            const doomControlsContainer = document.getElementById('doomControlsContainer'); // ADDED
             
             // Hide all special buttons first
             downloadBtn.classList.add('hidden');
             gtaControlsContainer.classList.add('hidden');
+            doomControlsContainer.classList.add('hidden'); // ADDED
             
             // MODIFIED: Check for base ID or version ID
             const isEagler = game.id.startsWith('other-eaglercraft');
             const isDoom = game.id === 'other-doom';
             const isGtaCarnage3D = game.id === 'other-gta-carnage3d';
 
-            if (isEagler || isDoom) {
-                // Show download button for Eaglercraft and Doom
+            if (isEagler) { // MODIFIED: Only Eagler
+                // Show download button for Eaglercraft
                 downloadBtn.href = game.url;
-                if (isEagler) {
-                    downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
-                    downloadBtn.removeAttribute('target');
-                } else {
-                    downloadBtn.removeAttribute('download');
-                    downloadBtn.target = '_blank';
-                }
+                downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
+                downloadBtn.removeAttribute('target');
+                downloadBtn.classList.remove('hidden');
+            } else if (isDoom) { // ADDED: Special block for DOOM
+                // Show DOOM controls
+                doomControlsContainer.classList.remove('hidden');
+                // Show download button for Doom
+                downloadBtn.href = game.url;
+                downloadBtn.removeAttribute('download');
+                downloadBtn.target = '_blank';
                 downloadBtn.classList.remove('hidden');
             } else if (isGtaCarnage3D) { // Only show for Carnage3D version
                 // Show controls button for GTA Carnage3D
@@ -1188,7 +1232,10 @@
         }
 
         function closeZoneViewer() {
-            window.history.pushState("", document.title, window.location.pathname + window.location.search);
+            // MODIFIED: Set hash to current category instead of clearing
+            const categoryName = categories[currentCategoryIndex];
+            const categoryHash = encodeURIComponent(categoryName.replace(/\s+/g, '-'));
+            window.location.hash = categoryHash;
 
             // --- MODIFIED: Force-reload all images that have a stored src ---
             document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
@@ -1201,10 +1248,14 @@
             const downloadBtn = document.getElementById('downloadBtnZone');
             const gtaControlsContainer = document.getElementById('gtaControlsContainer');
             const gtaControlsMenu = document.getElementById('gtaControlsMenu');
+            const doomControlsContainer = document.getElementById('doomControlsContainer'); // ADDED
+            const doomControlsMenu = document.getElementById('doomControlsMenu'); // ADDED
             
             downloadBtn.classList.add('hidden');
             gtaControlsContainer.classList.add('hidden');
+            doomControlsContainer.classList.add('hidden'); // ADDED
             gtaControlsMenu.classList.add('hidden'); // Ensure menu is closed
+            doomControlsMenu.classList.add('hidden'); // ADDED
             
             downloadBtn.href = '#';
             downloadBtn.removeAttribute('download');
@@ -1216,6 +1267,7 @@
             if (zoneFrame) {
                 zoneFrame.src = 'about:blank';
                 zoneFrame.dataset.activeUrl = '';
+                zoneFrame.dataset.activeGameId = ''; // MODIFIED: Clear active game ID
                 zoneFrame.onload = null; // Clear onload handler
             }
         }
@@ -1332,6 +1384,7 @@
             categorySlider.style.width = `${categories.length * 100}%`;
         }
 
+        // MODIFIED: This function NO LONGER sets the hash.
         function switchCategory(newIndex) {
             currentCategoryIndex = newIndex;
             updateSliderPosition();
@@ -1500,10 +1553,95 @@
 
             const preferredOrder = ['StrongdogXP', 'GN-Math', 'Gameboy Games', 'Others'];
             categories = preferredOrder.filter(cat => categories.includes(cat));
+            
+            // --- MODIFIED: Hash handling logic ---
+            async function handleHash() {
+                const hash = window.location.hash.substring(1);
+                
+                const parts = hash.split('&');
+                const categoryHash = parts[0];
+                const gameHash = parts[1];
+
+                // 1. Handle Category
+                const categoryName = categories.find(c => encodeURIComponent(c.replace(/\s+/g, '-')) === categoryHash);
+                const newCategoryIndex = categoryName ? categories.indexOf(categoryName) : 0; // Default to first category
+                
+                if (currentCategoryIndex !== newCategoryIndex) {
+                    // This is the ONLY place currentCategoryIndex should be set from a hash
+                    currentCategoryIndex = newCategoryIndex; 
+                    // Need to update slider *before* rendering games
+                    updateSliderPosition();
+                    renderGamesForCurrentCategory();
+                    updateArrowVisibility();
+                } else if (!hash && currentCategoryIndex !== 0) {
+                    // No hash, default to first category
+                    currentCategoryIndex = 0;
+                    updateSliderPosition();
+                    renderGamesForCurrentCategory();
+                    updateArrowVisibility();
+                }
+
+                // 2. Handle Game
+                const zoneViewer = document.getElementById('zoneViewer');
+                const activeGameId = document.getElementById('zoneFrame').dataset.activeGameId;
+
+                if (gameHash) {
+                    // Hash wants a game
+                    if (activeGameId === gameHash) {
+                        // Game is already open. Do nothing.
+                        return;
+                    }
+                    
+                    // Hash wants a *new* game. Find and open it.
+                    let gameToOpen = null;
+                    for (const game of allGames) {
+                        if (game.id === gameHash) { gameToOpen = game; break; }
+                        if (game.versions) {
+                            const version = game.versions.find(v => v.id === gameHash);
+                            if (version) {
+                                gameToOpen = { ...game, id: version.id, name: `${game.name} (${version.name})`, url: version.url, versions: undefined };
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (gameToOpen) {
+                        if (gameToOpen.category === 'StrongdogXP') {
+                            try {
+                                const page = gameToOpen.page;
+                                const originalHref = gameToOpen.href;
+                                const baseURL = sd_getBaseURLForPage(page);
+                                let adjustedHref = originalHref.replace(/^\.\//, "");
+                                adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                                const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
+                                const strongdogGameData = { ...gameToOpen, url: embedPath };
+                                openZone(strongdogGameData);
+                            } catch (error) { console.error(`Failed to get embed path for ${gameToOpen.name} from hash:`, error); }
+                        } else {
+                            openZone(gameToOpen);
+                        }
+                    }
+                } else {
+                    // Hash *does not* want a game
+                    if (zoneViewer.style.display === 'flex') {
+                        // Game is open, but hash doesn't have a game. Close it.
+                        closeZoneViewer(); // This will re-trigger handleHash, but it's fine.
+                    }
+                    // If no game is open, and no gameHash, we're good.
+                    // But we must ensure the hash *matches* the current category.
+                    const expectedCategoryHash = encodeURIComponent(categories[currentCategoryIndex].replace(/\s+/g, '-'));
+                    if (hash !== expectedCategoryHash) {
+                        // This sets the initial hash on load
+                        window.location.hash = expectedCategoryHash;
+                    }
+                }
+            }
+            // --- End Hash handling ---
+
 
             setupCategorySlider();
             updateArrowVisibility();
-            renderGamesForCurrentCategory();
+            // renderGamesForCurrentCategory(); // handleHash will call this
             renderFavorites();
 
             searchInput.placeholder = `Search all games...`;
@@ -1511,10 +1649,13 @@
             searchInput.addEventListener("focus", handleSearch);
             
             // --- Event Listeners ---
+            // MODIFIED: cycle() now just sets the hash, triggering the hashchange listener
             const cycle = (direction) => {
                  let newIndex = currentCategoryIndex + direction;
                  if (newIndex >= 0 && newIndex < categories.length) {
-                     switchCategory(newIndex);
+                     const categoryName = categories[newIndex];
+                     const categoryHash = encodeURIComponent(categoryName.replace(/\s+/g, '-'));
+                     window.location.hash = categoryHash;
                  }
             };
 
@@ -1523,9 +1664,12 @@
             categoryCycleBtn.addEventListener('click', () => {
                  let newIndex = currentCategoryIndex + 1;
                  if (newIndex >= categories.length) newIndex = 0;
-                 switchCategory(newIndex);
+                 const categoryName = categories[newIndex];
+                 const categoryHash = encodeURIComponent(categoryName.replace(/\s+/g, '-'));
+                 window.location.hash = categoryHash;
             });
 
+            // MODIFIED: keydown listeners also just set the hash
             document.addEventListener('keydown', (e) => {
                 if (document.activeElement === searchInput) return;
 
@@ -1555,9 +1699,12 @@
                     });
                 }
                 
-                // --- ADDED: Close GTA Controls Menu if clicking outside ---
+                // --- MODIFIED: Close Controls Menus if clicking outside ---
                 if (!ev.target.closest('#gtaControlsContainer')) {
                      document.getElementById('gtaControlsMenu').classList.add('hidden');
+                }
+                if (!ev.target.closest('#doomControlsContainer')) { // ADDED
+                     document.getElementById('doomControlsMenu').classList.add('hidden');
                 }
             });
 
@@ -1565,6 +1712,12 @@
             document.getElementById('gtaControlsBtnZone').addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent click from bubbling to document
                 document.getElementById('gtaControlsMenu').classList.toggle('hidden');
+            });
+            
+            // --- ADDED: DOOM Controls Button Listener ---
+            document.getElementById('doomControlsBtnZone').addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent click from bubbling to document
+                document.getElementById('doomControlsMenu').classList.toggle('hidden');
             });
 
             document.getElementById('fullscreenBtnZone')?.addEventListener('click', () => {
@@ -1575,6 +1728,10 @@
             document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
             */
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
+            
+            // --- ADDED: Hash change listener and initial call ---
+            window.addEventListener('hashchange', handleHash);
+            handleHash(); // Run once on page load
         }
 
         // --- ADDED: Intro Modal Logic ---
