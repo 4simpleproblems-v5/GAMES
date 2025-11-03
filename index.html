@@ -355,9 +355,16 @@
             transition: transform 0.3s ease-out;
         }
 
-        /* Category slider z-index */
+        /* MODIFIED: Category slider z-index and new sticky styles */
         #category-slider-container {
-            z-index: 5;
+            position: sticky;
+            top: 0;
+            padding-top: 0.75rem; /* 12px */
+            padding-bottom: 0.75rem; /* 12px */
+            background-color: rgba(7, 7, 7, 0.85); /* deep-black with 85% opacity */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 100; /* Make sure it's on top */
         }
 
     </style>
@@ -556,6 +563,9 @@
         const GN_COVER_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
         const GN_HTML_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
         const FAVORITES_KEY = 'gameHubFavorites_v3';
+        // ADDED: Key for GN-Math disclaimer
+        const GN_MATH_DISCLAIMER_KEY = 'fsp-gn-math-disclaimer-seen-v1';
+
 
         let allGames = [];
         let categories = [];
@@ -868,6 +878,12 @@
                 `;
             } else {
                 // Large card structure for 'Others' category
+                
+                // MODIFIED: Added logic for Eaglercraft description style
+                const descriptionStyle = game.id === 'other-eaglercraft' 
+                    ? 'max-width: 50%; text-shadow: 0 2px 10px rgba(0,0,0,0.9);' // More intense shadow
+                    : 'max-width: 50%;'; // Default
+                
                 card.innerHTML = `
                     <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
                         <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=${encodeURIComponent(game.name)}'" class="w-full h-full object-cover absolute inset-0 rounded-xl">
@@ -880,7 +896,7 @@
                                     ${favoriteButtonHtml}
                                 </div>
                             </div>
-                            <p class="text-lg text-white font-medium drop-shadow-lg" style="max-width: 50%;">${game.description}</p>
+                            <p class="text-lg text-white font-medium drop-shadow-lg" style="${descriptionStyle}">${game.description}</p>
                         </div>
                     </div>
                 `;
@@ -1314,6 +1330,27 @@
                 targetElement.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out';
             }
 
+            // --- ADDED: GN-Math Disclaimer Logic ---
+            if (categoryName === 'GN-Math' && !forceSmallCard && localStorage.getItem(GN_MATH_DISCLAIMER_KEY) !== 'true') {
+                const disclaimer = document.createElement('div');
+                disclaimer.id = 'gn-math-disclaimer';
+                disclaimer.className = 'col-span-full bg-card-dark border border-brand-border rounded-xl p-4 text-gray-300 relative text-center text-sm';
+                disclaimer.innerHTML = `
+                    <p><strong>Disclaimer:</strong> The GN-Math website has been taken down by a DMCA notice. Some games may be unstable or may not work.</p>
+                    <button id="dismiss-gn-disclaimer" class="absolute top-2 right-3 text-gray-500 hover:text-white text-2xl leading-none">&times;</button>
+                `;
+                targetElement.appendChild(disclaimer); // Prepend to grid
+                
+                // Add listener AFTER appending
+                setTimeout(() => {
+                    document.getElementById('dismiss-gn-disclaimer')?.addEventListener('click', () => {
+                        localStorage.setItem(GN_MATH_DISCLAIMER_KEY, 'true');
+                        disclaimer.style.display = 'none';
+                    });
+                }, 0);
+            }
+            // --- END: GN-Math Disclaimer ---
+
             const fragment = document.createDocumentFragment();
             gamesToRender.forEach(game => fragment.appendChild(createGameCard(game, forceSmallCard)));
             targetElement.appendChild(fragment);
@@ -1426,6 +1463,26 @@
                 gamesGridContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-8 text-lg">No games in this category yet.</p>`;
                 gamesGridContainer.classList.remove('opacity-0');
                 gamesGridContainer.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out';
+                
+                // MODIFIED: Also add disclaimer to empty GN-Math category
+                if (categoryName === 'GN-Math' && localStorage.getItem(GN_MATH_DISCLAIMER_KEY) !== 'true') {
+                    const disclaimer = document.createElement('div');
+                    disclaimer.id = 'gn-math-disclaimer';
+                    disclaimer.className = 'col-span-full bg-card-dark border border-brand-border rounded-xl p-4 text-gray-300 relative text-center text-sm';
+                    disclaimer.innerHTML = `
+                        <p><strong>Disclaimer:</strong> The GN-Math website has been taken down by a DMCA notice. Some games may be unstable or may not work.</p>
+                        <button id="dismiss-gn-disclaimer" class="absolute top-2 right-3 text-gray-500 hover:text-white text-2xl leading-none">&times;</button>
+                    `;
+                    gamesGridContainer.prepend(disclaimer); // Prepend to grid
+                    
+                    setTimeout(() => {
+                        document.getElementById('dismiss-gn-disclaimer')?.addEventListener('click', () => {
+                            localStorage.setItem(GN_MATH_DISCLAIMER_KEY, 'true');
+                            disclaimer.style.display = 'none';
+                        });
+                    }, 0);
+                }
+                
                 return;
             }
 
