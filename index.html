@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>4SP - GAMES</title>
+    <title>4SP - Game Hub</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
@@ -157,7 +157,7 @@
             margin: 0;
             font-size: 1.3em;
             color: #ffffff;
-            font-family: 'Geist', sans-serif;
+            font-family: 'Geist', 'sans-serif';
         }
         /* Added: Flex layout for horizontal buttons */
         #zoneViewer .zone-header .zone-controls {
@@ -388,6 +388,11 @@
         // IMPORT: Added site-mapping.js. Make sure this file is in the same directory.
         // If this file is missing, the Strongdog games will not load.
         import { siteMapping } from "./site-mapping.js";
+
+        // --- ADDED: Firebase Auth Imports ---
+        import { auth } from "../firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
 
         // --- ADDED: 'Others' Category Data ---
         const othersGames = [
@@ -1042,10 +1047,13 @@
             downloadBtn.classList.add('hidden');
             gtaControlsContainer.classList.add('hidden');
             
-            // MODIFIED: Check for base ID or version ID
-            const isEagler = game.id.startsWith('other-eaglercraft');
-            const isDoom = game.id === 'other-doom';
-            const isGtaCarnage3D = game.id === 'other-gta-carnage3d';
+            // ---*** APPLIED FIX HERE ***---
+            // MODIFIED: Check for base ID or version ID, adding type validation
+            const gameIdString = String(game.id || ''); // Ensures game.id is a string
+            const isEagler = gameIdString.startsWith('other-eaglercraft');
+            const isDoom = gameIdString === 'other-doom';
+            const isGtaCarnage3D = gameIdString === 'other-gta-carnage3d';
+            // ---*** END FIX ***---
 
             if (isEagler || isDoom) {
                 // Show download button for Eaglercraft and Doom
@@ -1497,7 +1505,19 @@
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
         }
 
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        // --- MODIFIED: Replaced original DOMContentLoaded listener ---
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // User is signed in, load the app.
+                    initializeApp();
+                } else {
+                    // User is signed out. Do not load games and redirect.
+                    console.log("User is not authenticated. Redirecting to home.");
+                    window.location.href = '../index.html';
+                }
+            });
+        });
     </script>
 </body>
 </html>
