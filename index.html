@@ -302,8 +302,7 @@
                 imgSrc: "./images/eaglercraft.png", // Updated to local relative path
                 description: "The classic survival and building game with authentic block-based physics and multiplayer support, accessible directly in the browser.",
                 category: "Others",
-                // MODIFIED: Base URL is now just a placeholder, logic will use specific URLs
-                url: "./others-games/eaglercraft-1.12.2.html" 
+                url: "../EAGLERCRAFT/eaglercraft-1.12.2.html" 
             },
             {
                 id: "other-doom",
@@ -567,8 +566,8 @@
                                 <i class="fa-solid fa-chevron-up text-other-grey transition-colors"></i>
                             </button>
                             <div class="eagler-dropdown">
-                                <a href="#" class="eagler-dropdown-link" data-url="./others-games/eaglercraft-1.12.2.html">Release 1.12.2</a>
-                                <a href="#" class="eagler-dropdown-link" data-url="./others-games/eaglercraft-1.12.2-wasm.html">Release 1.12.2 WASM</a>
+                                <a href="#" class="eagler-dropdown-link" data-url="../EAGLERCRAFT/eaglercraft-1.12.2.html">Release 1.12.2</a>
+                                <a href="#" class="eagler-dropdown-link" data-url="../EAGLERCRAFT/eaglercraft-1.12.2-wasm.html">Release 1.12.2 WASM</a>
                             </div>
                         </div>
                     `;
@@ -642,7 +641,7 @@
                     e.stopPropagation();
                     openZone({
                         ...game, // spread game data
-                        url: './others-games/eaglercraft-1.12.2.html' // override url
+                        url: '../EAGLERCRAFT/eaglercraft-1.12.2.html' // override url
                     });
                 });
             }
@@ -769,7 +768,7 @@
                     if (game.id === 'other-eaglercraft') {
                         openZone({
                             ...game,
-                            url: './others-games/eaglercraft-1.12.2.html'
+                            url: '../EAGLERCRAFT/eaglercraft-1.12.2.html'
                         });
                     } else {
                         // For DOOM
@@ -1136,7 +1135,7 @@
                         if (game.id === 'other-eaglercraft') {
                             openZone({
                                 ...game,
-                                url: './others-games/eaglercraft-1.12.2.html'
+                                url: '../EAGLERCRAFT/eaglercraft-1.12.2.html'
                             });
                         } else {
                             openZone(game);
