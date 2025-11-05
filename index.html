@@ -897,12 +897,16 @@
                 zoneFrame.src = gameUrl;
                 // Add sandbox attributes like in playindex.html
                 // For 'Others' games, this is necessary for things like Eaglercraft, DOOM, and GTA
-                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen');
+                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
+                // ADDED: allow attribute for features like pointer-lock which are crucial for game input
+                zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock');
                 zoneViewer.style.display = "flex";
             } else {
                 // GN-Math logic: Fetch and write HTML
                 // Remove sandbox attribute if it exists from a previous Strongdog/Others game
                 zoneFrame.removeAttribute('sandbox'); 
+                // REMOVED: allow attribute, not needed for blob-based games
+                zoneFrame.removeAttribute('allow');
                 
                 fetch(`${gameUrl}?t=${Date.now()}`)
                     .then(response => {
