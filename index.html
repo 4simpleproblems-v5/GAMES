@@ -104,22 +104,37 @@
         .search-results {
             max-height: 250px;
             overflow-y: auto;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            /* MODIFIED: Removed border-top, Tailwind handles borders now */
         }
         .search-item {
             display: flex;
-            align-items: center;
-            padding: 8px 15px;
+            /* MODIFIED: Removed padding, Tailwind handles it now */
             cursor: pointer;
             transition: background-color 0.2s;
             color: white;
             text-decoration: none;
+            padding: 8px 15px; /* MODIFIED: Re-added padding for items */
         }
-        .search-item:hover { background-color: #333; }
-        .search-item img {
-            width: 40px; height: 40px; border-radius: 8px;
-            margin-right: 12px; object-fit: cover;
-        }
+        .search-item:hover { background-color: rgba(255, 255, 255, 0.1); } /* MODIFIED: Lighter hover for blur */
+        
+        /* MODIFIED: Removed .search-item img styles, Tailwind handles it */
+
+        /* --- ADDED: Hover styles for search result buttons --- */
+        .search-item .play-btn-search .fa-solid-play { display: inline-block; }
+        .search-item .play-btn-search .fa-regular-play { display: none; }
+        .search-item:hover .play-btn-search .fa-solid-play { display: none; }
+        .search-item:hover .play-btn-search .fa-regular-play { display: inline-block; }
+
+        .search-item .favorite-btn-search .fa-solid-star { display: inline-block; }
+        .search-item .favorite-btn-search .fa-regular-star { display: none; }
+        .search-item:hover .favorite-btn-search:not(.favorited) .fa-solid-star { display: none; }
+        .search-item:hover .favorite-btn-search:not(.favorited) .fa-regular-star { display: inline-block; color: white; }
+        .search-item .favorite-btn-search.favorited .fa-solid-star { display: inline-block; color: #facc15; }
+        .search-item .favorite-btn-search.favorited .fa-regular-star { display: none; }
+        .search-item:hover .favorite-btn-search.favorited .fa-solid-star { display: none; }
+        .search-item:hover .favorite-btn-search.favorited .fa-regular-star { display: inline-block; color: #facc15; }
+        /* --- END: Added search button styles --- */
+
 
         @media (max-width: 768px) {
             #bottom-fixed-bar {
@@ -255,14 +270,15 @@
         </div>
     </main>
 
-    <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
-        <div class="relative flex items-center w-full">
+    <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 w-full max-w-md z-50 relative">
+        <div class="relative flex items-center w-full p-3">
             <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
             <button id="category-cycle-btn" title="Next Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
                 <i class="fa-solid fa-layer-group"></i>
             </button>
-            <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
-                </div>
+        </div>
+        <!-- MODIFIED: Added bg-black/70 and backdrop-blur-lg, removed bg-card-dark, changed rounded-lg to rounded-xl -->
+        <div class="search-results absolute bottom-full w-full mb-2 bg-black/70 backdrop-blur-lg border border-brand-border rounded-xl shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
         </div>
     </div>
     
@@ -273,8 +289,8 @@
              </div>
              <div class="zone-controls">
                 <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                <!-- MODIFIED: Re-added New Tab button -->
                 <button id="newTabBtnZone" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></button>
-                <!-- ADDED: Download button, hidden by default -->
                 <a id="downloadBtnZone" title="Download" class="hidden" href="#"><i class="fas fa-download"></i></a>
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
@@ -366,7 +382,7 @@
             }
             saveFavorites(favorites);
 
-            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn, .other-zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
+            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn, .other-zone-item[data-game-id='${gameId}'] .favorite-btn, .search-item[data-game-id='${gameId}'] .favorite-btn-search`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
                 btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
             });
@@ -389,7 +405,7 @@
                     }
                 }
             }
-            renderFavorites();
+            renderFavorites(); // This will re-render the favorites section
         }
 
         // --- URL and Path Helpers (No changes needed here) ---
@@ -599,21 +615,24 @@
                 if (availableVersions.length === 1) {
                     // Only one version available (e.g., Eaglercraft on non-WASM browser)
                     // Show a simple play button.
+                    // MODIFIED: Added data-version-name
+                    const version = availableVersions[0];
                     gameButtonsHtml = `
-                        <button class="play-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" data-url="${availableVersions[0].url}" title="Play Game">
+                        <button class="play-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" data-url="${version.url}" data-version-name="${version.name}" title="Play Game">
                             <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
                             <i class="fa-regular fa-circle-play fa-regular-play text-other-grey transition-colors"></i>
                         </button>
                     `;
                 } else {
                     // Multiple versions available, show dropdown
+                    // MODIFIED: Added data-version-name to links
                     gameButtonsHtml = `
                         <div class="relative">
                             <button class="version-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Select Version">
                                 <i class="fa-solid fa-chevron-up text-other-grey transition-colors"></i>
                             </button>
                             <div class="eagler-dropdown">
-                                ${availableVersions.map(v => `<a href="#" class="eagler-dropdown-link" data-url="${v.url}">${v.name}</a>`).join('')}
+                                ${availableVersions.map(v => `<a href="#" class="eagler-dropdown-link" data-url="${v.url}" data-version-name="${v.name}">${v.name}</a>`).join('')}
                             </div>
                         </div>
                     `;
@@ -673,11 +692,14 @@
                 });
             }
 
-            // Simple play buttons (for DOOM, or for Eaglercraft on non-WASM)
+            // MODIFIED: Simple play buttons (for DOOM, or for Eaglercraft on non-WASM)
+            // This now handles passing the correct version name
             card.querySelectorAll('.play-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    openZone({ ...game, url: btn.dataset.url }); // Open with the specific URL
+                    const versionName = btn.dataset.versionName; // Will be undefined for DOOM
+                    const title = versionName ? `${game.name} - ${versionName}` : game.name;
+                    openZone({ ...game, name: title, url: btn.dataset.url });
                 });
             });
 
@@ -695,13 +717,16 @@
                 });
             }
 
-            // Version dropdown links (Eaglercraft, GTA)
+            // MODIFIED: Version dropdown links (Eaglercraft, GTA)
+            // This now handles passing the correct version name
             card.querySelectorAll('.eagler-dropdown-link:not(.favorite-link)').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     const newUrl = link.dataset.url;
-                    openZone({ ...game, url: newUrl });
+                    const versionName = link.dataset.versionName; // Will be defined
+                    const title = versionName ? `${game.name} - ${versionName}` : game.name;
+                    openZone({ ...game, name: title, url: newUrl });
                     link.closest('.eagler-dropdown').classList.remove('show');
                 });
             });
@@ -821,6 +846,7 @@
                 } else if (game.category === 'Others') {
                     // 'Others' game (forced small card, e.g., in Favorites)
                     // The 'game' object here is already the specific version with the correct .url
+                    // and the correct .name ("Game - Version")
                     openZone(game);
                 } else {
                     // GN-Math Game Logic
@@ -839,6 +865,7 @@
         }
 
         // --- Game Viewer Logic (Modified to handle 'Others' games which use direct URL) ---
+        // MODIFIED: Replaced entire function with index(1).html version
         function openZone(game) {
             if (!game || !game.url) {
                 console.error("Could not load game: Invalid game data.");
@@ -957,6 +984,7 @@
         /**
          * MODIFIED: Rebuilt function to open games in about:blank, with a fallback.
          */
+        // MODIFIED: Added openGameInNewTab function from index(1).html
         function openGameInNewTab() {
             const zoneFrame = document.getElementById('zoneFrame');
             const zoneNameEl = document.getElementById('zoneNameEl');
@@ -1060,6 +1088,9 @@
                     }
                 });
                 
+                // Sort favorites to maintain a consistent order
+                favoriteGames.sort((a, b) => a.name.localeCompare(b.name));
+                
                 renderGames(favoriteGames, favoritesGameList, true);
             } else {
                 favoritesHeader.style.display = "none";
@@ -1148,7 +1179,7 @@
             };
         }
 
-        // MODIFIED: Search logic now handles versioned games correctly
+        // MODIFIED: Replaced entire search function
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
             renderGamesForCurrentCategory(text);
@@ -1161,6 +1192,8 @@
                 return;
             }
             
+            const favorites = getFavorites();
+
             filteredDropdown.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
                 const isOthers = game.category === 'Others';
@@ -1177,10 +1210,54 @@
                 
                 const linkEl = document.createElement("a");
                 linkEl.href = href;
-                linkEl.className = 'search-item';
-                linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https.placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
+                // MODIFIED: Added game ID for favorite toggling
+                linkEl.className = 'search-item flex justify-between items-center';
+                linkEl.dataset.gameId = game.id;
+
+                // Get category color
+                const categoryColorClass = categoryColors[game.category] || 'text-gray-400';
+            
+                // Get favorite status
+                let isFavorite;
+                if (game.versions) {
+                    isFavorite = game.versions.some(v => favorites.includes(v.favoriteId)) || favorites.includes(game.id);
+                } else {
+                    isFavorite = favorites.includes(game.id);
+                }
+
+                // MODIFIED: New innerHTML with category and buttons
+                linkEl.innerHTML = `
+                    <div class="flex items-center truncate min-w-0">
+                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                        <span class="ml-3 font-medium truncate" title="${game.name}">${game.name}</span>
+                    </div>
+                    <div class="flex items-center flex-shrink-0">
+                        <!-- REMOVED Category Span -->
+                        <div class="bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
+                            <button class="play-btn-search rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
+                                <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
+                                <i class="fa-regular fa-circle-play fa-regular-play text-accent-indigo transition-colors"></i>
+                            </button>
+                            <button class="favorite-btn-search rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                                <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                                <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
                 
-                // Attach universal click listener
+                // MODIFIED: Added separate listener for favorite button
+                const favBtn = linkEl.querySelector('.favorite-btn-search');
+                favBtn.addEventListener('click', (e) => {
+                    e.preventDefault(); 
+                    e.stopPropagation(); 
+                    
+                    // We just toggle the base game ID. This is the simplest, most predictable behavior.
+                    // toggleFavorite will handle re-rendering favorites and updating buttons.
+                    toggleFavorite(game.id);
+                });
+
+                // Attach universal click listener (for play)
                 linkEl.addEventListener('click', async (e) => {
                     e.preventDefault();
                     if (isStrongdog) {
@@ -1213,8 +1290,10 @@
                             const versionToOpen = availableVersions[0]; // Get the first one
                             
                             if (versionToOpen) {
+                                // MODIFIED: Pass the correct name
                                 openZone({
                                     ...game,
+                                    name: `${game.name} - ${versionToOpen.name}`,
                                     url: versionToOpen.url
                                 });
                             } else {
@@ -1334,6 +1413,7 @@
                 const zoneFrame = document.getElementById('zoneFrame');
                 if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
             });
+            // MODIFIED: Re-added event listener for newTabBtnZone
             document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
         }
