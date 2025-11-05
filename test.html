@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- The user's original navigation.js script -->
     <script src="../navigation.js"></script>
 
     <script>
@@ -273,8 +272,6 @@
              </div>
              <div class="zone-controls">
                 <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
-                <button id="newTabBtnZone" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></button>
-                <!-- ADDED: Download button, hidden by default -->
                 <a id="downloadBtnZone" title="Download" class="hidden" href="#"><i class="fas fa-download"></i></a>
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
@@ -844,6 +841,9 @@
                 console.error("Could not load game: Invalid game data.");
                 return;
             }
+            
+            // ADDED: Prevent background scrolling
+            document.body.style.overflow = 'hidden';
 
             // MODIFIED: Only set category hash
             const categoryHash = encodeURIComponent(game.category.replace(/\s+/g, '-'));
@@ -851,21 +851,16 @@
 
             // Handle Download Button
             const downloadBtn = document.getElementById('downloadBtnZone');
-            if (game.id === 'other-eaglercraft' || game.id === 'other-doom' || game.id === 'other-gta') {
+            // MODIFIED: Only show download button for Eaglercraft
+            if (game.id === 'other-eaglercraft') {
                 downloadBtn.href = game.url;
-                if (game.id === 'other-eaglercraft' || game.id === 'other-gta') {
-                    // This is a relative URL, so the download attribute should work.
-                    // We link to the specific version being opened.
-                    downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
-                    downloadBtn.removeAttribute('target');
-                } else {
-                    // This is an external URL (doom.4sp.games), download attr won't work.
-                    // Make it act like a new tab link.
-                    downloadBtn.removeAttribute('download');
-                    downloadBtn.target = '_blank';
-                }
+                // This is a relative URL, so the download attribute should work.
+                // We link to the specific version being opened.
+                downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
+                downloadBtn.removeAttribute('target');
                 downloadBtn.classList.remove('hidden');
             } else {
+                // Hide for all other games
                 downloadBtn.classList.add('hidden');
                 downloadBtn.href = '#';
                 downloadBtn.removeAttribute('download');
@@ -891,22 +886,21 @@
             zoneFrame.src = 'about:blank'; // Clear previous game
             zoneFrame.dataset.activeUrl = game.url; // Store the URL that will be loaded
             
+            // --- MODIFIED: Apply sandbox and allow attributes to ALL games ---
+            // This ensures features like pointer lock and fullscreen work for GN-Math, Strongdog, and Others.
+            zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
+            zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock');
+            // --- END MODIFICATION ---
+            
             const isURLBasedGame = game.category === 'StrongdogXP' || game.category === 'Others'; 
 
             if (isURLBasedGame) {
                 zoneFrame.src = gameUrl;
-                // Add sandbox attributes like in playindex.html
-                // For 'Others' games, this is necessary for things like Eaglercraft, DOOM, and GTA
-                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
-                // ADDED: allow attribute for features like pointer-lock which are crucial for game input
-                zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock');
+                // The setAttribute calls were moved up
                 zoneViewer.style.display = "flex";
             } else {
                 // GN-Math logic: Fetch and write HTML
-                // Remove sandbox attribute if it exists from a previous Strongdog/Others game
-                zoneFrame.removeAttribute('sandbox'); 
-                // REMOVED: allow attribute, not needed for blob-based games
-                zoneFrame.removeAttribute('allow');
+                // The removeAttribute calls are no longer needed
                 
                 fetch(`${gameUrl}?t=${Date.now()}`)
                     .then(response => {
@@ -928,6 +922,9 @@
         }
 
         function closeZoneViewer() {
+            // ADDED: Restore background scrolling
+            document.body.style.overflow = 'auto';
+            
             // Clear URL hash
             window.history.pushState("", document.title, window.location.pathname + window.location.search);
 
@@ -954,55 +951,7 @@
             }
         }
 
-        /**
-         * MODIFIED: Rebuilt function to open games in about:blank, with a fallback.
-         */
-        function openGameInNewTab() {
-            const zoneFrame = document.getElementById('zoneFrame');
-            const zoneNameEl = document.getElementById('zoneNameEl');
-            const game = allGames.find(z => z.name === zoneNameEl.textContent);
-
-            if (!game) {
-                console.error("Could not find game data for new tab.");
-                return;
-            }
-            
-            const gameUrl = zoneFrame.dataset.activeUrl; // Get the URL that was *actually* loaded
-            
-            if (!gameUrl) {
-                console.error("Could not find active game URL to open in new tab.");
-                return;
-            }
-
-            // This logic now works for ALL game types (GN-Math, Strongdog, Others)
-            // It attempts to fetch the game and write it to an about:blank page.
-            const newWindow = window.open("about:blank", "_blank");
-            if (newWindow) {
-                // Add cache-busting for GN-Math games, as they are single files that might update.
-                let fetchUrl = gameUrl;
-                if (game.category === 'GN-Math') {
-                    fetchUrl = `${gameUrl}?t=${Date.now()}`;
-                }
-
-                fetch(fetchUrl)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`HTTP error ${response.status} for ${fetchUrl}`);
-                        return response.text();
-                    })
-                    .then(html => {
-                        newWindow.document.open();
-                        newWindow.document.write(html);
-                        newWindow.document.close();
-                    })
-                    .catch(err => {
-                        console.error("Error fetching game for about:blank, falling back to direct URL:", err);
-                        // Fallback: If fetch fails (e.g., cross-origin for DOOM, or file not found),
-                        // close the blank window and just open the URL directly.
-                        newWindow.close();
-                        window.open(gameUrl, "_blank"); // Open the URL in a new tab normally
-                    });
-            }
-        }
+        // REMOVED: openGameInNewTab function is no longer needed
 
 
         // --- Game List Rendering ---
@@ -1299,31 +1248,20 @@
 
             // ADDED: Keyboard arrow key navigation
             document.addEventListener('keydown', (e) => {
-                const isZoneViewerOpen = document.getElementById('zoneViewer').style.display === 'flex';
+                // Don't switch categories if user is typing in the search bar
+                if (document.activeElement === searchInput) return;
 
-                if (isZoneViewerOpen) {
-                    // If game viewer is open, prevent default action for arrow keys to stop scrolling/navigation
-                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                        e.preventDefault();
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    // Check if not disabled (at start)
+                    if (currentCategoryIndex > 0) {
+                        cycle(-1);
                     }
-                } else {
-                    // Game viewer is closed, handle category navigation
-                    
-                    // Don't switch categories if user is typing in the search bar
-                    if (document.activeElement === searchInput) return;
-
-                    if (e.key === 'ArrowLeft') {
-                        e.preventDefault();
-                        // Check if not disabled (at start)
-                        if (currentCategoryIndex > 0) {
-                            cycle(-1);
-                        }
-                    } else if (e.key === 'ArrowRight') {
-                        e.preventDefault();
-                        // Check if not disabled (at end)
-                        if (currentCategoryIndex < categories.length - 1) {
-                            cycle(1);
-                        }
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    // Check if not disabled (at end)
+                    if (currentCategoryIndex < categories.length - 1) {
+                        cycle(1);
                     }
                 }
             });
@@ -1345,7 +1283,7 @@
                 const zoneFrame = document.getElementById('zoneFrame');
                 if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
             });
-            document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
+            // REMOVED: Event listener for newTabBtnZone
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
         }
 
