@@ -104,22 +104,37 @@
         .search-results {
             max-height: 250px;
             overflow-y: auto;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            /* MODIFIED: Removed border-top, Tailwind handles borders now */
         }
         .search-item {
             display: flex;
-            align-items: center;
-            padding: 8px 15px;
+            /* MODIFIED: Removed padding, Tailwind handles it now */
             cursor: pointer;
             transition: background-color 0.2s;
             color: white;
             text-decoration: none;
+            padding: 8px 15px; /* MODIFIED: Re-added padding for items */
         }
-        .search-item:hover { background-color: #333; }
-        .search-item img {
-            width: 40px; height: 40px; border-radius: 8px;
-            margin-right: 12px; object-fit: cover;
-        }
+        .search-item:hover { background-color: rgba(255, 255, 255, 0.1); } /* MODIFIED: Lighter hover for blur */
+        
+        /* MODIFIED: Removed .search-item img styles, Tailwind handles it */
+
+        /* --- ADDED: Hover styles for search result buttons --- */
+        .search-item .play-btn-search .fa-solid-play { display: inline-block; }
+        .search-item .play-btn-search .fa-regular-play { display: none; }
+        .search-item:hover .play-btn-search .fa-solid-play { display: none; }
+        .search-item:hover .play-btn-search .fa-regular-play { display: inline-block; }
+
+        .search-item .favorite-btn-search .fa-solid-star { display: inline-block; }
+        .search-item .favorite-btn-search .fa-regular-star { display: none; }
+        .search-item:hover .favorite-btn-search:not(.favorited) .fa-solid-star { display: none; }
+        .search-item:hover .favorite-btn-search:not(.favorited) .fa-regular-star { display: inline-block; color: white; }
+        .search-item .favorite-btn-search.favorited .fa-solid-star { display: inline-block; color: #facc15; }
+        .search-item .favorite-btn-search.favorited .fa-regular-star { display: none; }
+        .search-item:hover .favorite-btn-search.favorited .fa-solid-star { display: none; }
+        .search-item:hover .favorite-btn-search.favorited .fa-regular-star { display: inline-block; color: #facc15; }
+        /* --- END: Added search button styles --- */
+
 
         @media (max-width: 768px) {
             #bottom-fixed-bar {
@@ -261,7 +276,8 @@
             <button id="category-cycle-btn" title="Next Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
                 <i class="fa-solid fa-layer-group"></i>
             </button>
-            <div class="search-results absolute bottom-full w-full mb-2 bg-card-dark border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
+            <!-- MODIFIED: Added bg-black/70 and backdrop-blur-lg, removed bg-card-dark -->
+            <div class="search-results absolute bottom-full w-full mb-2 bg-black/70 backdrop-blur-lg border border-brand-border rounded-lg shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
                 </div>
         </div>
     </div>
@@ -273,8 +289,8 @@
              </div>
              <div class="zone-controls">
                 <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
-                <!-- REMOVED: Open in New Tab button -->
-                <!-- ADDED: Download button, hidden by default -->
+                <!-- MODIFIED: Re-added New Tab button -->
+                <button id="newTabBtnZone" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></button>
                 <a id="downloadBtnZone" title="Download" class="hidden" href="#"><i class="fas fa-download"></i></a>
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
@@ -366,7 +382,7 @@
             }
             saveFavorites(favorites);
 
-            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn, .other-zone-item[data-game-id='${gameId}'] .favorite-btn`).forEach(btn => {
+            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn, .other-zone-item[data-game-id='${gameId}'] .favorite-btn, .search-item[data-game-id='${gameId}'] .favorite-btn-search`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
                 btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
             });
@@ -849,14 +865,12 @@
         }
 
         // --- Game Viewer Logic (Modified to handle 'Others' games which use direct URL) ---
+        // MODIFIED: Replaced entire function with index(1).html version
         function openZone(game) {
             if (!game || !game.url) {
                 console.error("Could not load game: Invalid game data.");
                 return;
             }
-            
-            // ADDED: Prevent background scrolling
-            document.body.style.overflow = 'hidden';
 
             // MODIFIED: Only set category hash
             const categoryHash = encodeURIComponent(game.category.replace(/\s+/g, '-'));
@@ -864,18 +878,21 @@
 
             // Handle Download Button
             const downloadBtn = document.getElementById('downloadBtnZone');
-            // MODIFIED: Only show download button for Eaglercraft
-            // Check base game ID
-            const baseGameId = game.id.split('_')[0];
-            if (baseGameId === 'other-eaglercraft') {
+            if (game.id === 'other-eaglercraft' || game.id === 'other-doom' || game.id === 'other-gta') {
                 downloadBtn.href = game.url;
-                // This is a relative URL, so the download attribute should work.
-                // We link to the specific version being opened.
-                downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
-                downloadBtn.removeAttribute('target');
+                if (game.id === 'other-eaglercraft' || game.id === 'other-gta') {
+                    // This is a relative URL, so the download attribute should work.
+                    // We link to the specific version being opened.
+                    downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
+                    downloadBtn.removeAttribute('target');
+                } else {
+                    // This is an external URL (doom.4sp.games), download attr won't work.
+                    // Make it act like a new tab link.
+                    downloadBtn.removeAttribute('download');
+                    downloadBtn.target = '_blank';
+                }
                 downloadBtn.classList.remove('hidden');
             } else {
-                // Hide for all other games
                 downloadBtn.classList.add('hidden');
                 downloadBtn.href = '#';
                 downloadBtn.removeAttribute('download');
@@ -897,29 +914,26 @@
             const zoneFrame = document.getElementById('zoneFrame');
             const zoneNameEl = document.getElementById('zoneNameEl');
             
-            // MODIFIED: This now receives the correct name (e.g., "Eaglercraft - Release 1.12.2")
             zoneNameEl.textContent = game.name;
             zoneFrame.src = 'about:blank'; // Clear previous game
             zoneFrame.dataset.activeUrl = game.url; // Store the URL that will be loaded
-            
-            // --- MODIFIED: Apply sandbox and allow attributes to ALL games ---
-            // This ensures features like pointer lock and fullscreen work for GN-Math, Strongdog, and Others.
-            zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
-            zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock');
-            // --- END MODIFICATION ---
             
             const isURLBasedGame = game.category === 'StrongdogXP' || game.category === 'Others'; 
 
             if (isURLBasedGame) {
                 zoneFrame.src = gameUrl;
+                // Add sandbox attributes like in playindex.html
+                // For 'Others' games, this is necessary for things like Eaglercraft, DOOM, and GTA
+                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
+                // ADDED: allow attribute for features like pointer-lock which are crucial for game input
+                zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock');
                 zoneViewer.style.display = "flex";
-                // MODIFIED: Request fullscreen and focus
-                if (zoneFrame.requestFullscreen) {
-                    zoneFrame.requestFullscreen().catch(err => console.error(`Error attempting fullscreen: ${err.message}`));
-                }
-                zoneFrame.focus();
             } else {
                 // GN-Math logic: Fetch and write HTML
+                // Remove sandbox attribute if it exists from a previous Strongdog/Others game
+                zoneFrame.removeAttribute('sandbox'); 
+                // REMOVED: allow attribute, not needed for blob-based games
+                zoneFrame.removeAttribute('allow');
                 
                 fetch(`${gameUrl}?t=${Date.now()}`)
                     .then(response => {
@@ -932,11 +946,6 @@
                         doc.write(html);
                         doc.close();
                         zoneViewer.style.display = "flex";
-                        // MODIFIED: Request fullscreen and focus
-                        if (zoneFrame.requestFullscreen) {
-                            zoneFrame.requestFullscreen().catch(err => console.error(`Error attempting fullscreen: ${err.message}`));
-                        }
-                        zoneFrame.focus();
                     })
                     .catch(error => {
                         console.error(`Failed to load game "${game.name}": ${error.message}.`);
@@ -946,9 +955,6 @@
         }
 
         function closeZoneViewer() {
-            // ADDED: Restore background scrolling
-            document.body.style.overflow = 'auto';
-            
             // Clear URL hash
             window.history.pushState("", document.title, window.location.pathname + window.location.search);
 
@@ -975,7 +981,56 @@
             }
         }
 
-        // REMOVED: openGameInNewTab function is no longer needed
+        /**
+         * MODIFIED: Rebuilt function to open games in about:blank, with a fallback.
+         */
+        // MODIFIED: Added openGameInNewTab function from index(1).html
+        function openGameInNewTab() {
+            const zoneFrame = document.getElementById('zoneFrame');
+            const zoneNameEl = document.getElementById('zoneNameEl');
+            const game = allGames.find(z => z.name === zoneNameEl.textContent);
+
+            if (!game) {
+                console.error("Could not find game data for new tab.");
+                return;
+            }
+            
+            const gameUrl = zoneFrame.dataset.activeUrl; // Get the URL that was *actually* loaded
+            
+            if (!gameUrl) {
+                console.error("Could not find active game URL to open in new tab.");
+                return;
+            }
+
+            // This logic now works for ALL game types (GN-Math, Strongdog, Others)
+            // It attempts to fetch the game and write it to an about:blank page.
+            const newWindow = window.open("about:blank", "_blank");
+            if (newWindow) {
+                // Add cache-busting for GN-Math games, as they are single files that might update.
+                let fetchUrl = gameUrl;
+                if (game.category === 'GN-Math') {
+                    fetchUrl = `${gameUrl}?t=${Date.now()}`;
+                }
+
+                fetch(fetchUrl)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error ${response.status} for ${fetchUrl}`);
+                        return response.text();
+                    })
+                    .then(html => {
+                        newWindow.document.open();
+                        newWindow.document.write(html);
+                        newWindow.document.close();
+                    })
+                    .catch(err => {
+                        console.error("Error fetching game for about:blank, falling back to direct URL:", err);
+                        // Fallback: If fetch fails (e.g., cross-origin for DOOM, or file not found),
+                        // close the blank window and just open the URL directly.
+                        newWindow.close();
+                        window.open(gameUrl, "_blank"); // Open the URL in a new tab normally
+                    });
+            }
+        }
 
 
         // --- Game List Rendering ---
@@ -1124,7 +1179,7 @@
             };
         }
 
-        // MODIFIED: Search logic now handles versioned games correctly
+        // MODIFIED: Replaced entire search function
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
             renderGamesForCurrentCategory(text);
@@ -1137,6 +1192,8 @@
                 return;
             }
             
+            const favorites = getFavorites();
+
             filteredDropdown.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
                 const isOthers = game.category === 'Others';
@@ -1153,10 +1210,54 @@
                 
                 const linkEl = document.createElement("a");
                 linkEl.href = href;
-                linkEl.className = 'search-item';
-                linkEl.innerHTML = `<img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'"><span>${game.name}</span>`;
+                // MODIFIED: Added game ID for favorite toggling
+                linkEl.className = 'search-item flex justify-between items-center';
+                linkEl.dataset.gameId = game.id;
+
+                // Get category color
+                const categoryColorClass = categoryColors[game.category] || 'text-gray-400';
+            
+                // Get favorite status
+                let isFavorite;
+                if (game.versions) {
+                    isFavorite = game.versions.some(v => favorites.includes(v.favoriteId)) || favorites.includes(game.id);
+                } else {
+                    isFavorite = favorites.includes(game.id);
+                }
+
+                // MODIFIED: New innerHTML with category and buttons
+                linkEl.innerHTML = `
+                    <div class="flex items-center truncate min-w-0">
+                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https.placehold.co/80x80/111111/888888?text=4SP'" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                        <span class="ml-3 font-medium truncate" title="${game.name}">${game.name}</span>
+                    </div>
+                    <div class="flex items-center space-x-4 flex-shrink-0 ml-4">
+                        <span class="text-sm font-semibold ${categoryColorClass} hidden sm:block">${game.category}</span>
+                        <div class="bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
+                            <button class_="play-btn-search rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
+                                <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
+                                <i class="fa-regular fa-circle-play fa-regular-play text-accent-indigo transition-colors"></i>
+                            </button>
+                            <button class="favorite-btn-search rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                                <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                                <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
                 
-                // Attach universal click listener
+                // MODIFIED: Added separate listener for favorite button
+                const favBtn = linkEl.querySelector('.favorite-btn-search');
+                favBtn.addEventListener('click', (e) => {
+                    e.preventDefault(); 
+                    e.stopPropagation(); 
+                    
+                    // We just toggle the base game ID. This is the simplest, most predictable behavior.
+                    // toggleFavorite will handle re-rendering favorites and updating buttons.
+                    toggleFavorite(game.id);
+                });
+
+                // Attach universal click listener (for play)
                 linkEl.addEventListener('click', async (e) => {
                     e.preventDefault();
                     if (isStrongdog) {
@@ -1312,7 +1413,8 @@
                 const zoneFrame = document.getElementById('zoneFrame');
                 if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
             });
-            // REMOVED: Event listener for newTabBtnZone
+            // MODIFIED: Re-added event listener for newTabBtnZone
+            document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
         }
 
