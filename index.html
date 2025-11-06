@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- The user's original navigation.js script -->
     <script src="../navigation.js"></script>
 
     <script>
@@ -276,7 +275,6 @@
             <button id="category-cycle-btn" title="Next Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
                 <i class="fa-solid fa-layer-group"></i>
             </button>
-            <!-- MODIFIED: Moved search results back inside the relative container and applied blur/rounded styles -->
             <div class="search-results absolute bottom-full w-full mb-2 bg-black/70 backdrop-blur-lg border border-brand-border rounded-xl shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
             </div>
         </div>
@@ -289,8 +287,6 @@
              </div>
              <div class="zone-controls">
                 <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
-                <!-- MODIFIED: Re-added New Tab button -->
-                <button id="newTabBtnZone" title="Open in New Tab"><i class="fas fa-external-link-alt"></i></button>
                 <a id="downloadBtnZone" title="Download" class="hidden" href="#"><i class="fas fa-download"></i></a>
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
@@ -336,6 +332,18 @@
                     { name: "Carnage3D", url: "../CARNAGE3D/web/carnage3D.html", favoriteId: "other-gta_carnage3d" },
                     { name: "Grand Theft Auto (JS-DOS)", url: "../GTA-JSDOS/index.html", favoriteId: "other-gta_jsdos" }
                 ]
+            },
+            // ADDED: New Sim City game card
+            {
+                id: "other-simcity",
+                name: "Sim City",
+                imgSrc: "./images/simcity2000.png",
+                description: "The original city-building classics. Design, build, and manage the city of your dreams in either the original Sim City or the detailed Sim City 2000.",
+                category: "Others",
+                versions: [
+                    { name: "Sim City", url: "../SIM-CITY/index.html", favoriteId: "other-simcity_1" },
+                    { name: "Sim City 2000", url: "../SIM-CITY-2/index.html", favoriteId: "other-simcity_2000" }
+                ]
             }
         ];
 
@@ -346,6 +354,7 @@
         const FAVORITES_KEY = 'gameHubFavorites_v3';
 
         let allGames = [];
+        let searchableGames = []; // ADDED: For search results
         let categories = [];
         let currentCategoryIndex = 0;
         const categoryColors = {
@@ -607,7 +616,7 @@
             const hasWasm = supportsWasm();
 
             if (game.versions && game.versions.length > 0) {
-                // This is a versioned card (Eaglercraft, GTA)
+                // This is a versioned card (Eaglercraft, GTA, Sim City)
                 
                 // Filter versions based on WASM support if needed
                 const availableVersions = game.versions.filter(v => !v.wasm || (v.wasm && hasWasm));
@@ -703,7 +712,7 @@
                 });
             });
 
-            // Version dropdown button (for Eaglercraft, GTA)
+            // Version dropdown button (for Eaglercraft, GTA, Sim City)
             const versionBtn = card.querySelector('.version-btn');
             if (versionBtn) {
                 versionBtn.addEventListener('click', (e) => {
@@ -717,7 +726,7 @@
                 });
             }
 
-            // MODIFIED: Version dropdown links (Eaglercraft, GTA)
+            // MODIFIED: Version dropdown links (Eaglercraft, GTA, Sim City)
             // This now handles passing the correct version name
             card.querySelectorAll('.eagler-dropdown-link:not(.favorite-link)').forEach(link => {
                 link.addEventListener('click', (e) => {
@@ -734,7 +743,7 @@
             // Favorite button logic
             const favBtn = card.querySelector('.favorite-btn');
             if (favBtn.classList.contains('version-favorite-btn')) {
-                // Versioned favorite button (Eaglercraft, GTA)
+                // Versioned favorite button (Eaglercraft, GTA, Sim City)
                 favBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const dropdown = favBtn.nextElementSibling;
@@ -878,21 +887,20 @@
 
             // Handle Download Button
             const downloadBtn = document.getElementById('downloadBtnZone');
-            if (game.id === 'other-eaglercraft' || game.id === 'other-doom' || game.id === 'other-gta') {
+            
+            // MODIFIED: Show download button ONLY for Eaglercraft
+            // Check base game ID (from search) or current game ID (from card)
+            const baseId = game.baseGameId || game.id; 
+            
+            if (baseId === 'other-eaglercraft') {
                 downloadBtn.href = game.url;
-                if (game.id === 'other-eaglercraft' || game.id === 'other-gta') {
-                    // This is a relative URL, so the download attribute should work.
-                    // We link to the specific version being opened.
-                    downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
-                    downloadBtn.removeAttribute('target');
-                } else {
-                    // This is an external URL (doom.4sp.games), download attr won't work.
-                    // Make it act like a new tab link.
-                    downloadBtn.removeAttribute('download');
-                    downloadBtn.target = '_blank';
-                }
+                // This is a relative URL, so the download attribute should work.
+                // We link to the specific version being opened.
+                downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
+                downloadBtn.removeAttribute('target');
                 downloadBtn.classList.remove('hidden');
             } else {
+                // Hide for all other games (DOOM, GTA, Sim City, etc.)
                 downloadBtn.classList.add('hidden');
                 downloadBtn.href = '#';
                 downloadBtn.removeAttribute('download');
@@ -981,56 +989,7 @@
             }
         }
 
-        /**
-         * MODIFIED: Rebuilt function to open games in about:blank, with a fallback.
-         */
-        // MODIFIED: Added openGameInNewTab function from index(1).html
-        function openGameInNewTab() {
-            const zoneFrame = document.getElementById('zoneFrame');
-            const zoneNameEl = document.getElementById('zoneNameEl');
-            const game = allGames.find(z => z.name === zoneNameEl.textContent);
-
-            if (!game) {
-                console.error("Could not find game data for new tab.");
-                return;
-            }
-            
-            const gameUrl = zoneFrame.dataset.activeUrl; // Get the URL that was *actually* loaded
-            
-            if (!gameUrl) {
-                console.error("Could not find active game URL to open in new tab.");
-                return;
-            }
-
-            // This logic now works for ALL game types (GN-Math, Strongdog, Others)
-            // It attempts to fetch the game and write it to an about:blank page.
-            const newWindow = window.open("about:blank", "_blank");
-            if (newWindow) {
-                // Add cache-busting for GN-Math games, as they are single files that might update.
-                let fetchUrl = gameUrl;
-                if (game.category === 'GN-Math') {
-                    fetchUrl = `${gameUrl}?t=${Date.now()}`;
-                }
-
-                fetch(fetchUrl)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`HTTP error ${response.status} for ${fetchUrl}`);
-                        return response.text();
-                    })
-                    .then(html => {
-                        newWindow.document.open();
-                        newWindow.document.write(html);
-                        newWindow.document.close();
-                    })
-                    .catch(err => {
-                        console.error("Error fetching game for about:blank, falling back to direct URL:", err);
-                        // Fallback: If fetch fails (e.g., cross-origin for DOOM, or file not found),
-                        // close the blank window and just open the URL directly.
-                        newWindow.close();
-                        window.open(gameUrl, "_blank"); // Open the URL in a new tab normally
-                    });
-            }
-        }
+        // REMOVED: openGameInNewTab function
 
 
         // --- Game List Rendering ---
@@ -1071,7 +1030,7 @@
                             favoriteGames.push(game);
                         }
                     } else if (game.versions) {
-                        // Check versions for favorites (Eaglercraft, GTA)
+                        // Check versions for favorites (Eaglercraft, GTA, Sim City)
                         game.versions.forEach(version => {
                             if (favoriteIds.includes(version.favoriteId)) {
                                 if (!favoriteGames.some(g => g.id === version.favoriteId)) {
@@ -1185,7 +1144,8 @@
             renderGamesForCurrentCategory(text);
 
             // Update dropdown
-            const filteredDropdown = text ? allGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
+            // MODIFIED: Use searchableGames to show individual versions
+            const filteredDropdown = text ? searchableGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
             searchResults.innerHTML = "";
             if (filteredDropdown.length === 0 || !text) {
                 searchResults.style.display = "none";
@@ -1212,18 +1172,14 @@
                 linkEl.href = href;
                 // MODIFIED: Added game ID for favorite toggling
                 linkEl.className = 'search-item flex justify-between items-center';
-                linkEl.dataset.gameId = game.id;
+                linkEl.dataset.gameId = game.id; // This is now the version-specific ID
 
                 // Get category color
                 const categoryColorClass = categoryColors[game.category] || 'text-gray-400';
             
                 // Get favorite status
-                let isFavorite;
-                if (game.versions) {
-                    isFavorite = game.versions.some(v => favorites.includes(v.favoriteId)) || favorites.includes(game.id);
-                } else {
-                    isFavorite = favorites.includes(game.id);
-                }
+                // MODIFIED: This is simpler, game.id is the version-specific ID
+                let isFavorite = favorites.includes(game.id);
 
                 // MODIFIED: New innerHTML with category and buttons
                 linkEl.innerHTML = `
@@ -1232,7 +1188,6 @@
                         <span class="ml-3 font-medium truncate" title="${game.name}">${game.name}</span>
                     </div>
                     <div class="flex items-center flex-shrink-0">
-                        <!-- REMOVED Category Span -->
                         <div class="bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
                             <button class="play-btn-search rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
                                 <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
@@ -1252,8 +1207,8 @@
                     e.preventDefault(); 
                     e.stopPropagation(); 
                     
-                    // We just toggle the base game ID. This is the simplest, most predictable behavior.
-                    // toggleFavorite will handle re-rendering favorites and updating buttons.
+                    // MODIFIED: Toggle the version-specific ID.
+                    // toggleFavorite function already handles updating the main card star.
                     toggleFavorite(game.id);
                 });
 
@@ -1282,27 +1237,15 @@
                             alert(`Could not load game: ${game.name}. See console for details.`);
                         }
                     } else if (isOthers) {
-                        // Others: Open directly in modal
-                        if (game.versions && game.versions.length > 0) {
-                            // It's a versioned game (Eaglercraft, GTA). Open the first available version.
-                            const hasWasm = supportsWasm();
-                            const availableVersions = game.versions.filter(v => !v.wasm || (v.wasm && hasWasm));
-                            const versionToOpen = availableVersions[0]; // Get the first one
-                            
-                            if (versionToOpen) {
-                                // MODIFIED: Pass the correct name
-                                openZone({
-                                    ...game,
-                                    name: `${game.name} - ${versionToOpen.name}`,
-                                    url: versionToOpen.url
-                                });
-                            } else {
-                                alert("This game requires features your browser does not support.");
-                            }
-                        } else {
-                            // Simple 'Others' game (DOOM)
-                            openZone(game);
+                        // MODIFIED: 'game' is now the specific version from searchableGames
+                        // Check for WASM
+                        const hasWasm = supportsWasm();
+                        if (game.wasm && !hasWasm) {
+                             alert("This game requires features your browser does not support.");
+                             return;
                         }
+                        // Just open the game, all info (name, url, id) is correct
+                        openZone(game);
                     } else {
                         // GN-Math: Open directly in modal
                         openZone(game);
@@ -1335,6 +1278,28 @@
                 console.error("Failed to load GN-Math games:", error);
                 allGames = [...strongdogGames, ...othersGames]; // Fallback
             }
+
+            // MODIFIED: Create searchableGames array that includes individual versions
+            searchableGames = [];
+            allGames.forEach(game => {
+                if (game.versions && game.versions.length > 0) {
+                    // It's a versioned game, add each version
+                    game.versions.forEach(version => {
+                        searchableGames.push({
+                            ...game, // Spread base game info (imgSrc, category)
+                            id: version.favoriteId, // Use version-specific ID
+                            name: `${game.name} - ${version.name}`, // "Eaglercraft - Release 1.12.2"
+                            url: version.url,
+                            wasm: version.wasm, // Keep wasm flag
+                            versions: undefined, // This is a simple game card now
+                            baseGameId: game.id // Store original ID for favoriting logic
+                        });
+                    });
+                } else {
+                    // It's a simple game
+                    searchableGames.push(game);
+                }
+            });
 
             // MODIFIED: Create categories dynamically and insert the new ones
             categories = [...new Set(allGames.map(g => g.category))];
@@ -1413,8 +1378,7 @@
                 const zoneFrame = document.getElementById('zoneFrame');
                 if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
             });
-            // MODIFIED: Re-added event listener for newTabBtnZone
-            document.getElementById('newTabBtnZone')?.addEventListener('click', openGameInNewTab);
+            // MODIFIED: Removed event listener for newTabBtnZone
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
         }
 
