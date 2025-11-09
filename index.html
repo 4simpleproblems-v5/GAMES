@@ -228,6 +228,30 @@
         .eagler-dropdown-link:hover {
             background-color: rgba(255, 255, 255, 0.15);
         }
+        
+        /* --- ADDED: Splash Text Styles --- */
+        @keyframes tilt {
+            0% { transform: rotate(-165deg) translate(50%, -50%); }
+            50% { transform: rotate(-175deg) translate(50%, -50%); } /* -165 - 10 = -175 */
+            100% { transform: rotate(-165deg) translate(50%, -50%); }
+        }
+
+        #splash-text {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1; /* Below the header but above the main content */
+            color: white;
+            font-size: 1.5rem; /* Large font size */
+            font-weight: 300; /* Geist 300 */
+            white-space: nowrap;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Slight shadow */
+            /* Initial transformation: Rotate -165deg and shift the element so its center is at the top-right corner of its container (the main element). */
+            transform: rotate(-165deg) translate(50%, -50%); 
+            transform-origin: 0 0; /* Rotate around the top-left of the text element itself */
+            animation: tilt 4s ease-in-out infinite alternate; /* Slow, back-and-forth tilt */
+        }
+        /* --- END Splash Text Styles --- */
 
     </style>
 </head>
@@ -237,7 +261,8 @@
         <a href="../index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
     </header>
 
-    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4">
+    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4 relative"> <div id="splash-text"></div> 
+        
         <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl">
             <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
                 <strong>Welcome to the 4SP Game Hub!</strong><br>
@@ -352,6 +377,15 @@
         const GN_COVER_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
         const GN_HTML_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
         const FAVORITES_KEY = 'gameHubFavorites_v3';
+        
+        // ADDED: List of splash texts
+        const SPLASH_TEXTS = [
+            "Thanks Josh!",
+            "Adding GBA Games Soon!",
+            "All in one Page!"
+        ];
+        // --- END ADDED ---
+
 
         let allGames = [];
         let searchableGames = []; // ADDED: For search results
@@ -1258,6 +1292,17 @@
         }, 250);
 
         // --- Data Loading and Initialization ---
+        
+        // ADDED: Function to choose and set a random splash text
+        function setRandomSplashText() {
+            const splashEl = document.getElementById('splash-text');
+            if (splashEl) {
+                const randomIndex = Math.floor(Math.random() * SPLASH_TEXTS.length);
+                splashEl.textContent = SPLASH_TEXTS[randomIndex];
+            }
+        }
+        // --- END ADDED ---
+        
         async function initializeApp() {
             const strongdogGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
             
@@ -1317,6 +1362,7 @@
             updateArrowVisibility(); // ADDED: Set initial arrow state
             renderGamesForCurrentCategory();
             renderFavorites();
+            setRandomSplashText(); // ADDED: Call to set the random splash text
 
             searchInput.placeholder = `Search all games...`;
             searchInput.addEventListener("input", handleSearch);
