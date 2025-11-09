@@ -14,6 +14,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../navigation.js"></script>
 
+    <!-- Google tag (gtag.js) - ADDED -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1D4F692C1Q"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-1D4F692C1Q');
+    </script>
+    <!-- End Google Analytics -->
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -26,8 +37,8 @@
                         'brand-border': '#252525',
                         'strongdog-orange': '#FFA500',
                         'gn-math': '#FB2651',
-                        'gameboy': '#9A2257', // ADDED: New category color
-                        // ADDED: New color for the 'Others' category
+                        'gameboy': '#9A2257', // New category color
+                        // New color for the 'Others' category
                         'other-grey': '#AAAAAA', 
                     },
                     fontFamily: {
@@ -67,7 +78,7 @@
             box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
         }
         
-        /* ADDED: New styling for the full-width card in the 'Others' category */
+        /* New styling for the full-width card in the 'Others' category */
         .other-zone-item {
             min-height: 250px; /* Enforce height */
             transition: box-shadow 0.2s ease-in-out;
@@ -87,7 +98,6 @@
         .play-btn .fa-regular-play { display: none; }
         .play-btn:hover .fa-solid-play { display: none; }
         .play-btn:hover .fa-regular-play { display: inline-block; }
-        /* Removed .play-btn-no-wasm rules as it's no longer used */
 
         /* --- Favorite Star Hover CSS --- */
         .favorite-btn .fa-solid-star { display: inline-block; }
@@ -103,22 +113,18 @@
         .search-results {
             max-height: 250px;
             overflow-y: auto;
-            /* MODIFIED: Removed border-top, Tailwind handles borders now */
         }
         .search-item {
             display: flex;
-            /* MODIFIED: Removed padding, Tailwind handles it now */
             cursor: pointer;
             transition: background-color 0.2s;
             color: white;
             text-decoration: none;
-            padding: 8px 15px; /* MODIFIED: Re-added padding for items */
+            padding: 8px 15px; /* Re-added padding for items */
         }
-        .search-item:hover { background-color: rgba(255, 255, 255, 0.1); } /* MODIFIED: Lighter hover for blur */
-        
-        /* MODIFIED: Removed .search-item img styles, Tailwind handles it */
+        .search-item:hover { background-color: rgba(255, 255, 255, 0.1); } /* Lighter hover for blur */
 
-        /* --- ADDED: Hover styles for search result buttons --- */
+        /* --- Added: Hover styles for search result buttons --- */
         .search-item .play-btn-search .fa-solid-play { display: inline-block; }
         .search-item .play-btn-search .fa-regular-play { display: none; }
         .search-item:hover .play-btn-search .fa-solid-play { display: none; }
@@ -169,7 +175,7 @@
             display: flex;
             align-items: center;
         }
-        /* MODIFIED: Added 'a' to the selectors to style the new download button */
+        /* Added 'a' to the selectors to style the new download button */
         #zoneViewer .zone-header .zone-controls button,
         #zoneViewer .zone-header .zone-controls a {
             margin-left: 8px;
@@ -196,7 +202,7 @@
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
-        /* --- ADDED: Eaglercraft Dropdown (now generic version dropdown) --- */
+        /* --- ADDED: Generic version dropdown --- */
         .eagler-dropdown {
             display: none;
             position: absolute;
@@ -229,13 +235,14 @@
             background-color: rgba(255, 255, 255, 0.15);
         }
 
-        /* --- ADDED SPLASH TEXT CSS --- */
+        /* --- SPLASH TEXT CSS (MODIFIED centering) --- */
         @keyframes tilt {
             0% { 
-                transform: translate(50%, -50%) rotate(-5deg); 
+                /* Center point is (right:0, top:0) - translate(-50%, -50%) to put element's center there */
+                transform: translate(-50%, -50%) rotate(-18deg); 
             }
             100% { 
-                transform: translate(50%, -50%) rotate(5deg); 
+                transform: translate(-50%, -50%) rotate(-12deg); 
             } 
         }
 
@@ -250,7 +257,8 @@
             font-size: 1.5rem; 
             white-space: nowrap;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); 
-            transform: translate(50%, -50%) rotate(-165deg); 
+            /* Initial transform for centering and initial rotation */
+            transform: translate(-50%, -50%) rotate(-15deg); 
             transform-origin: 50% 50%; 
             animation: tilt 4s ease-in-out infinite alternate; 
         }
@@ -260,13 +268,12 @@
 </head>
 
 <body class="bg-deep-black text-white min-h-screen">
-    <header class="w-full p-4 flex justify-center items-center">
-        <a href="../index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
-    </header>
+    <!-- REMOVED: The header section with '4SP Games' text -->
 
     <main class="mx-auto my-5 w-full max-w-screen-2xl px-4 relative">
         <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl relative">
-            <div id="splash-text"></div> <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
+            <div id="splash-text"></div> <!-- SPLASH TEXT IS INSIDE AND RELATIVE TO THIS CONTAINER -->
+            <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
                 <strong>Welcome to the 4SP Game Hub!</strong><br>
                 This is a collection of games curated for the 4SP community. Use the search bar below to find your favorite.
             </p>
@@ -532,13 +539,10 @@
             // *** FIXED: Removed duplicate 'const arr' declaration ***
             const index = page - 2;
             if (arr[index]) {
-                 // Original: return arr[index].replace(/^\.\/$/, "../");
-                 // This means paths in siteMapping are relative to play/
-                 // e.g., `../../strongdog2/` or `../strongdog2/` or `./`
+                 // Original: if path is './', return '../' (resolves to /GAMES/)
                 let path = arr[index];
                 
                 // Translate the special ./ -> ../ rule
-                // Original: if path is './', return '../' (resolves to /GAMES/)
                 // My translation: if path is './', return './' (resolves to /GAMES/)
                 if (path === './') {
                     return './';
@@ -546,12 +550,10 @@
                 
                 // Translate the paths themselves
                 if (path.startsWith('../../')) {
-                    // Original: ../../strongdog2/ (resolves to /strongdog2/)
                     // My translation: ../strongdog2/ (resolves to /strongdog2/)
                     return path.replace('../../', '../');
                 }
                 if (path.startsWith('../')) {
-                    // Original: ../strongdog2/ (resolves to /GAMES/strongdog2/)
                     // My translation: ./strongdog2/ (resolves to /GAMES/strongdog2/)
                     return path.replace('../', './');
                 }
@@ -1032,8 +1034,6 @@
                 zoneFrame.dataset.activeUrl = ''; // Clear the stored URL
             }
         }
-
-        // REMOVED: openGameInNewTab function
 
 
         // --- Game List Rendering ---
