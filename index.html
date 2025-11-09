@@ -13,16 +13,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../navigation.js"></script>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1D4F692C1Q"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-1D4F692C1Q');
-  </script>
-    
 
     <script>
         tailwind.config = {
@@ -267,17 +257,16 @@
         /* --- END SPLASH TEXT CSS --- */
 
     </style>
-    
 </head>
 
 <body class="bg-deep-black text-white min-h-screen">
-    <header class="w-full p-4 flex **justify-center** items-center">
+    <header class="w-full p-4 flex justify-center items-center">
         <a href="../index.html" class="text-white font-semibold text-lg" style="font-weight: 400;">4SP Games</a>
     </header>
 
-    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4 **relative**">
-        <div id="splash-text"></div> <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl">
-            <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
+    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4 relative">
+        <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl relative">
+            <div id="splash-text"></div> <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
                 <strong>Welcome to the 4SP Game Hub!</strong><br>
                 This is a collection of games curated for the 4SP community. Use the search bar below to find your favorite.
             </p>
@@ -335,9 +324,9 @@
     <script type="module">
         // --- ADDED SPLASH TEXT JS ---
         const SPLASH_TEXTS = [
-            "Thanks Josh!",
-            "Adding GBA Games Soon!",
-            "What's Up?"
+            "Welcome to the 4SP Game Hub!",
+            "Placeholder Splash Text 2!",
+            "Placeholder Splash Text 3!"
         ];
         
         function setRandomSplashText() {
@@ -640,7 +629,7 @@
         function supportsWasm() {
             try {
                 if (typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function") {
-                    const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
+                    const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
                     if (module instanceof WebAssembly.Module) {
                         return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
                     }
