@@ -542,21 +542,7 @@
         // --- [END] Strongdog Game Path Logic ---
 
 
-        // --- ADDED: WebAssembly Support Check ---
-        function supportsWasm() {
-            try {
-                if (typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function") {
-                    const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
-                    if (module instanceof WebAssembly.Module) {
-                        return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
-                    }
-                }
-            } catch (e) {
-                // Wasm instantiation failed
-            }
-            return false;
-        }
-
+        // --- REMOVED: WebAssembly Support Check (as requested by user) ---
 
         // --- Game Card Rendering (No functional changes here) ---
         
@@ -626,10 +612,10 @@
 
             let gameButtonsHtml = '';
             let favoriteButtonHtml = '';
-            const hasWasm = supportsWasm();
-
+            
+            // FIX 1: Removed supportsWasm check. All versions are now explicitly available.
             if (game.versions && game.versions.length > 0) {
-                const availableVersions = game.versions.filter(v => !v.wasm || (v.wasm && hasWasm));
+                const availableVersions = game.versions; 
 
                 if (availableVersions.length === 1) {
                     const version = availableVersions[0];
@@ -1167,12 +1153,9 @@
                             console.error(`Failed to get embed path for ${game.name}:`, error);
                             alert(`Could not load game: ${game.name}. See console for details.`);
                         }
-                    } else if (isOthers) {
-                        const hasWasm = supportsWasm();
-                        if (game.wasm && !hasWasm) {
-                             alert("This game requires features your browser does not support.");
-                             return;
-                        }
+                    } 
+                    // FIX 1: Removed WASM check for 'Others' games
+                    else if (isOthers) {
                         openZone(game);
                     } else {
                         openZone(game);
@@ -1293,6 +1276,14 @@
             });
 
             document.addEventListener('keydown', (e) => {
+                // FIX 2: Prevent 'Enter' key refresh bug when a game is active in the viewer
+                const isGameOpen = document.getElementById('zoneViewer').style.display === "flex";
+                if (e.key === 'Enter' && isGameOpen) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation(); 
+                    return;
+                }
+                
                 if (document.activeElement === searchInput) return;
 
                 if (e.key === 'ArrowLeft') {
