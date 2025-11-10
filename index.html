@@ -14,7 +14,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../navigation.js"></script>
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-1D4F692C1Q"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -23,8 +22,6 @@
 
       gtag('config', 'G-1D4F692C1Q');
     </script>
-    <!-- End Google Analytics -->
-
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -242,7 +239,6 @@
 <body class="bg-deep-black text-white min-h-screen">
 
     <main class="mx-auto my-5 w-full max-w-screen-2xl px-4 relative">
-        <!-- MODIFIED: Credits Button styling - changed background to bg-card-dark and removed blur -->
         <button id="creditsBtn" class="absolute top-0 right-4 z-20 text-white bg-card-dark px-4 py-2 rounded-lg border border-brand-border hover:bg-white/10 transition-colors">
             <i class="fa-solid fa-users mr-2"></i>Credits
         </button>
@@ -303,7 +299,6 @@
         <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
     </div>
 
-    <!-- ADDED: Credits Modal -->
     <div id="creditsModal" class="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-lg z-[6000] items-center justify-center p-4" style="display: none;">
         <div class="bg-card-dark rounded-xl border border-brand-border shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center p-4 border-b border-brand-border sticky top-0 bg-card-dark z-10">
@@ -311,12 +306,9 @@
                 <button id="closeCreditsBtn" class="text-white hover:text-gray-400 p-2"><i class="fas fa-times"></i></button>
             </div>
             <div id="creditsContent" class="p-6 space-y-6">
-                <!-- Content injected by JavaScript -->
-            </div>
+                </div>
         </div>
     </div>
-    <!-- END: Credits Modal -->
-
     <script type="module">
         // REMOVED: SPLASH_TEXTS and setRandomSplashText logic
         
@@ -568,6 +560,15 @@
 
         // --- Game Card Rendering (No functional changes here) ---
         
+        const superMarioGame = {
+            id: "other-sm64",
+            name: "Super Mario 64",
+            imgSrc: "./images/sm64.png",
+            description: "The iconic 3D platformer that revolutionized gaming. Run, jump, and triple-jump your way through vast worlds to collect stars and save the princess.",
+            category: "Others",
+            url: "../sm64/index.html"
+        };
+        
         const othersGames = [
             {
                 id: "other-eaglercraft",
@@ -579,14 +580,6 @@
                     { name: "Release 1.12.2", url: "../EAGLERCRAFT/eaglercraft-1.12.2.html", favoriteId: "other-eaglercraft_1.12.2" },
                     { name: "Release 1.12.2 WASM", url: "../EAGLERCRAFT/eaglercraft-1.12.2-wasm.html", favoriteId: "other-eaglercraft_wasm", wasm: true }
                 ]
-            },
-            {
-                id: "other-doom",
-                name: "DOOM",
-                imgSrc: "./images/doom.png",
-                description: "The legendary first-person shooter that pioneered the genre, focusing on blasting through hordes of demons in a timeless, adrenaline-fueled classic.",
-                category: "Others",
-                url: "../DOOM/index.html"
             },
             {
                 id: "other-gta",
@@ -609,7 +602,16 @@
                     { name: "Sim City", url: "../SIM-CITY/index.html", favoriteId: "other-simcity_1" },
                     { name: "Sim City 2000", url: "../SIM-CITY-2/index.html", favoriteId: "other-simcity_2000" }
                 ]
-            }
+            },
+            {
+                id: "other-doom",
+                name: "DOOM",
+                imgSrc: "./images/doom.png",
+                description: "The legendary first-person shooter that pioneered the genre, focusing on blasting through hordes of demons in a timeless, adrenaline-fueled classic.",
+                category: "Others",
+                url: "../DOOM/index.html"
+            },
+            superMarioGame
         ];
 
         function createOthersGameCard(game) {
@@ -663,7 +665,7 @@
                 `;
 
             } else {
-                // This is a simple card (DOOM)
+                // This is a simple card (DOOM, SM64)
                 gameButtonsHtml = `
                     <button class="play-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" data-url="${game.url}" title="Play Game">
                         <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
