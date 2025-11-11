@@ -597,7 +597,7 @@
                 category: "Others",
                 url: "../DOOM/index.html"
             },
-            superMarioGame
+            // superMarioGame // <-- REMOVED AS REQUESTED
         ];
 
         function createOthersGameCard(game) {
@@ -1275,17 +1275,35 @@
                  switchCategory(newIndex);
             });
 
+            // ==========================================================
+            // === THIS IS THE MODIFIED BLOCK FOR THE KEYBOARD FIX ===
+            // ==========================================================
             document.addEventListener('keydown', (e) => {
-                // FIX 2: Prevent 'Enter' key refresh bug when a game is active in the viewer
                 const isGameOpen = document.getElementById('zoneViewer').style.display === "flex";
-                if (e.key === 'Enter' && isGameOpen) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation(); 
+
+                // First, check if the game modal is open.
+                if (isGameOpen) {
+                    
+                    // Keep the original 'Enter' key fix
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopImmediatePropagation(); 
+                        return;
+                    }
+
+                    // [REMOVED] 'Escape' key handler removed as requested.
+
+                    // For all other keys (Arrows, WASD, etc.),
+                    // do nothing and let the event go to the iframe.
                     return;
                 }
-                
+
+                // --- If we are here, the game is NOT open ---
+
+                // Don't interfere if the user is typing in the search bar
                 if (document.activeElement === searchInput) return;
 
+                // Handle category navigation with arrow keys
                 if (e.key === 'ArrowLeft') {
                     e.preventDefault();
                     if (currentCategoryIndex > 0) {
@@ -1298,6 +1316,9 @@
                     }
                 }
             });
+            // ==========================================================
+            // === END OF MODIFIED BLOCK ===
+            // ==========================================================
 
             document.addEventListener("click", ev => {
                 if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
