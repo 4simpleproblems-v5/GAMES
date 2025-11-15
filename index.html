@@ -1073,7 +1073,9 @@
 
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
-            renderGamesForCurrentCategory(text);
+            
+            // [MODIFIED] Removed filtering of the main game grid.
+            // renderGamesForCurrentCategory(text); 
 
             const filteredDropdown = text ? searchableGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
             searchResults.innerHTML = "";
@@ -1225,6 +1227,9 @@
                 console.error("Failed to load GN-Math games:", error);
                 allGames = [...strongdogGames, ...othersGames];
             }
+
+            // [MODIFIED] Filter out any game with "bitlife" in the name, case-insensitive.
+            allGames = allGames.filter(g => !g.name.toLowerCase().includes('bitlife'));
 
             searchableGames = [];
             allGames.forEach(game => {
