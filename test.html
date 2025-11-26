@@ -1,821 +1,340 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en" class="dark">
 <head>
-    <title>4SP - GAMES</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔒 Securly Block Tester</title>
+    <meta name="description" content="A tool to test Securly block status on the useast server.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../navigation.js"></script>
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1D4F692C1Q"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-1D4F692C1Q');
-    </script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        'deep-black': '#000000',
-                        'brand-border': 'rgba(255, 255, 255, 0.1)',
-                        'accent-indigo': '#4F46E5',
-                        'accent-lime': '#A3E635',
-                        'accent-red': '#EF4444',
-                    },
-                    spacing: {
-                        '128': '32rem',
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="../injector.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 
     <style>
-        .games-grid {
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        /* --- BASE STYLING (MATCHING notes.html) --- */
+        body { 
+            font-family: 'Geist', sans-serif; 
+            background-color: #070707; 
+            color: #c0c0c0; 
+            transition: all 0.3s ease;
+            font-size: 16px;
+            overflow-x: hidden;
+            font-weight: 300; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: flex-start; /* Keep content at the top */
+            padding-top: 4rem; /* Space for the fixed header */
         }
-        @media (min-width: 640px) {
-            .games-grid {
-                grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-            }
+
+        h1, h2, h3, .font-bold, .font-semibold, strong, .tracking-widest {
+            font-weight: 400 !important;
         }
-        @media (min-width: 768px) {
-            .games-grid {
-                grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-            }
-        }
-        @media (min-width: 1024px) {
-            .games-grid {
-                grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
-            }
-        }
-        /* Polyfill for aspect-ratio */
-        .aspect-w-3 { position: relative; padding-bottom: 66.666667%; }
-        .aspect-h-2 { }
-        .aspect-w-3 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
-        
-        /* --- Game Viewer Modal --- */
-        #zoneViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 5000; flex-direction: column; }
-        #zoneFrame { width: 100%; height: 100%; border: none; }
-        .shadow-glow {
-            box-shadow: 0 0 10px rgba(79, 70, 229, 0.5); /* accent-indigo glow */
-        }
-        /* Style for the dropdown/select elements to match the theme */
-        .eagler-dropdown {
-            background-color: #0A0A0A;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #FFFFFF;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
+
+        /* --- THEME-AWARE STYLES (MATCHING notes.html) --- */
+        .btn-toolbar-style {
+            background: var(--menu-bg, #0000000);
+            border: 1px solid var(--menu-border, #333);
+            border-radius: 0.75rem;
+            color: var(--menu-text, #d1d5db);
+            padding: 0.5rem 1rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .eagler-dropdown:focus {
-            outline: none;
-            border-color: #4F46E5;
+        .btn-toolbar-style:hover {
+            background-color: var(--menu-bg, #000000);
+            border-color: var(--menu-border, #fff);
+            color: var(--tab-hover-text, #ffffff);
         }
-        .eagler-dropdown option {
-            background-color: #000000;
-            color: #FFFFFF;
+        /* Primary Button Style (Used for Check Status button) */
+        .btn-toolbar-style.btn-primary-override {
+            background-color: var(--tab-active-bg, rgba(79, 70, 229, 0.1));
+            border: 1px solid var(--tab-active-border, #4f46e5);
+            color: var(--tab-active-text, #4f46e5);
+            /* Make it full width and centered */
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-toolbar-style.btn-primary-override:hover {
+            background-color: var(--tab-active-hover-bg, rgba(79, 70, 229, 0.15));
+            border-color: var(--tab-active-hover-border, #6366f1);
+            color: var(--tab-active-hover-text, #6366f1);
         }
         
-        /* Transition for opacity change on search */
-        .grid-hidden {
-            opacity: 0;
-            pointer-events: none;
+        /* --- MAIN TESTER UI STYLES --- */
+        #page-content {
+            /* Centers the form container within the rest of the vertical space (for 16:9) */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1; 
+            min-height: calc(100vh - 4rem); /* Header height */
+        }
+        
+        #tester-container {
+            background-color: #0d0d0d;
+            border: 1px solid #1a1a1a;
+            border-radius: 1rem;
+            padding: 40px;
+            width: 90%; 
+            max-width: 600px; /* Sensible max-width for 16:9 form */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 50px; /* Add some margin at the bottom */
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: #aaaaaa;
+            font-size: 14px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 0.5rem;
+            box-sizing: border-box;
+            font-size: 1rem;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            font-weight: 300;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            outline: none;
+        }
+        
+        /* Check Button disabled state using .btn-primary-override colors */
+        .btn-toolbar-style.btn-primary-override:disabled {
+            background-color: var(--tab-active-bg, rgba(79, 70, 229, 0.1));
+            border-color: var(--tab-border, #333);
+            color: var(--tab-text, #9ca3af);
+            cursor: not-allowed;
+        }
+        .btn-toolbar-style.btn-primary-override:disabled:hover {
+            background-color: var(--tab-active-bg, rgba(79, 70, 229, 0.1));
+            border-color: var(--tab-border, #333);
+            color: var(--tab-text, #9ca3af);
+        }
+
+        /* Result Display Styles */
+        #result-display {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 700;
+            min-height: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        .status-blocked {
+            background-color: #dc2626; /* Tailwind red-600 */
+            color: white;
+        }
+        .status-allowed {
+            background-color: #10b981; /* Tailwind emerald-500 */
+            color: black;
+        }
+        .status-loading, .status-info {
+            background-color: #333;
+            color: #bbb;
+        }
+        
+        #disclaimer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            padding-top: 15px;
         }
     </style>
+
 </head>
+<body class="min-h-screen">
+    <div id="loading-screen" class="fixed inset-0 bg-[#070707] flex items-center justify-center z-50">
+        <i class="fa-solid fa-spinner fa-spin fa-2x text-white"></i>
+    </div>
 
-<body class="bg-deep-black text-white min-h-screen">
-
-    <nav class="sticky top-0 z-40 bg-deep-black/95 backdrop-blur-lg border-b border-brand-border/70">
-        <div class="mx-auto w-full max-w-screen-2xl px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-6">
-                <a href="../" class="flex items-center space-x-2">
-                    <img src="img/4sp.png" alt="4SP Logo" class="h-8 w-auto">
-                    <span class="text-xl font-medium hidden sm:inline">4SP</span>
-                </a>
-                <div class="hidden sm:flex items-center space-x-4 text-sm font-light">
-                    </div>
-            </div>
-            <div id="search-bar-container" class="relative">
-                <input type="text" id="searchInput" placeholder="Search games..." class="bg-black/80 border border-brand-border rounded-xl px-4 py-2 w-full sm:w-64 focus:border-accent-indigo focus:ring-1 focus:ring-accent-indigo transition placeholder-gray-500">
-                <div id="searchResults" class="absolute left-0 right-0 mt-2 bg-black/90 border border-brand-border rounded-xl shadow-xl max-h-64 overflow-y-auto z-50" style="display: none;">
-                    </div>
-            </div>
-            <div class="flex items-center space-x-4">
-                <button id="creditsBtn" class="bg-brand-border/50 hover:bg-brand-border/80 text-white p-2 rounded-lg transition-colors text-sm" aria-label="Open Credits">
-                    <i class="fas fa-info-circle"></i>
-                </button>
-                <button id="themeToggle" class="bg-brand-border/50 hover:bg-brand-border/80 text-white p-2 rounded-lg transition-colors text-sm" aria-label="Toggle Dark/Light Mode">
-                    <i class="fas fa-sun" id="themeIcon"></i>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4 relative">
-        <header class="flex flex-col sm:flex-row justify-between items-center mb-6">
-            <h1 class="text-4xl font-extrabold flex items-center space-x-3">
-                <span class="transition-colors duration-300" id="categoryTitle">Loading...</span>
-                <div class="flex space-x-2">
-                    <button id="prevCategoryBtn" class="bg-brand-border/50 hover:bg-brand-border/80 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center transition disabled:opacity-30 disabled:pointer-events-none" aria-label="Previous Category">
-                        <i class="fas fa-chevron-left text-xs"></i>
-                    </button>
-                    <button id="nextCategoryBtn" class="bg-brand-border/50 hover:bg-brand-border/80 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center transition disabled:opacity-30 disabled:pointer-events-none" aria-label="Next Category">
-                        <i class="fas fa-chevron-right text-xs"></i>
-                    </button>
-                </div>
-            </h1>
-            <div class="mt-4 sm:mt-0">
-                <span id="favoritesHeader" class="text-sm font-normal bg-brand-border/50 text-gray-300 px-3 py-1 rounded-full border border-brand-border" style="display: none;">
-                    <i class="fas fa-heart text-accent-red mr-1"></i> My Favorites
-                </span>
-                <span id="zoneHeader" class="text-sm font-normal bg-brand-border/50 text-gray-300 px-3 py-1 rounded-full border border-brand-border" style="display: none;">
-                    <i class="fas fa-globe text-accent-indigo mr-1"></i> GN Zones
-                </span>
-            </div>
+    <div id="page-content" class="w-full">
+        
+        <header class="fixed top-0 left-0 w-full z-1000 flex justify-between items-center p-4 border-b border-[#1a1a1a] bg-[#070707]">
+            <h1 class="text-2xl font-bold text-white">Securly Tester</h1>
+            <div class="flex items-center gap-2">
         </header>
 
-        <section id="games-section">
-            <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
-                </div>
-        </section>
-    </main>
+        <div id="tester-container">
+            <h2 class="text-xl font-bold text-white mb-6 text-center">Block Status Check (useast)</h2>
 
-    <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
-        <div class="flex items-center justify-between">
-            <a id="nav-btn-home" href="../" class="flex flex-col items-center p-2 rounded-xl transition hover:bg-gray-800">
-                <i class="fas fa-home text-lg mb-1"></i>
-                <span class="text-xs">Home</span>
-            </a>
-            <a id="nav-btn-apps" href="../apps/" class="flex flex-col items-center p-2 rounded-xl transition hover:bg-gray-800">
-                <i class="fas fa-shapes text-lg mb-1"></i>
-                <span class="text-xs">Apps</span>
-            </a>
-            <a id="nav-btn-games" href="./" class="flex flex-col items-center p-2 rounded-xl text-accent-indigo bg-gray-900/50">
-                <i class="fas fa-gamepad text-lg mb-1"></i>
-                <span class="text-xs font-semibold">Games</span>
-            </a>
-            <a id="nav-btn-music" href="../music/" class="flex flex-col items-center p-2 rounded-xl transition hover:bg-gray-800">
-                <i class="fas fa-music text-lg mb-1"></i>
-                <span class="text-xs">Music</span>
-            </a>
-            <button id="nav-btn-panic" class="flex flex-col items-center p-2 rounded-xl transition hover:bg-gray-800 text-accent-red" aria-label="Panic Button">
-                <i class="fas fa-bolt text-lg mb-1"></i>
-                <span class="text-xs">Panic</span>
+            <div class="input-group">
+                <label for="user">Student Email (User)</label>
+                <input id="user" type="text" placeholder="student@yourschool.org" value="student@yourschool.org" oninput="clearResult()">
+            </div>
+
+            <div class="input-group">
+                <label for="url">URL to Test</label>
+                <input id="url" type="text" placeholder="https://zapatopi.net/treeoctopus/" value="https://zapatopi.net/treeoctopus/" oninput="clearResult()">
+            </div>
+
+            <button id="check-button" class="btn-toolbar-style btn-primary-override" onclick="checkSecurlyStatus()">
+                <i class="fa-solid fa-check-circle"></i> Check Block Status
             </button>
-            <button id="nav-btn-tab-disguise" class="flex flex-col items-center p-2 rounded-xl transition hover:bg-gray-800" aria-label="Tab Disguise">
-                <i class="fas fa-mask text-lg mb-1"></i>
-                <span class="text-xs">Disguise</span>
-            </button>
+
+            <div id="result-display" class="status-info">
+                Click 'Check Block Status'
+            </div>
+
+            <p id="disclaimer">
+                **CORS PROXY IN USE:** A public proxy is prepended to the Securly URL to attempt to bypass browser restrictions.
+            </p>
         </div>
+
     </div>
     
-    <div id="zoneViewer" aria-modal="true" role="dialog">
-        <div id="zoneViewerHeader" class="p-3 bg-black/90 flex items-center justify-between">
-            <h2 id="zoneTitle" class="text-xl font-bold truncate max-w-[70%]"></h2>
-            <div class="flex space-x-2">
-                <select id="eaglerVersionSelect" class="eagler-dropdown text-sm" style="display: none;"></select>
-                <button id="fullscreenBtnZone" class="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition" aria-label="Fullscreen">
-                    <i class="fas fa-expand-alt"></i>
-                </button>
-                <button id="closeBtnZone" class="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition" aria-label="Close Game">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-        <iframe id="zoneFrame" allow="fullscreen"></iframe>
-    </div>
-
-    <div id="creditsModal" class="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-lg z-[6000] flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-black/95 text-white p-6 sm:p-8 rounded-3xl border border-gray-700 shadow-2xl backdrop-blur-md w-full max-w-xl">
-            <div class="flex justify-between items-start mb-4">
-                <h2 class="text-2xl font-bold">Credits</h2>
-                <button id="closeCreditsBtn" class="text-gray-400 hover:text-white transition" aria-label="Close Credits Modal">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            <div id="creditsContent" class="space-y-4 text-sm max-h-96 overflow-y-auto pr-2">
-                <p><strong>StrongdogXP</strong> - Creator, Developer, Maintainer of the 4SP Platform.</p>
-                <p><strong>GN-Math</strong> - Developer, Maintainer of the GN Zones project.</p>
-                <p><strong>Icon & Asset Sources</strong> - Icons from Font Awesome and custom assets designed by the StrongdogXP team.</p>
-                <p><strong>Special Thanks</strong> - To the communities and developers who inspired and contributed to the open-source projects utilized here.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="category-tip-overlay" class="fixed inset-0 bg-black/70 z-[9999] transition-opacity duration-300 opacity-0" style="display: none; align-items: center; justify-content: center;">
-        <div id="category-tip-banner" class="absolute w-full max-w-7xl px-4 md:static">
-            <div class="bg-black/95 text-white p-4 sm:p-6 rounded-3xl border border-gray-700 shadow-2xl backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6">
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-xl font-normal mb-1">Game Hub Tip: Swapping Categories</h3>
-                    <p class="text-sm text-gray-300 mb-2 font-light">
-                        To switch between game categories like <strong>StrongdogXP</strong>, <strong>GN-Math</strong>, and <strong>Gameboy Games</strong>, simply click the <strong>left and right arrow buttons</strong> next to the category title in the center of the screen.
-                    </p>
-                </div>
-                <div class="flex-shrink-0">
-                    <button id="tip-acknowledge-button" class="w-full md:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-normal rounded-xl text-white bg-accent-indigo hover:bg-indigo-600 transition">
-                        Got it!
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script type="module">
+    <script type="text/javascript">
+        // Hardcoded server URL as requested
+        const SECURLY_SERVER_URL = 'https://useast-www.securly.com';
         
-        import games from "./cards-data.js";
-        import { siteMapping } from "./site-mapping.js";
-
-        // --- Configuration & Globals ---
-        const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
-        const FAVORITES_KEY = '4sp_games_favorites';
-        const SEARCH_HISTORY_KEY = '4sp_games_search_history';
-        let categories = [];
-        let currentCategoryIndex = 0;
-        let gnZones = [];
-        let isSearchActive = false;
-
-        // --- DOM Elements ---
-        const favoritesHeader = document.getElementById("favoritesHeader");
-        const zoneHeader = document.getElementById("zoneHeader");
-        const categoryTitle = document.getElementById('categoryTitle');
-        const prevCategoryBtn = document.getElementById('prevCategoryBtn');
-        const nextCategoryBtn = document.getElementById('nextCategoryBtn');
-        const searchInput = document.getElementById('searchInput');
-        const searchResults = document.getElementById('searchResults');
-        const gamesSection = document.getElementById('games-section');
-        const zoneViewer = document.getElementById('zoneViewer');
-        const zoneFrame = document.getElementById('zoneFrame');
-        const zoneTitle = document.getElementById('zoneTitle');
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const eaglerVersionSelect = document.getElementById('eaglerVersionSelect');
-        const gamesGridContainer = document.getElementById('games-grid-container');
+        // --- Global State and Element References ---
+        const CORS_PROXY = 'https://corsproxy.io/?'; 
+        const resultDisplay = document.getElementById('result-display');
+        const checkButton = document.getElementById('check-button');
+        const loadingScreen = document.getElementById('loading-screen');
+        const pageContent = document.getElementById('page-content');
         
-        // ADDED: Category Tip DOM Elements
-        const categoryTipOverlay = document.getElementById('category-tip-overlay');
-        const tipAcknowledgeButton = document.getElementById('tip-acknowledge-button');
-        const CATEGORY_TIP_KEY = '4sp_category_tip_shown';
+        // --- UI Functions ---
 
-        // ADDED: Credit Modal DOM Elements
-        const creditsModal = document.getElementById('creditsModal');
-        const creditsBtn = document.getElementById('creditsBtn');
-        const closeCreditsBtn = document.getElementById('closeCreditsBtn');
-
-        // --- Favorites Management ---
-        const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
-        const isFavorite = (gameId) => getFavorites().includes(gameId);
-        
-        function toggleFavorite(gameId) {
-            let favorites = getFavorites();
-            const index = favorites.indexOf(gameId);
-            if (index > -1) {
-                favorites.splice(index, 1);
-            } else {
-                favorites.push(gameId);
-            }
-            localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-            
-            // Re-render the relevant game card(s) and current category
-            const targetElement = isSearchActive ? searchResults : gamesGridContainer;
-            renderCurrentCategory(targetElement);
-            
-            // If viewing favorites, force re-render favorites list
-            if (categoryTitle.textContent === "My Favorites") {
-                renderFavorites();
-            }
-        }
-        
-        // --- Utilities ---
-
-        /**
-         * Adjusts the game URL based on the current hostname to ensure it loads correctly
-         * across various deployment environments (e.g., local host, strongdogxp.com, gn-math.xyz).
-         * @param {string} originalUrl The base URL for the game.
-         * @returns {string} The adjusted URL.
-         */
-        function getAdjustedUrls(originalUrl) {
-            const currentHost = window.location.host;
-
-            for (const { host, replacePattern, replacement } of siteMapping) {
-                // Check if the current host or its subdomain matches the mapping host
-                if (currentHost === host || currentHost.endsWith('.' + host)) {
-                    // Check if a replacement is defined for the specific game URL
-                    if (originalUrl.includes(replacePattern)) {
-                        return originalUrl.replace(replacePattern, replacement);
-                    }
-                }
-            }
-            return originalUrl;
+        function clearResult() {
+            resultDisplay.className = 'status-info';
+            resultDisplay.innerText = 'Click \'Check Block Status\'';
         }
 
+        // --- Core Securly Logic ---
+
         /**
-         * Cleans a URL to get the host part only, without protocol or trailing slashes.
-         * Used for matching against the GN Zones list.
-         * @param {string} url 
-         * @returns {string} Hostname only.
+         * Builds the Securly URL based on inputs and the hardcoded server.
          */
-        function sd_getCurrentKeyHostOnly(url) {
+        function buildSecurlyUrl() {
+            const user = document.getElementById('user').value.trim();
+            const url = document.getElementById('url').value.trim();
+            const serverUrl = SECURLY_SERVER_URL; 
+            
+            if (!user || !url) {
+                return null;
+            }
+
+            let urlHost;
             try {
-                const urlObj = new URL(url);
-                let host = urlObj.hostname;
-                // Remove www. if present
-                if (host.startsWith('www.')) {
-                    host = host.substring(4);
-                }
-                return host;
+                // Ensure URL has a protocol for the URL constructor to work
+                const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+                urlHost = (new URL(fullUrl)).hostname;
             } catch (e) {
-                return ''; // Return empty string for invalid URLs
-            }
-        }
-
-        // --- START CATEGORY TIP LOGIC (Copied/Modified from index.html Cookie Logic) --- //
-
-        function hasCategoryTipBeenShown() {
-            return localStorage.getItem(CATEGORY_TIP_KEY) === 'shown';
-        }
-
-        function showCategoryTip() {
-            if (!hasCategoryTipBeenShown()) {
-                // Delay display slightly to be less intrusive on game hub load
-                setTimeout(() => {
-                    if (categoryTipOverlay) {
-                        // To centralize, we rely on the CSS 'display: flex' on the overlay
-                        categoryTipOverlay.style.display = 'flex';
-                        // Force reflow/repaint to ensure transition works
-                        void categoryTipOverlay.offsetWidth;
-                        categoryTipOverlay.classList.remove('opacity-0');
-                        categoryTipOverlay.classList.add('opacity-100');
-                        // Prevent scrolling while tip is open
-                        document.body.style.overflow = 'hidden';
-                    }
-                }, 1500); // 1.5 second delay
-            }
-        }
-
-        function hideCategoryTip() {
-            if (categoryTipOverlay) {
-                localStorage.setItem(CATEGORY_TIP_KEY, 'shown');
-                categoryTipOverlay.classList.remove('opacity-100');
-                categoryTipOverlay.classList.add('opacity-0');
-                // Wait for the transition to finish before hiding display
-                setTimeout(() => {
-                    categoryTipOverlay.style.display = 'none';
-                    document.body.style.overflow = '';
-                }, 300); // Duration of the CSS transition
-            }
-        }
-
-        // --- END CATEGORY TIP LOGIC --- //
-
-        // --- Game List Rendering --- 
-        function renderGames(gamesToRender, targetElement, forceSmallCard = false) {
-            targetElement.innerHTML = gamesToRender.map(game => {
-                const isFav = isFavorite(game.id);
-                const isZone = game.category === "GN Zones";
-                const isEagler = game.type === 'eagler';
-                const cardClass = forceSmallCard ? 'min-w-[150px]' : '';
-                
-                // Determine the correct image source for the card. 
-                // Games in gnZones use the 'gn_zones' image from the game object.
-                const imageSrc = isZone ? game.gn_zones.image : game.image;
-
-                return `
-                    <div class="relative bg-black/50 border border-brand-border rounded-xl shadow-xl overflow-hidden group hover:shadow-glow transition-all duration-300 ${cardClass}">
-                        <div class="aspect-w-3 aspect-h-2 relative">
-                            <img src="${imageSrc}" alt="${game.title} Thumbnail" loading="lazy" class="w-full h-full object-cover transition-opacity duration-300">
-                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                                <button data-id="${game.id}" data-url="${game.url}" data-title="${game.title}" data-category="${game.category}" data-type="${game.type}" class="launch-game-btn inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-accent-indigo hover:bg-indigo-600 transition">
-                                    <i class="fas fa-play mr-2"></i> Play
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-3">
-                            <div class="flex justify-between items-center">
-                                <h3 class="text-base font-normal truncate">${game.title}</h3>
-                                <button data-id="${game.id}" class="favorite-toggle-btn text-lg transition-colors ml-2" aria-label="Favorite">
-                                    <i class="${isFav ? 'fas text-accent-red' : 'far text-gray-500'} fa-heart"></i>
-                                </button>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">
-                                ${isZone ? `<span class="text-accent-indigo font-medium">GN Zone</span>` : game.category}
-                                ${isEagler ? `<span class="text-accent-lime font-medium ml-2">Eagler</span>` : ''}
-                            </p>
-                            ${isEagler ? `
-                                <div class="relative mt-2">
-                                    <select data-id="${game.id}" class="eagler-dropdown w-full text-xs version-select-dropdown">
-                                        <option value="${game.url}">Play 1.8</option>
-                                        <option value="${game.eagler.v1_5_2}">Play 1.5</option>
-                                    </select>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Re-attach event listeners after innerHTML update
-            attachGameEventListeners();
-        }
-
-        function attachGameEventListeners() {
-            document.querySelectorAll('.launch-game-btn').forEach(button => {
-                button.removeEventListener('click', handleLaunchGame);
-                button.addEventListener('click', handleLaunchGame);
-            });
-            document.querySelectorAll('.favorite-toggle-btn').forEach(button => {
-                button.removeEventListener('click', handleFavoriteToggle);
-                button.addEventListener('click', handleFavoriteToggle);
-            });
-            document.querySelectorAll('.version-select-dropdown').forEach(select => {
-                select.removeEventListener('change', handleVersionChange);
-                select.addEventListener('change', handleVersionChange);
-            });
-        }
-        
-        // --- Category & Display Management ---
-
-        function renderCurrentCategory(targetElement) {
-            isSearchActive = false;
-            searchResults.style.display = "none";
-            gamesGridContainer.classList.remove('grid-hidden');
-            targetElement.classList.remove('flex-col', 'space-y-4');
-            targetElement.classList.add('games-grid');
-
-            if (currentCategoryIndex === 0) {
-                renderFavorites();
-                return;
-            }
-            if (currentCategoryIndex === 1) {
-                renderZones();
-                return;
+                return null;
             }
             
-            const currentCategory = categories[currentCategoryIndex];
-            categoryTitle.textContent = currentCategory.title;
-            favoritesHeader.style.display = "none";
-            zoneHeader.style.display = "none";
+            // 1. Construct the raw Securly Broker URL
+            const securlyLink = `${serverUrl}/crextn/broker?useremail=` +
+                encodeURIComponent(user) +
+                "&reason=crextn&host=" +
+                encodeURIComponent(urlHost) +
+                "&url=" +
+                btoa(url) +
+                "&msg=&ver=2.97.13&cu=" + encodeURIComponent(serverUrl + "/crextn") + "&uf=1&cf=1&lat=34.5678910&lng=-98.7654321";
             
-            const filteredGames = games.filter(game => game.category === currentCategory.name);
-            renderGames(filteredGames, targetElement);
-            updateCategoryButtons();
+            // 2. Prepend the CORS Proxy
+            return CORS_PROXY + encodeURIComponent(securlyLink);
         }
 
-        function renderFavorites() {
-            categoryTitle.textContent = "My Favorites";
-            favoritesHeader.style.display = "inline-block";
-            zoneHeader.style.display = "none";
-            
-            const favorites = getFavorites();
-            const favoriteGames = favorites.map(id => games.find(g => g.id === id)).filter(Boolean);
-            
-            if (favoriteGames.length === 0) {
-                gamesGridContainer.innerHTML = '<p class="col-span-full text-center text-gray-400 mt-10">You have no favorite games yet. Click the heart icon on a game to add it!</p>';
-            } else {
-                renderGames(favoriteGames, gamesGridContainer);
-            }
-            updateCategoryButtons();
-        }
+        /**
+         * Fetches the status from Securly via proxy and displays the result.
+         */
+        async function checkSecurlyStatus() {
+            const proxiedSecurlyLink = buildSecurlyUrl();
 
-        function renderZones() {
-            categoryTitle.textContent = "GN Zones";
-            favoritesHeader.style.display = "none";
-            zoneHeader.style.display = "inline-block";
-
-            // GN Zones are already structured like games for rendering
-            if (gnZones.length === 0) {
-                 gamesGridContainer.innerHTML = '<p class="col-span-full text-center text-gray-400 mt-10">Could not load GN Zones. The network may be blocked or the URL is unavailable.</p>';
-            } else {
-                renderGames(gnZones, gamesGridContainer);
-            }
-            updateCategoryButtons();
-        }
-        
-        function switchCategory(newIndex) {
-            currentCategoryIndex = newIndex;
-            renderCurrentCategory(gamesGridContainer);
-            document.getElementById('searchInput').value = ''; // Clear search bar on switch
-        }
-
-        function updateCategoryButtons() {
-            prevCategoryBtn.disabled = currentCategoryIndex <= 0;
-            nextCategoryBtn.disabled = currentCategoryIndex >= categories.length - 1;
-        }
-
-        // --- Game Viewer Logic ---
-
-        function handleLaunchGame(event) {
-            const button = event.currentTarget;
-            let url = button.dataset.url;
-            const title = button.dataset.title;
-            const type = button.dataset.type;
-            const category = button.dataset.category;
-
-            // Apply URL adjustments
-            url = getAdjustedUrls(url);
-
-            zoneTitle.textContent = title;
-            zoneFrame.src = url;
-            zoneViewer.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-
-            // Handle Eaglercraft version selection
-            const isEagler = type === 'eagler' || (category === 'GN Zones' && url.includes('eagler')); // Broad check for zones too
-            
-            if (isEagler) {
-                // For Eagler, we need to handle the dropdown specifically in the viewer
-                eaglerVersionSelect.style.display = 'inline-block';
-                eaglerVersionSelect.innerHTML = `
-                    <option value="${button.dataset.url}">Play 1.8</option>
-                    <option value="${games.find(g => g.url === button.dataset.url)?.eagler?.v1_5_2 || ''}">Play 1.5</option>
-                `;
-                // Set the default selection to the launched version
-                eaglerVersionSelect.value = url;
-                
-                // Remove previous listener and add a new one for the viewer's select
-                eaglerVersionSelect.removeEventListener('change', handleViewerVersionChange);
-                eaglerVersionSelect.addEventListener('change', handleViewerVersionChange);
-
-            } else {
-                eaglerVersionSelect.style.display = 'none';
-            }
-        }
-
-        function closeZoneViewer() {
-            zoneFrame.src = 'about:blank'; // Stop game/content from running
-            zoneViewer.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-
-        // Handles version change from the main grid card dropdown
-        function handleVersionChange(event) {
-            const select = event.target;
-            const gameId = select.dataset.id;
-            const selectedUrl = select.value;
-            const game = games.find(g => g.id === gameId);
-            
-            // Find the launch button for this game card and update its data-url
-            const card = select.closest('.group');
-            const launchButton = card.querySelector('.launch-game-btn');
-            
-            if (launchButton) {
-                launchButton.dataset.url = selectedUrl;
-                // Launch the game immediately with the selected version
-                launchButton.click();
-            }
-        }
-        
-        // Handles version change from the dropdown *inside* the viewer
-        function handleViewerVersionChange(event) {
-            const selectedUrl = event.target.value;
-            zoneFrame.src = selectedUrl;
-        }
-
-        // --- Search Logic ---
-
-        function handleSearch() {
-            const query = searchInput.value.toLowerCase().trim();
-            isSearchActive = query.length > 0;
-            
-            if (!isSearchActive) {
-                searchResults.style.display = "none";
-                gamesGridContainer.classList.remove('grid-hidden');
-                // Re-render the current category when search is cleared
-                renderCurrentCategory(gamesGridContainer); 
+            if (!proxiedSecurlyLink) {
+                resultDisplay.className = 'status-blocked';
+                resultDisplay.innerHTML = '⚠️ **Please enter valid Email and URL.**';
                 return;
             }
 
-            // Hide the main grid and show the search results container
-            gamesGridContainer.classList.add('grid-hidden');
-            searchResults.style.display = "block";
-            searchResults.classList.add('flex-col', 'space-y-4');
-            searchResults.classList.remove('games-grid'); // Ensure it's not a grid layout
+            // Set loading state
+            resultDisplay.className = 'status-loading';
+            resultDisplay.innerHTML = `Checking **useast**...`;
+            checkButton.disabled = true;
+            checkButton.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Checking...`;
 
-            // Combine all games (main list + zones) for a comprehensive search
-            const allSearchableGames = [...games, ...gnZones];
-            
-            const results = allSearchableGames.filter(game => 
-                game.title.toLowerCase().includes(query) ||
-                (game.category && game.category.toLowerCase().includes(query)) ||
-                (game.tags && game.tags.some(tag => tag.toLowerCase().includes(query)))
-            );
-
-            if (results.length === 0) {
-                searchResults.innerHTML = '<p class="p-4 text-center text-gray-400">No games found matching your search.</p>';
-                return;
-            }
-
-            // Render search results in a vertical list, forcing small cards
-            // Render games in a temporary div to use the existing renderGames logic
-            const tempDiv = document.createElement('div');
-            renderGames(results, tempDiv, true);
-            
-            // Apply a simple list structure for search results
-            searchResults.innerHTML = results.map(game => {
-                const isFav = isFavorite(game.id);
-                const isEagler = game.type === 'eagler';
-                const imageSrc = game.category === "GN Zones" ? game.gn_zones.image : game.image;
-                
-                // For search results, we use a different, more compact card structure
-                return `
-                    <div class="flex items-center p-3 bg-black/70 border-b border-brand-border/50 last:border-b-0 hover:bg-black/90 transition">
-                        <img src="${imageSrc}" alt="${game.title}" class="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0">
-                        <div class="flex-1 min-w-0">
-                            <h4 class="text-sm font-medium truncate">${game.title}</h4>
-                            <p class="text-xs text-gray-400">
-                                ${game.category === "GN Zones" ? `<span class="text-accent-indigo font-medium">GN Zone</span>` : game.category}
-                                ${isEagler ? `<span class="text-accent-lime font-medium ml-2">Eagler</span>` : ''}
-                            </p>
-                        </div>
-                        <div class="flex items-center space-x-2 flex-shrink-0 ml-4">
-                            ${isEagler ? `
-                                <div class="relative">
-                                    <select data-id="${game.id}" class="eagler-dropdown text-xs version-select-dropdown p-1">
-                                        <option value="${game.url}">1.8</option>
-                                        <option value="${game.eagler.v1_5_2}">1.5</option>
-                                    </select>
-                                </div>
-                            ` : ''}
-                            <button data-id="${game.id}" class="favorite-toggle-btn text-lg transition-colors" aria-label="Favorite">
-                                <i class="${isFav ? 'fas text-accent-red' : 'far text-gray-500'} fa-heart"></i>
-                            </button>
-                            <button data-id="${game.id}" data-url="${game.url}" data-title="${game.title}" data-category="${game.category}" data-type="${game.type}" class="launch-game-btn inline-flex items-center justify-center px-3 py-1 text-xs font-medium rounded-lg text-white bg-accent-indigo hover:bg-indigo-600 transition">
-                                <i class="fas fa-play"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            attachGameEventListeners();
-        }
-
-        // --- Core Initialization ---
-
-        async function loadGnZones() {
             try {
-                const response = await fetch(GN_ZONES_URL);
+                const response = await fetch(proxiedSecurlyLink);
+
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                     throw new Error(`Proxy error with status: ${response.status}`);
                 }
-                const data = await response.json();
+
+                const text = await response.text();
                 
-                // Transform the raw zones data into the game card format
-                gnZones = data.map(zone => {
-                    const idSlug = zone.url.split('/').pop() || zone.name.toLowerCase().replace(/\s/g, '-');
-                    return {
-                        id: `gn-zone-${idSlug}`, // Unique ID for favorites
-                        title: zone.name,
-                        category: "GN Zones",
-                        url: zone.url,
-                        image: zone.image, // Placeholder, will use gn_zones.image
-                        type: 'gn-zone',
-                        tags: [zone.name.toLowerCase(), 'gn zone', 'zone'],
-                        gn_zones: {
-                            image: zone.image,
-                            description: zone.description,
-                        }
-                    };
-                });
+                // Analyze the response text for Securly's keywords
+                if (text.includes('DENY')) {
+                    resultDisplay.className = 'status-blocked';
+                    resultDisplay.innerHTML = '🚫 **BLOCKED (DENY)** 🚫';
+                } 
+                else if (text.includes('ALLOW')) {
+                    resultDisplay.className = 'status-allowed';
+                    resultDisplay.innerHTML = '✅ **ALLOWED (ALLOW)** ✅';
+                }
+                else {
+                    resultDisplay.className = 'status-info';
+                    resultDisplay.innerHTML = `❓ **Unclear Status** (No DENY/ALLOW found)`;
+                    console.log("Full Securly Response Text:", text);
+                }
 
             } catch (error) {
-                console.error("Error loading GN Zones:", error);
-                gnZones = [];
+                resultDisplay.className = 'status-blocked';
+                resultDisplay.innerHTML = '❌ **Failed to Connect** (CORS/Network Error)';
+                console.error('Fetch Error:', error);
+            } finally {
+                checkButton.disabled = false;
+                checkButton.innerHTML = `<i class="fa-solid fa-check-circle"></i> Check Block Status`;
             }
         }
+        
+        // --- Initialization (Matching notes.html auth pattern) ---
 
-        function setupCategories() {
-            // 1. Favorites (Static first category)
-            categories.push({ name: 'favorites', title: 'My Favorites' });
-
-            // 2. GN Zones (Static second category, if loaded)
-            if (gnZones.length > 0) {
-                categories.push({ name: 'gn-zones', title: 'GN Zones' });
-            }
-
-            // 3. Dynamic Categories from cards-data.js
-            const categoryNames = [...new Set(games.map(game => game.category))];
-            categoryNames.forEach(name => {
-                categories.push({ name: name, title: name });
-            });
-
-            // Set the initial category to the first one (Favorites)
-            currentCategoryIndex = 0;
-        }
-
-        function handleFavoriteToggle(event) {
-            const gameId = event.currentTarget.dataset.id;
-            toggleFavorite(gameId);
-        }
-
-        function renderCreditsModal() {
-            creditsModal.style.display = 'flex';
-        }
-
-        function initializeApp() {
-            // Load and set up categories
-            loadGnZones().then(() => {
-                setupCategories();
-                renderCurrentCategory(gamesGridContainer);
-            });
-
-            // --- Theme Toggle ---
-            const currentTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.classList.toggle('dark', currentTheme === 'dark');
-            themeIcon.classList.toggle('fa-sun', currentTheme === 'dark');
-            themeIcon.classList.toggle('fa-moon', currentTheme !== 'dark');
-            
-            themeToggle.addEventListener('click', () => {
-                const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-                document.documentElement.classList.toggle('dark');
-                localStorage.setItem('theme', newTheme);
-                themeIcon.classList.toggle('fa-sun', newTheme === 'dark');
-                themeIcon.classList.toggle('fa-moon', newTheme === 'light');
-            });
-            
-            // --- Search Listeners ---
-            searchInput.addEventListener('input', handleSearch);
-            // Close search results when clicking outside
-            document.addEventListener('click', (ev) => {
-                if (!document.getElementById('search-bar-container').contains(ev.target)) {
-                    searchResults.style.display = "none";
-                }
-            });
-
-            // --- General Event Listeners ---
-            const cycle = (direction) => {
-                let newIndex = currentCategoryIndex + direction;
-                if (newIndex >= 0 && newIndex < categories.length) {
-                    switchCategory(newIndex);
-                }
-            };
-            prevCategoryBtn.addEventListener('click', () => cycle(-1));
-            nextCategoryBtn.addEventListener('click', () => cycle(1));
-
-            // Close Eagler dropdowns when clicking outside
-            document.addEventListener('click', (ev) => {
-                // Keep search results visible if clicking within the search bar
-                if (searchInput.value.length > 0 && !document.getElementById('bottom-fixed-bar').contains(ev.target)) {
-                    // searchResults.style.display = "none"; // Disabled this to keep results open for launch
-                }
-                
-                if (!ev.target.closest('.version-btn') && !ev.target.closest('.version-favorite-btn') && !ev.target.closest('.eagler-dropdown')) {
-                    document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
-                        d.classList.remove('show');
-                    });
-                }
-            });
-
-            document.getElementById('fullscreenBtnZone')?.addEventListener('click', () => {
-                const zoneFrame = document.getElementById('zoneFrame');
-                if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
-            });
-            document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
-
-            // ADDED: Category Tip initialization
-            if (!hasCategoryTipBeenShown()) {
-                showCategoryTip();
-            } else if (categoryTipOverlay) {
-                // Ensure it's hidden if already acknowledged
-                categoryTipOverlay.style.display = 'none';
-                categoryTipOverlay.classList.remove('opacity-100');
-                categoryTipOverlay.classList.add('opacity-0');
-            }
-            if (tipAcknowledgeButton) {
-                tipAcknowledgeButton.addEventListener('click', hideCategoryTip);
-            }
-
-            // ADDED: Credits Modal Listeners
-            creditsBtn.addEventListener('click', renderCreditsModal);
-            closeCreditsBtn.addEventListener('click', () => {
-                creditsModal.style.display = 'none';
-            });
-            // Close modal when clicking on the dark backdrop
-            creditsModal.addEventListener('click', (e) => {
-                if (e.target === creditsModal) {
-                    creditsModal.style.display = 'none';
+        // Simple mock authentication to match notes.html behavior
+        const mockAuth = { onAuthStateChanged: (cb) => cb(true) }; 
+        
+        async function initializeAuth() {
+            mockAuth.onAuthStateChanged((user) => {
+                if (!user) {
+                    // window.location.href = '../index.html'; // Removed but kept in auth block
+                } else {
+                    // Initialize UI after "auth" check
+                    clearResult();
+                    loadingScreen.style.display = 'none';
+                    pageContent.style.display = 'flex';
                 }
             });
         }
+        setTimeout(() => { initializeAuth(); }, 100); 
 
-        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
