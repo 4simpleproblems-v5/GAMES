@@ -1,340 +1,1132 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en"> 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔒 Securly Block Tester</title>
-    <meta name="description" content="A tool to test Securly block status on the useast server.">
+    <title>4SP - GAMES</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../navigation.js"></script>
-    <script src="../injector.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1D4F692C1Q"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-1D4F692C1Q');
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-black': '#040404',
+                        'card-dark': '#111111',
+                        'accent-indigo': '#4f46e5', // Unified accent color
+                        'brand-border': '#252525',
+                        'strongdog-orange': '#FFA500',
+                        'gn-math': '#FB2651',
+                        'gameboy': '#9A2257', // New category color
+                        'other-grey': '#AAAAAA', // New color for the 'Others' category
+                    },
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'md': '0.375rem',
+                        'lg': '0.5rem',
+                        'xl': '1rem',
+                    },
+                    aspectRatio: {
+                        '3/2': '3 / 2',
+                    },
+                }
+            }
+        }
+    </script>
+    
     <style>
-        /* --- BASE STYLING (MATCHING notes.html) --- */
-        body { 
-            font-family: 'Geist', sans-serif; 
-            background-color: #070707; 
-            color: #c0c0c0; 
-            transition: all 0.3s ease;
-            font-size: 16px;
-            overflow-x: hidden;
-            font-weight: 300; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center; 
-            justify-content: flex-start; /* Keep content at the top */
-            padding-top: 4rem; /* Space for the fixed header */
+        /* Base styles */
+        :root {
+            /* Styles ported from Messenger for buttons */
+            --menu-bg: #000000;
+            --menu-border: #333;
+            --menu-text: #d1d5db;
+            --tab-hover-text: #ffffff;
         }
 
-        h1, h2, h3, .font-bold, .font-semibold, strong, .tracking-widest {
+        body {
+            font-family: 'Geist', 'sans-serif';
+            font-weight: 300;
+            background-color: #040404;
+            padding-bottom: 100px; /* Space for the fixed search bar */
+        }
+        
+        h1, h2, h3, .font-bold, .font-semibold, strong {
             font-weight: 400 !important;
         }
 
-        /* --- THEME-AWARE STYLES (MATCHING notes.html) --- */
+        /* --- Button Style (Matching Messenger Copy/Add) --- */
         .btn-toolbar-style {
-            background: var(--menu-bg, #0000000);
-            border: 1px solid var(--menu-border, #333);
-            border-radius: 0.75rem;
-            color: var(--menu-text, #d1d5db);
+            background: var(--menu-bg);
+            border: 1px solid var(--menu-border);
+            border-radius: 0.75rem; 
+            color: var(--menu-text);
             padding: 0.5rem 1rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
+            text-decoration: none; /* Important for <a> tags */
+            font-size: 1rem;
         }
         .btn-toolbar-style:hover {
-            background-color: var(--menu-bg, #000000);
-            border-color: var(--menu-border, #fff);
-            color: var(--tab-hover-text, #ffffff);
-        }
-        /* Primary Button Style (Used for Check Status button) */
-        .btn-toolbar-style.btn-primary-override {
-            background-color: var(--tab-active-bg, rgba(79, 70, 229, 0.1));
-            border: 1px solid var(--tab-active-border, #4f46e5);
-            color: var(--tab-active-text, #4f46e5);
-            /* Make it full width and centered */
-            width: 100%;
-            justify-content: center;
-        }
-        .btn-toolbar-style.btn-primary-override:hover {
-            background-color: var(--tab-active-hover-bg, rgba(79, 70, 229, 0.15));
-            border-color: var(--tab-active-hover-border, #6366f1);
-            color: var(--tab-active-hover-text, #6366f1);
+            background-color: var(--menu-bg);
+            border-color: #fff; /* Force white border on hover */
+            color: var(--tab-hover-text);
         }
         
-        /* --- MAIN TESTER UI STYLES --- */
-        #page-content {
-            /* Centers the form container within the rest of the vertical space (for 16:9) */
+        .zone-item {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            /* Card rounding is now applied via the `rounded-xl` class in the HTML */
+        }
+        .zone-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
+        }
+        
+        /* New styling for the full-width card in the 'Others' category */
+        .other-zone-item {
+            min-height: 250px; /* Enforce height */
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .other-zone-item:hover {
+            box-shadow: 0 8px 25px rgba(170, 170, 170, 0.2); /* Accent box shadow */
+        }
+        .other-zone-item .image-overlay {
+            background: linear-gradient(90deg, rgba(7,7,7,0.85) 0%, rgba(7,7,7,0) 40%, rgba(7,7,7,0) 60%, rgba(7,7,7,0.85) 100%);
+        }
+        .other-zone-item:hover .image-overlay {
+            background: linear-gradient(90deg, rgba(7,7,7,0.7) 0%, rgba(7,7,7,0) 50%, rgba(7,7,7,0) 50%, rgba(7,7,7,0.7) 100%);
+        }
+
+        /* --- Play Button Hover CSS --- */
+        /* These aliases are maintained, but the HTML now uses fa-play */
+        .play-btn .fa-solid-play { display: inline-block; }
+        .play-btn .fa-regular-play { display: none; }
+        .play-btn:hover .fa-solid-play { display: none; }
+        .play-btn:hover .fa-regular-play { display: inline-block; }
+
+        /* --- Favorite Star Hover CSS --- */
+        .favorite-btn .fa-solid-star { display: inline-block; }
+        .favorite-btn .fa-regular-star { display: none; }
+        .favorite-btn:not(.favorited):hover .fa-solid-star { display: none; }
+        .favorite-btn:not(.favorited):hover .fa-regular-star { display: inline-block; color: white; }
+        .favorite-btn.favorited .fa-solid-star { display: inline-block; color: #facc15; }
+        .favorite-btn.favorited .fa-regular-star { display: none; }
+        .favorite-btn.favorited:hover .fa-solid-star { display: none; }
+        .favorite-btn.favorited:hover .fa-regular-star { display: inline-block; color: #facc15; }
+        
+        /* Search Bar Results Styling */
+        .search-results {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .search-item {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            flex-grow: 1; 
-            min-height: calc(100vh - 4rem); /* Header height */
-        }
-        
-        #tester-container {
-            background-color: #0d0d0d;
-            border: 1px solid #1a1a1a;
-            border-radius: 1rem;
-            padding: 40px;
-            width: 90%; 
-            max-width: 600px; /* Sensible max-width for 16:9 form */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            margin-bottom: 50px; /* Add some margin at the bottom */
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 400;
-            color: #aaaaaa;
-            font-size: 14px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #444;
-            border-radius: 0.5rem;
-            box-sizing: border-box;
-            font-size: 1rem;
-            background-color: #1a1a1a;
-            color: #f0f0f0;
-            font-weight: 300;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        input[type="text"]:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-            outline: none;
-        }
-        
-        /* Check Button disabled state using .btn-primary-override colors */
-        .btn-toolbar-style.btn-primary-override:disabled {
-            background-color: var(--tab-active-bg, rgba(79, 70, 229, 0.1));
-            border-color: var(--tab-border, #333);
-            color: var(--tab-text, #9ca3af);
-            cursor: not-allowed;
-        }
-        .btn-toolbar-style.btn-primary-override:disabled:hover {
-            background-color: var(--tab-active-bg, rgba(79, 70, 229, 0.1));
-            border-color: var(--tab-border, #333);
-            color: var(--tab-text, #9ca3af);
-        }
-
-        /* Result Display Styles */
-        #result-display {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 0.75rem;
-            text-align: center;
-            font-size: 1.5em;
-            font-weight: 700;
-            min-height: 40px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-        .status-blocked {
-            background-color: #dc2626; /* Tailwind red-600 */
+            cursor: pointer;
+            transition: background-color 0.2s;
             color: white;
+            text-decoration: none;
+            padding: 8px 15px; /* Re-added padding for items */
         }
-        .status-allowed {
-            background-color: #10b981; /* Tailwind emerald-500 */
-            color: black;
+        .search-item:hover { background-color: rgba(255, 255, 255, 0.1); } /* Lighter hover for blur */
+
+        /* --- Hover styles for search result buttons --- */
+        .search-item .play-btn-search .fa-solid-play { display: inline-block; }
+        .search-item .play-btn-search .fa-regular-play { display: none; }
+        .search-item:hover .play-btn-search .fa-solid-play { display: none; }
+        .search-item:hover .play-btn-search .fa-regular-play { display: inline-block; }
+
+        .search-item .favorite-btn-search .fa-solid-star { display: inline-block; }
+        .search-item .favorite-btn-search .fa-regular-star { display: none; }
+        .search-item:hover .favorite-btn-search:not(.favorited) .fa-solid-star { display: none; }
+        .search-item:hover .favorite-btn-search:not(.favorited) .fa-regular-star { display: inline-block; color: white; }
+        .search-item .favorite-btn-search.favorited .fa-solid-star { display: inline-block; color: #facc15; }
+        .search-item .favorite-btn-search.favorited .fa-regular-star { display: none; }
+        .search-item:hover .favorite-btn-search.favorited .fa-solid-star { display: none; }
+        .search-item:hover .favorite-btn-search.favorited .fa-regular-star { display: inline-block; color: #facc15; }
+        /* --- END: Added search button styles --- */
+
+
+        @media (max-width: 768px) {
+            #bottom-fixed-bar {
+                left: 10px !important; right: 10px !important;
+                bottom: 10px !important; width: auto !important;
+            }
         }
-        .status-loading, .status-info {
-            background-color: #333;
-            color: #bbb;
-        }
+
+        /* Polyfill for aspect-ratio */
+        .aspect-w-3 { position: relative; padding-bottom: 66.666667%; }
+        .aspect-h-2 { }
+        .aspect-w-3 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
         
-        #disclaimer {
-            margin-top: 30px;
-            font-size: 12px;
-            color: #777;
-            text-align: center;
-            padding-top: 15px;
+        /* --- Game Viewer Modal --- */
+        #zoneViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 5000; flex-direction: column; }
+        #zoneViewer .zone-header {
+            background-color: #111111;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #252525;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
+        #zoneViewer .zone-header .zone-title h2 {
+            margin: 0;
+            font-size: 1.3em;
+            color: #ffffff;
+            font-family: 'Geist', sans-serif;
+        }
+        #zoneViewer .zone-header .zone-controls {
+            display: flex;
+            align-items: center;
+        }
+        /* Added 'a' to the selectors to style the new download button */
+        #zoneViewer .zone-header .zone-controls button,
+        #zoneViewer .zone-header .zone-controls a {
+            margin-left: 8px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px); /* Safari support */
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem; /* squircle */
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease-in-out;
+            text-decoration: none; /* For 'a' tag */
+        }
+        #zoneViewer .zone-header .zone-controls button:hover,
+        #zoneViewer .zone-header .zone-controls a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
+        .hidden { display: none !important; }
+
+        /* --- Generic version dropdown --- */
+        .eagler-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 120%; /* Position above the button */
+            right: 0;
+            background-color: rgba(30, 30, 30, 0.7); /* Glass texture */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem; /* 12px */
+            padding: 0.5rem; /* 8px */
+            z-index: 10;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .eagler-dropdown.show {
+            display: block;
+        }
+        .eagler-dropdown-link {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.375rem; /* 6px */
+            transition: background-color 0.2s;
+            font-weight: 400; /* Medium */
+            white-space: nowrap;
+        }
+        .eagler-dropdown-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* --- Credits Modal CSS --- */
+        #creditsModal { display: none; }
     </style>
-
 </head>
-<body class="min-h-screen">
-    <div id="loading-screen" class="fixed inset-0 bg-[#070707] flex items-center justify-center z-50">
-        <i class="fa-solid fa-spinner fa-spin fa-2x text-white"></i>
-    </div>
 
-    <div id="page-content" class="w-full">
+<body class="bg-deep-black text-white min-h-screen">
+
+    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4 relative">
+        <button id="creditsBtn" class="absolute top-0 right-4 z-20 btn-toolbar-style">
+            <i class="fa-solid fa-users mr-2"></i>Credits
+        </button>
         
-        <header class="fixed top-0 left-0 w-full z-1000 flex justify-between items-center p-4 border-b border-[#1a1a1a] bg-[#070707]">
-            <h1 class="text-2xl font-bold text-white">Securly Tester</h1>
-            <div class="flex items-center gap-2">
-        </header>
-
-        <div id="tester-container">
-            <h2 class="text-xl font-bold text-white mb-6 text-center">Block Status Check (useast)</h2>
-
-            <div class="input-group">
-                <label for="user">Student Email (User)</label>
-                <input id="user" type="text" placeholder="student@yourschool.org" value="student@yourschool.org" oninput="clearResult()">
-            </div>
-
-            <div class="input-group">
-                <label for="url">URL to Test</label>
-                <input id="url" type="text" placeholder="https://zapatopi.net/treeoctopus/" value="https://zapatopi.net/treeoctopus/" oninput="clearResult()">
-            </div>
-
-            <button id="check-button" class="btn-toolbar-style btn-primary-override" onclick="checkSecurlyStatus()">
-                <i class="fa-solid fa-check-circle"></i> Check Block Status
-            </button>
-
-            <div id="result-display" class="status-info">
-                Click 'Check Block Status'
-            </div>
-
-            <p id="disclaimer">
-                **CORS PROXY IN USE:** A public proxy is prepended to the Securly URL to attempt to bypass browser restrictions.
+        <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl relative">
+            <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
+                <strong>Welcome to the 4SP Game Hub!</strong><br>
+                This is a collection of games curated for the 4SP community. Use the search bar below to find your favorite.
             </p>
         </div>
+        
+        <h2 id="favoritesHeader" class="text-center text-3xl font-bold mt-12 mb-6 text-white" style="display: none;">
+            <strong>Favorites</strong>
+        </h2>
+        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
 
+        <div id="category-viewer" class="w-full mt-12">
+            <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
+                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="overflow-hidden w-64 text-center">
+                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
+                        </div>
+                </div>
+                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
+                </div>
+        </div>
+    </main>
+
+    <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
+        <div class="relative flex items-center w-full">
+            <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
+            <button id="category-cycle-btn" title="Next Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
+                <i class="fa-solid fa-layer-group"></i>
+            </button>
+            <div class="search-results absolute bottom-full w-full mb-2 bg-black/70 backdrop-blur-lg border border-brand-border rounded-xl shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
+            </div>
+        </div>
     </div>
     
-    <script type="text/javascript">
-        // Hardcoded server URL as requested
-        const SECURLY_SERVER_URL = 'https://useast-www.securly.com';
+    <div id="zoneViewer" aria-modal="true" role="dialog">
+        <div class="zone-header">
+             <div class="zone-title">
+                <h2 id="zoneNameEl">Game Title</h2>
+             </div>
+             <div class="zone-controls">
+                <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                <a id="downloadBtnZone" title="Download" class="hidden" href="#"><i class="fas fa-download"></i></a>
+                <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
+             </div>
+        </div>
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
+    </div>
+
+    <div id="creditsModal" class="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-lg z-[6000] items-center justify-center p-4" style="display: none;">
+        <div class="bg-card-dark rounded-xl border border-brand-border shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center p-4 border-b border-brand-border sticky top-0 bg-card-dark z-10">
+                <h3 class="text-xl font-bold">Project Credits</h3>
+                <button id="closeCreditsBtn" class="text-white hover:text-gray-400 p-2"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="creditsContent" class="p-6 space-y-6">
+                </div>
+        </div>
+    </div>
+    <script type="module">
         
-        // --- Global State and Element References ---
-        const CORS_PROXY = 'https://corsproxy.io/?'; 
-        const resultDisplay = document.getElementById('result-display');
-        const checkButton = document.getElementById('check-button');
-        const loadingScreen = document.getElementById('loading-screen');
-        const pageContent = document.getElementById('page-content');
+        import games from "./cards-data.js";
+        import { siteMapping } from "./site-mapping.js";
+
+        // --- Configuration & Globals ---
+        const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
+        const GN_COVER_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
+        const GN_HTML_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
+        const FAVORITES_KEY = 'gameHubFavorites_v3';
+
+        let allGames = [];
+        let searchableGames = [];
+        let categories = [];
+        let currentCategoryIndex = 0;
+        const categoryColors = {
+            'StrongdogXP': 'text-strongdog-orange',
+            'GN-Math': 'text-gn-math',
+            'Gameboy Games': 'text-gameboy',
+            'Others': 'text-other-grey', 
+        };
         
-        // --- UI Functions ---
+        // ADDED: Credits Data and Hex Map for GitHub button
+        const CATEGORY_HEX_COLORS = {
+            'StrongdogXP': '#FFA500',
+            'GN-Math': '#FB2651',
+            'Gameboy Games': '#9A2257',
+            'Others': '#AAAAAA'
+        };
 
-        function clearResult() {
-            resultDisplay.className = 'status-info';
-            resultDisplay.innerText = 'Click \'Check Block Status\'';
-        }
+        const CREDITS_DATA = {
+            'StrongdogXP': {
+                credit: "Core game collection provided by Josh P.",
+                githubUrl: "https://github.com/jman1593/"
+            },
+            'GN-Math': {
+                credit: "Primary game source and infrastructure provided by the GN-Math Community.",
+                githubUrl: "https://github.com/gn-math/"
+            },
+            'Gameboy Games': {
+                credit: "Emulator and ROM files from various public sources."
+            },
+            'Others': {
+                credit: "Various community developers and open-source projects (e.g., DOOM, Eaglercraft, Carnage3D, JS-DOS)."
+            }
+        };
 
-        // --- Core Securly Logic ---
+        // --- DOM Elements ---
+        const favoritesHeader = document.getElementById("favoritesHeader");
+        const favoritesGameList = document.getElementById("favoritesGameList");
+        const searchInput = document.getElementById("searchInput");
+        const searchResults = document.getElementById("searchResults");
+        const categorySlider = document.getElementById('category-slider');
+        const prevCategoryBtn = document.getElementById('prev-category');
+        const nextCategoryBtn = document.getElementById('next-category');
+        const categoryCycleBtn = document.getElementById('category-cycle-btn');
+        const gamesGridContainer = document.getElementById('games-grid-container');
+        
+        // ADDED: Credit Modal DOM Elements
+        const creditsModal = document.getElementById('creditsModal');
+        const creditsContent = document.getElementById('creditsContent');
+        const creditsBtn = document.getElementById('creditsBtn');
+        const closeCreditsBtn = document.getElementById('closeCreditsBtn');
 
-        /**
-         * Builds the Securly URL based on inputs and the hardcoded server.
-         */
-        function buildSecurlyUrl() {
-            const user = document.getElementById('user').value.trim();
-            const url = document.getElementById('url').value.trim();
-            const serverUrl = SECURLY_SERVER_URL; 
+
+        // --- Favorites Management ---
+        const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+        const saveFavorites = (favs) => localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+        
+        function toggleFavorite(gameId) {
+            let favorites = getFavorites();
+            const isFavorited = favorites.includes(gameId);
+
+            if (isFavorited) {
+                favorites = favorites.filter(id => id !== gameId);
+            } else {
+                favorites.push(gameId);
+            }
+            saveFavorites(favorites);
+
+            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn, .other-zone-item[data-game-id='${gameId}'] .favorite-btn, .search-item[data-game-id='${gameId}'] .favorite-btn-search`).forEach(btn => {
+                btn.classList.toggle('favorited', !isFavorited);
+                btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
+            });
+
+            const gameIdParts = gameId.split('_');
+            const baseGameId = gameIdParts[0];
+
+            // Update versioned game's main button state
+            if (gameId.includes('eaglercraft') || gameId.includes('gta') || gameId.includes('simcity')) {
+                const baseGameElement = document.querySelector(`.other-zone-item[data-game-id='${baseGameId}']`);
+                if (baseGameElement) {
+                    const baseFavBtn = baseGameElement.querySelector('.favorite-btn');
+                    // Check if *any* version is favorited
+                    const anyVersionFavorited = allGames.find(g => g.id === baseGameId)
+                        .versions.some(v => getFavorites().includes(v.favoriteId));
+                    
+                    baseFavBtn.classList.toggle('favorited', anyVersionFavorited);
+                    baseFavBtn.title = anyVersionFavorited ? 'Remove All Versions' : 'Add to Favorites';
+
+                    // If a version is unfavorited and it was the last one, remove the version-favorite-btn
+                    if (!anyVersionFavorited && baseGameElement.querySelector('.version-favorite-btn')) {
+                        baseGameElement.querySelector('.version-favorite-btn').remove();
+                    }
+                }
+            }
             
-            if (!user || !url) {
-                return null;
+            // Re-render favorites list if it's currently visible
+            if (favoritesGameList.style.display !== 'none') {
+                renderFavorites();
+            }
+        }
+        
+        // --- Game Logic ---
+        function openZone(game) {
+            const gameUrl = game.url;
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
+            const zoneNameEl = document.getElementById('zoneNameEl');
+            const downloadBtn = document.getElementById('downloadBtnZone');
+
+            // 1. Reset
+            closeZoneViewer();
+            zoneNameEl.textContent = game.name;
+
+            // 2. Handle Download Button for WASM
+            if (game.wasm) {
+                downloadBtn.classList.remove('hidden');
+                downloadBtn.href = gameUrl;
+                downloadBtn.setAttribute('download', `${game.name.replace(/[^a-z0-9]/gi, '_')}.html`);
+                downloadBtn.setAttribute('target', '_blank'); // Open in new tab for download prompt
+            } else {
+                downloadBtn.classList.add('hidden');
+                downloadBtn.href = '#';
+                downloadBtn.removeAttribute('download');
+                downloadBtn.removeAttribute('target');
             }
 
-            let urlHost;
-            try {
-                // Ensure URL has a protocol for the URL constructor to work
-                const fullUrl = url.startsWith('http') ? url : 'https://' + url;
-                urlHost = (new URL(fullUrl)).hostname;
-            } catch (e) {
-                return null;
+
+            // 3. Load Content
+            const isURLBasedGame = game.category === 'StrongdogXP' || game.category === 'Others' || game.category === 'Gameboy Games';
+            if (isURLBasedGame) {
+                zoneFrame.src = gameUrl;
+                // Add sandboxing for external/URL-based content
+                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
+                zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock');
+                zoneViewer.style.display = "flex";
+            } else {
+                // Remove sandboxing for internal/injected content
+                zoneFrame.removeAttribute('sandbox');
+                zoneFrame.removeAttribute('allow');
+                
+                // Fetch and inject HTML for GN-Math games (which are expected to be safe)
+                fetch(`${gameUrl}?t=${Date.now()}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                        return response.text();
+                    })
+                    .then(html => {
+                        const doc = zoneFrame.contentWindow.document;
+                        doc.open();
+                        doc.write(html);
+                        doc.close();
+                        zoneViewer.style.display = "flex";
+                    })
+                    .catch(error => {
+                        console.error(`Failed to load game "${game.name}": ${error.message}.`);
+                        alert(`Could not load game: ${game.name}. See console for details.`);
+                        closeZoneViewer();
+                    });
             }
-            
-            // 1. Construct the raw Securly Broker URL
-            const securlyLink = `${serverUrl}/crextn/broker?useremail=` +
-                encodeURIComponent(user) +
-                "&reason=crextn&host=" +
-                encodeURIComponent(urlHost) +
-                "&url=" +
-                btoa(url) +
-                "&msg=&ver=2.97.13&cu=" + encodeURIComponent(serverUrl + "/crextn") + "&uf=1&cf=1&lat=34.5678910&lng=-98.7654321";
-            
-            // 2. Prepend the CORS Proxy
-            return CORS_PROXY + encodeURIComponent(securlyLink);
         }
 
-        /**
-         * Fetches the status from Securly via proxy and displays the result.
-         */
-        async function checkSecurlyStatus() {
-            const proxiedSecurlyLink = buildSecurlyUrl();
+        function closeZoneViewer() {
+            window.history.pushState("", document.title, window.location.pathname + window.location.search);
 
-            if (!proxiedSecurlyLink) {
-                resultDisplay.className = 'status-blocked';
-                resultDisplay.innerHTML = '⚠️ **Please enter valid Email and URL.**';
+            document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
+                if (img.dataset.originalSrc && img.src !== img.dataset.originalSrc) {
+                    img.src = img.dataset.originalSrc;
+                }
+            });
+            const downloadBtn = document.getElementById('downloadBtnZone');
+            downloadBtn.classList.add('hidden');
+            downloadBtn.href = '#';
+            downloadBtn.removeAttribute('download');
+            downloadBtn.removeAttribute('target');
+
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
+            zoneViewer.style.display = "none";
+            if (zoneFrame) {
+                zoneFrame.src = 'about:blank';
+                zoneFrame.dataset.activeUrl = '';
+            }
+        }
+
+        // --- Game List Rendering ---
+        function renderGames(gamesToRender, targetElement, forceSmallCard = false) {
+            targetElement.innerHTML = '';
+            const categoryName = categories[currentCategoryIndex];
+            
+            // Render regular cards (StrongdogXP, GN-Math, Gameboy Games)
+            gamesToRender.filter(g => g.category !== 'Others').forEach(game => {
+                const cardHtml = renderGameCard(game, categoryName);
+                targetElement.appendChild(cardHtml);
+            });
+
+            // Render 'Others' cards (special full-width style, unless forced small)
+            gamesToRender.filter(g => g.category === 'Others').forEach(game => {
+                const cardHtml = forceSmallCard ? renderGameCard(game, categoryName) : renderOtherGameCard(game);
+                targetElement.appendChild(cardHtml);
+            });
+
+            // Attach listeners to newly rendered cards
+            attachCardEventListeners(targetElement);
+        }
+
+        function renderGameCard(game, categoryName) {
+            let imgSrc;
+            if (categoryName === 'GN-Math') {
+                imgSrc = `${GN_COVER_URL_BASE}/${game.id.split('_')[1]}.png`;
+            } else {
+                imgSrc = game.imgSrc;
+            }
+
+            const isFavorite = getFavorites().includes(game.id);
+
+            const card = document.createElement("div");
+            // UPDATED: Changed rounded-lg to rounded-xl for more rounded cards
+            card.className = 'zone-item bg-card-dark rounded-xl border border-brand-border overflow-hidden';
+            card.dataset.gameId = game.id;
+            
+            card.innerHTML = `
+                <div class="relative w-full cursor-pointer group">
+                    <div class="aspect-w-3 aspect-h-2">
+                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${game.name}">${game.name}</h3>
+                    <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center space-x-3 shadow-lg">
+                        <button class="play-btn rounded-lg text-white text-xl transition duration-200 focus:outline-none" data-url="${game.url}" title="Play Game">
+                            <i class="fa-solid fa-play fa-solid-play text-accent-indigo transition-colors"></i>
+                            <i class="fa-regular fa-play fa-regular-play text-accent-indigo transition-colors"></i>
+                        </button>
+                        <button class="favorite-btn rounded-lg text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                            <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                            <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function renderOtherGameCard(game) {
+            const card = document.createElement("div");
+            // UPDATED: Added rounded-xl to the card element
+            card.className = 'other-zone-item relative bg-card-dark border border-brand-border overflow-hidden rounded-xl col-span-full';
+            card.dataset.gameId = game.id;
+
+            let favoriteButtonHtml = '';
+            let gameButtonsHtml = '';
+            const isAnyFavorite = game.versions 
+                ? game.versions.some(v => getFavorites().includes(v.favoriteId))
+                : getFavorites().includes(game.id);
+
+            if (game.versions && game.versions.length > 0) { // Versioned games (Eaglercraft, GTA, Sim City)
+                // Version selector button
+                gameButtonsHtml = `
+                    <button class="version-btn btn-toolbar-style rounded-lg text-sm" data-id="${game.id}">
+                        ${game.versions.length} Versions <i class="fa-solid fa-chevron-down ml-1"></i>
+                    </button>
+                    <div class="eagler-dropdown">
+                        ${game.versions.map(v => `<a href="#" class="eagler-dropdown-link favorite-link" data-favorite-id="${v.favoriteId}">${v.name}</a>`).join('')}
+                    </div>
+                `;
+                // Favorite button (checks if ANY version is favorited)
+                favoriteButtonHtml = `
+                    <button class="favorite-btn rounded-lg text-white text-3xl transition duration-200 focus:outline-none ${isAnyFavorite ? 'favorited' : ''}" title="${isAnyFavorite ? 'Remove All Versions' : 'Add to Favorites'}">
+                        <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                        <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                    </button>
+                `;
+            } else { // This is a simple card (DOOM, SM64)
+                // UPDATED: Changed rounded-full to rounded-lg and fa-circle-play to fa-play
+                gameButtonsHtml = `
+                    <button class="play-btn rounded-lg text-white text-3xl transition duration-200 focus:outline-none" data-url="${game.url}" title="Play Game">
+                        <i class="fa-solid fa-play fa-solid-play text-other-grey transition-colors"></i>
+                        <i class="fa-regular fa-play fa-regular-play text-other-grey transition-colors"></i>
+                    </button>
+                `;
+                // UPDATED: Changed rounded-full to rounded-lg
+                favoriteButtonHtml = `
+                    <button class="favorite-btn rounded-lg text-white text-3xl transition duration-200 focus:outline-none ${isAnyFavorite ? 'favorited' : ''}" title="${isAnyFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                        <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                        <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                    </button>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
+                    <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=4SP+Featured'" class="w-full h-full object-cover absolute inset-0 rounded-xl">
+                    <div class="image-overlay absolute inset-0 transition-colors duration-200"></div>
+                    <div class="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between">
+                        <div class="flex items-start justify-between w-full">
+                            <h3 class="text-4xl font-bold text-white text-shadow-lg">${game.name}</h3>
+                            <div class="flex items-center space-x-2">
+                                ${favoriteButtonHtml}
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-end justify-between w-full mt-4">
+                            <p class="text-gray-300 text-sm sm:text-base max-w-lg mb-4 sm:mb-0">${game.description}</p>
+                            <div class="flex items-center space-x-2 relative">
+                                ${gameButtonsHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function renderFavorites() {
+            const favorites = getFavorites();
+            const favoriteGames = searchableGames.filter(g => favorites.includes(g.id) || (g.baseGameId && favorites.includes(g.baseGameId))).map(g => {
+                // For versioned games, we want to show the base card if any version is favorited
+                if (g.baseGameId) {
+                    return allGames.find(baseG => baseG.id === g.baseGameId);
+                }
+                return g;
+            });
+
+            // Filter out duplicates (base cards and versions)
+            const uniqueFavoriteGames = [];
+            const seenIds = new Set();
+            for (const game of favoriteGames) {
+                if (!seenIds.has(game.id)) {
+                    uniqueFavoriteGames.push(game);
+                    seenIds.add(game.id);
+                }
+            }
+
+            if (uniqueFavoriteGames.length > 0) {
+                favoritesHeader.style.display = 'block';
+                favoritesGameList.style.display = 'grid';
+                renderGames(uniqueFavoriteGames, favoritesGameList, true); // Force small card view for favorites
+            } else {
+                favoritesHeader.style.display = 'none';
+                favoritesGameList.style.display = 'none';
+                favoritesGameList.innerHTML = '';
+            }
+        }
+        
+        function attachCardEventListeners(targetElement) {
+            // Play Button Listener
+            targetElement.querySelectorAll('.play-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const gameUrl = btn.dataset.url;
+                    const gameCard = btn.closest('[data-game-id]');
+                    const gameId = gameCard.dataset.gameId;
+                    const game = searchableGames.find(g => g.id === gameId);
+                    
+                    if (game) {
+                        openZone(game);
+                    } else {
+                        console.error("Game data not found for ID:", gameId);
+                    }
+                };
+            });
+
+            // Favorite Button Listener
+            targetElement.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const gameCard = btn.closest('[data-game-id]');
+                    const gameId = gameCard.dataset.gameId;
+                    toggleFavorite(gameId);
+                };
+            });
+
+            // Card Click Listener (Open Game)
+            targetElement.querySelectorAll('.zone-item, .other-zone-item').forEach(card => {
+                const isVersioned = card.querySelector('.version-btn');
+                
+                card.onclick = (e) => {
+                    if (e.target.closest('button') || e.target.closest('a')) {
+                        return; // Ignore if clicking on a button or link inside
+                    }
+                    
+                    if (isVersioned) {
+                        // For versioned cards, do nothing on card click, buttons must be used
+                        return;
+                    }
+
+                    const gameId = card.dataset.gameId;
+                    const game = searchableGames.find(g => g.id === gameId);
+                    
+                    if (game) {
+                        openZone(game);
+                    } else {
+                        console.error("Game data not found for ID:", gameId);
+                    }
+                };
+            });
+            
+            // Version Button Listener (for dropdown)
+            targetElement.querySelectorAll('.version-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    // Close other dropdowns
+                    document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
+                        if (d !== btn.nextElementSibling) d.classList.remove('show');
+                    });
+                    btn.nextElementSibling.classList.toggle('show');
+                };
+            });
+            
+            // Version Dropdown Links (Play link)
+            targetElement.querySelectorAll('.eagler-dropdown-link:not(.favorite-link)').forEach(link => {
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const favoriteId = link.dataset.favoriteId;
+                    const game = searchableGames.find(g => g.id === favoriteId);
+                    if (game) {
+                        openZone(game);
+                    } else {
+                        console.error("Game data not found for favorite ID:", favoriteId);
+                    }
+                    link.closest('.eagler-dropdown').classList.remove('show');
+                };
+            });
+            
+            // Version Dropdown Links (Favorite link)
+            targetElement.querySelectorAll('.eagler-dropdown-link.favorite-link').forEach(link => {
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const favoriteId = link.dataset.favoriteId;
+                    toggleFavorite(favoriteId);
+                    link.closest('.eagler-dropdown').classList.remove('show');
+                };
+            });
+        }
+        
+        
+        // --- Category Slider Logic ---
+        function updateArrowVisibility() {
+            const atStart = currentCategoryIndex === 0;
+            const atEnd = currentCategoryIndex === categories.length - 1;
+            
+            prevCategoryBtn.disabled = atStart;
+            prevCategoryBtn.classList.toggle('text-gray-700', atStart);
+            prevCategoryBtn.classList.toggle('opacity-30', atStart);
+            prevCategoryBtn.classList.toggle('text-gray-500', !atStart);
+            prevCategoryBtn.classList.toggle('hover:text-white', !atStart);
+            prevCategoryBtn.classList.toggle('opacity-100', !atStart);
+
+            nextCategoryBtn.disabled = atEnd;
+            nextCategoryBtn.classList.toggle('text-gray-700', atEnd);
+            nextCategoryBtn.classList.toggle('opacity-30', atEnd);
+            nextCategoryBtn.classList.toggle('text-gray-500', !atEnd);
+            nextCategoryBtn.classList.toggle('hover:text-white', !atEnd);
+            nextCategoryBtn.classList.toggle('opacity-100', !atEnd);
+        }
+
+        function setupCategorySlider() {
+            categorySlider.innerHTML = categories.map(cat => 
+                `<div class="w-64 flex-shrink-0"> 
+                    <h2 class="text-3xl font-bold ${categoryColors[cat] || 'text-white'}">
+                        <strong>${cat}</strong>
+                    </h2>
+                </div>`
+            ).join('');
+            updateSliderPosition();
+        }
+
+        function updateSliderPosition() {
+            // Recalculate based on the number of categories
+            const categoryWidth = 100 / categories.length;
+            categorySlider.style.transform = `translateX(-${currentCategoryIndex * categoryWidth}%)`;
+            categorySlider.style.width = `${categories.length * 100}%`;
+        }
+        
+        function switchCategory(newIndex) {
+            // Clamp the index
+            if (newIndex < 0) newIndex = categories.length - 1;
+            if (newIndex >= categories.length) newIndex = 0;
+
+            currentCategoryIndex = newIndex;
+            updateSliderPosition();
+            renderGamesForCurrentCategory();
+            updateArrowVisibility();
+        }
+
+        async function renderGamesForCurrentCategory(searchTerm = '') {
+            const categoryName = categories[currentCategoryIndex];
+            gamesGridContainer.classList.add('opacity-0');
+            await new Promise(resolve => setTimeout(resolve, 150)); 
+
+            let gamesToRender = allGames.filter(g => g.category === categoryName);
+            
+            if(searchTerm) {
+                // Filter the current category's games by name
+                gamesToRender = gamesToRender.filter(g => g.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            }
+
+            // Custom grid layout for 'Others' category when not searching
+            if (categoryName === 'Others' && !searchTerm) {
+                gamesGridContainer.className = 'games-grid grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 transition-opacity duration-300 ease-in-out';
+            } else {
+                gamesGridContainer.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out';
+            }
+
+            if (gamesToRender.length === 0 && !searchTerm) {
+                gamesGridContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-8 text-lg">No games in this category yet.</p>`;
+            } else if (gamesToRender.length === 0 && searchTerm) {
+                 gamesGridContainer.innerHTML = `<p class="col-span-full text-center text-gray-400 mt-8 text-lg">No results found in ${categoryName} for "${searchTerm}".</p>`;
+            } else {
+                renderGames(gamesToRender, gamesGridContainer);
+            }
+
+            gamesGridContainer.classList.remove('opacity-0');
+        }
+
+        // --- Search Logic (Debounced) ---
+        let searchTimeout;
+        const sd_getBaseURLForPage = siteMapping.sd_getBaseURLForPage;
+        const sd_getEmbedPath = siteMapping.sd_getEmbedPath;
+        const sd_isStrongdog = siteMapping.sd_isStrongdog;
+
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            // If we are showing category content, filter that content.
+            if (!searchResults.style.display || searchResults.style.display === 'none') {
+                 renderGamesForCurrentCategory(searchTerm);
+            }
+            
+            if (searchTerm.length === 0) {
+                searchResults.style.display = "none";
+                renderGamesForCurrentCategory(); // Revert to full category list
                 return;
             }
 
-            // Set loading state
-            resultDisplay.className = 'status-loading';
-            resultDisplay.innerHTML = `Checking **useast**...`;
-            checkButton.disabled = true;
-            checkButton.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Checking...`;
-
-            try {
-                const response = await fetch(proxiedSecurlyLink);
-
-                if (!response.ok) {
-                     throw new Error(`Proxy error with status: ${response.status}`);
-                }
-
-                const text = await response.text();
+            // Debounce the global search to reduce load
+            searchTimeout = setTimeout(() => {
+                const results = searchableGames.filter(game => 
+                    game.name.toLowerCase().includes(searchTerm)
+                ).slice(0, 10); // Limit results to 10
                 
-                // Analyze the response text for Securly's keywords
-                if (text.includes('DENY')) {
-                    resultDisplay.className = 'status-blocked';
-                    resultDisplay.innerHTML = '🚫 **BLOCKED (DENY)** 🚫';
-                } 
-                else if (text.includes('ALLOW')) {
-                    resultDisplay.className = 'status-allowed';
-                    resultDisplay.innerHTML = '✅ **ALLOWED (ALLOW)** ✅';
+                searchResults.innerHTML = '';
+
+                if (results.length === 0) {
+                    searchResults.innerHTML = `<div class="p-3 text-gray-400 text-sm text-center">No games found for "${searchInput.value}"</div>`;
+                    searchResults.style.display = "block";
+                    return;
                 }
-                else {
-                    resultDisplay.className = 'status-info';
-                    resultDisplay.innerHTML = `❓ **Unclear Status** (No DENY/ALLOW found)`;
-                    console.log("Full Securly Response Text:", text);
+
+                results.forEach(game => {
+                    const isStrongdog = sd_isStrongdog(game);
+                    const isOthers = game.category === 'Others' || game.id.startsWith('other-');
+
+                    const isFavorite = getFavorites().includes(game.id);
+                    const iconColor = game.category === 'StrongdogXP' ? 'text-strongdog-orange' : 
+                                      game.category === 'GN-Math' ? 'text-gn-math' : 
+                                      game.category === 'Gameboy Games' ? 'text-gameboy' : 
+                                      'text-other-grey'; // Default/Others
+
+                    const linkEl = document.createElement('a');
+                    linkEl.href = '#';
+                    linkEl.className = 'search-item border-b border-brand-border last:border-b-0';
+                    linkEl.dataset.gameId = game.id;
+                    
+                    // Use a placeholder image or a small icon
+                    let imgSrc = game.imgSrc || './images/4sp_placeholder.png'; 
+                    if (game.category === 'GN-Math') {
+                         imgSrc = `${GN_COVER_URL_BASE}/${game.id.split('_')[1]}.png`;
+                    }
+                    
+                    linkEl.innerHTML = `
+                        <img src="${imgSrc}" alt="" class="w-10 h-10 object-cover rounded-md flex-shrink-0 mr-3" onerror="this.onerror=null;this.src='./images/4sp_placeholder.png'">
+                        <div class="flex flex-col flex-grow truncate">
+                            <span class="text-sm font-semibold truncate">${game.name}</span>
+                            <span class="text-xs text-gray-400">${game.category}</span>
+                        </div>
+                        <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
+                            <button class="play-btn-search rounded-md text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
+                                <i class="fa-solid fa-play fa-solid-play ${iconColor} transition-colors"></i>
+                                <i class="fa-regular fa-play fa-regular-play ${iconColor} transition-colors"></i>
+                            </button>
+                            <button class="favorite-btn-search rounded-md text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                                <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
+                                <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    const favBtn = linkEl.querySelector('.favorite-btn-search');
+                    favBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleFavorite(game.id);
+                    });
+
+                    linkEl.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        const targetGame = allGames.find(g => g.id === game.id);
+
+                        if (isStrongdog) {
+                            try {
+                                // Strongdog games require pre-fetching the embed path
+                                const page = game.page;
+                                const originalHref = game.href;
+                                const baseURL = sd_getBaseURLForPage(page);
+                                let adjustedHref = originalHref.replace(/^\.\//, "");
+                                adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                                const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
+                                const strongdogGameData = { name: game.name, url: embedPath, category: game.category };
+                                openZone(strongdogGameData);
+                            } catch (error) {
+                                console.error(`Failed to get embed path for ${game.name}:`, error);
+                                alert(`Could not load game: ${game.name}. See console for details.`);
+                            }
+                        } else if (isOthers && targetGame && targetGame.versions) {
+                            // For versioned 'Other' games, we open the first version as default
+                            const defaultGame = {
+                                id: targetGame.versions[0].favoriteId,
+                                name: `${targetGame.name} - ${targetGame.versions[0].name}`,
+                                url: targetGame.versions[0].url,
+                                category: targetGame.category,
+                                wasm: targetGame.versions[0].wasm
+                            };
+                            openZone(defaultGame);
+                        } else {
+                            // Direct URL games (GN-Math, Gameboy, simple Others)
+                            openZone(game);
+                        }
+                        
+                        searchResults.style.display = "none";
+                    });
+
+                    searchResults.appendChild(linkEl);
+                });
+                searchResults.style.display = "block";
+            }, 250);
+        }
+
+        // --- Credits Modal Logic ---
+        function renderCreditsModal() {
+            creditsContent.innerHTML = '';
+            const fragment = document.createDocumentFragment();
+
+            categories.forEach(category => {
+                const data = CREDITS_DATA[category];
+                if (!data) return;
+
+                const creditBlock = document.createElement('div');
+                
+                let githubButton = '';
+                if (data.githubUrl) {
+                    const hexColor = CATEGORY_HEX_COLORS[category] || '#4f46e5';
+                    githubButton = `
+                        <a href="${data.githubUrl}" target="_blank" class="btn-toolbar-style" style="border-color: ${hexColor}; color: ${hexColor};">
+                            <i class="fa-brands fa-github"></i> GitHub
+                        </a>
+                    `;
                 }
+
+                creditBlock.innerHTML = `
+                    <h4 class="text-xl font-semibold mb-2 ${categoryColors[category] || 'text-accent-indigo'}">${category}</h4>
+                    <p class="text-gray-400 mb-4">${data.credit}</p>
+                    ${githubButton}
+                `;
+                fragment.appendChild(creditBlock);
+            });
+
+            creditsContent.appendChild(fragment);
+            creditsModal.style.display = 'flex';
+        }
+
+
+        // --- Initialization ---
+        async function initializeApp() {
+            // 1. Fetch GN-Math games from external source
+            try {
+                const response = await fetch(GN_ZONES_URL);
+                if (!response.ok) throw new Error("Failed to fetch GN-Math games");
+                const gnMathGames = await response.json();
+                
+                // Process GN-Math games
+                const processedGnMathGames = gnMathGames.zones.map(zone => ({
+                    id: `gn-math_${zone.id}`,
+                    name: zone.title,
+                    imgSrc: `${GN_COVER_URL_BASE}/${zone.id}.png`,
+                    url: `${GN_HTML_URL_BASE}/${zone.id}.html`,
+                    category: 'GN-Math'
+                }));
+                allGames = [...games, ...processedGnMathGames];
 
             } catch (error) {
-                resultDisplay.className = 'status-blocked';
-                resultDisplay.innerHTML = '❌ **Failed to Connect** (CORS/Network Error)';
-                console.error('Fetch Error:', error);
-            } finally {
-                checkButton.disabled = false;
-                checkButton.innerHTML = `<i class="fa-solid fa-check-circle"></i> Check Block Status`;
+                console.warn("Could not load GN-Math games. Using local games only.", error);
+                allGames = games; // Fallback to only local 'games' array
             }
-        }
-        
-        // --- Initialization (Matching notes.html auth pattern) ---
-
-        // Simple mock authentication to match notes.html behavior
-        const mockAuth = { onAuthStateChanged: (cb) => cb(true) }; 
-        
-        async function initializeAuth() {
-            mockAuth.onAuthStateChanged((user) => {
-                if (!user) {
-                    // window.location.href = '../index.html'; // Removed but kept in auth block
+            
+            // 2. Prepare searchable list
+            allGames.forEach(game => {
+                if (game.versions && game.versions.length > 0) {
+                    game.versions.forEach(version => {
+                        searchableGames.push({
+                            ...game,
+                            id: version.favoriteId,
+                            name: `${game.name} - ${version.name}`,
+                            url: version.url,
+                            wasm: version.wasm,
+                            versions: undefined,
+                            baseGameId: game.id // Keep a reference to the base game
+                        });
+                    });
                 } else {
-                    // Initialize UI after "auth" check
-                    clearResult();
-                    loadingScreen.style.display = 'none';
-                    pageContent.style.display = 'flex';
+                    searchableGames.push(game);
+                }
+            });
+
+            // 3. Setup Categories
+            categories = [...new Set(allGames.map(g => g.category))];
+            const preferredOrder = ['StrongdogXP', 'GN-Math', 'Gameboy Games', 'Others'];
+            categories = preferredOrder.filter(cat => categories.includes(cat));
+
+            setupCategorySlider();
+            updateArrowVisibility();
+            renderGamesForCurrentCategory();
+            renderFavorites();
+
+            // 4. Setup Event Listeners
+            searchInput.placeholder = `Search all ${allGames.length} games...`;
+            searchInput.addEventListener("input", handleSearch);
+            searchInput.addEventListener("focus", handleSearch);
+            
+            // --- Category Navigation Listeners ---
+            const cycle = (direction) => {
+                let newIndex = currentCategoryIndex + direction;
+                if (newIndex < 0) newIndex = categories.length - 1;
+                if (newIndex >= categories.length) newIndex = 0;
+                switchCategory(newIndex);
+            };
+            prevCategoryBtn.addEventListener('click', () => cycle(-1));
+            nextCategoryBtn.addEventListener('click', () => cycle(1));
+            categoryCycleBtn.addEventListener('click', () => cycle(1)); // The button on the search bar
+
+            // Close search and version dropdowns when clicking elsewhere
+            document.addEventListener('click', (ev) => {
+                if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
+                    searchResults.style.display = "none";
+                }
+                
+                if (!ev.target.closest('.version-btn') && !ev.target.closest('.version-favorite-btn') && !ev.target.closest('.eagler-dropdown')) {
+                    document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
+                        d.classList.remove('show');
+                    });
+                }
+            });
+
+            document.getElementById('fullscreenBtnZone')?.addEventListener('click', () => {
+                const zoneFrame = document.getElementById('zoneFrame');
+                if (zoneFrame?.requestFullscreen) zoneFrame.requestFullscreen();
+            });
+            document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
+
+            // ADDED: Credits Modal Listeners
+            creditsBtn.addEventListener('click', renderCreditsModal);
+            closeCreditsBtn.addEventListener('click', () => {
+                creditsModal.style.display = 'none';
+            });
+            // Close modal when clicking on the dark backdrop
+            creditsModal.addEventListener('click', (e) => {
+                if (e.target === creditsModal) {
+                    creditsModal.style.display = 'none';
                 }
             });
         }
-        setTimeout(() => { initializeAuth(); }, 100); 
 
+        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
