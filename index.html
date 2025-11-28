@@ -340,6 +340,23 @@
                 </div>
         </div>
     </div>
+
+    <div id="instruction-overlay" class="fixed inset-0 bg-black/70 z-[8000] transition-opacity duration-300 opacity-0" style="display: none;">
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-7xl px-4">
+            <div class="bg-black/95 text-white p-4 sm:p-6 rounded-3xl border border-gray-700 shadow-2xl backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6">
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-xl font-normal mb-1">How to Navigate</h3>
+                    <p class="text-sm text-gray-300 mb-2 font-light">
+                        To explore more games, use the <strong>arrows</strong> next to the category title (currently "StrongdogXP") to switch between <strong>GN-Math</strong>, <strong>Gameboy Games</strong>, and the <strong>Others</strong> section featuring personally selected titles.
+                    </p>
+                </div>
+                <div class="flex-shrink-0 w-full md:w-auto">
+                    <input type="text" id="instruction-input" placeholder="Type 'I understand'" class="w-full md:w-auto px-6 py-3 border border-transparent text-base font-normal rounded-xl text-white bg-purple-500/10 ring-1 ring-purple-500/50 focus:ring-purple-500/80 focus:bg-purple-500/20 focus:outline-none placeholder-gray-400 transition-all duration-200">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         
         import games from "./cards-data.js";
@@ -404,6 +421,38 @@
         const creditsBtn = document.getElementById('creditsBtn');
         const closeCreditsBtn = document.getElementById('closeCreditsBtn');
 
+        // ADDED: Instruction Overlay Logic
+        const INSTRUCTION_KEY = '4sp-games-instruction-seen';
+        const instructionOverlay = document.getElementById('instruction-overlay');
+        const instructionInput = document.getElementById('instruction-input');
+
+        function setupInstructionOverlay() {
+            if (localStorage.getItem(INSTRUCTION_KEY) !== 'seen') {
+                // Show the overlay
+                instructionOverlay.style.display = 'block';
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+                
+                // Fade in
+                setTimeout(() => {
+                    instructionOverlay.classList.remove('opacity-0');
+                    instructionOverlay.classList.add('opacity-100');
+                }, 10);
+
+                instructionInput.addEventListener('input', (e) => {
+                    if (e.target.value.trim().toLowerCase() === 'i understand') {
+                        // Fade out
+                        instructionOverlay.classList.remove('opacity-100');
+                        instructionOverlay.classList.add('opacity-0');
+                        
+                        setTimeout(() => {
+                            instructionOverlay.style.display = 'none';
+                            document.body.style.overflow = '';
+                            localStorage.setItem(INSTRUCTION_KEY, 'seen');
+                        }, 300);
+                    }
+                });
+            }
+        }
 
         // --- Favorites Management ---
         const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
@@ -1292,6 +1341,9 @@
             renderGamesForCurrentCategory();
             renderFavorites();
 
+            // Setup the instruction overlay
+            setupInstructionOverlay();
+
             searchInput.placeholder = `Search all games...`;
             searchInput.addEventListener("input", handleSearch);
             searchInput.addEventListener("focus", handleSearch);
@@ -1337,8 +1389,8 @@
 
                 // --- If we are here, the game is NOT open ---
 
-                // Don't interfere if the user is typing in the search bar
-                if (document.activeElement === searchInput) return;
+                // Don't interfere if the user is typing in the search bar or instruction input
+                if (document.activeElement === searchInput || document.activeElement === instructionInput) return;
 
                 // Handle category navigation with arrow keys
                 if (e.key === 'ArrowLeft') {
