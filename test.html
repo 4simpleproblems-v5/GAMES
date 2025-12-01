@@ -45,6 +45,7 @@
                         'lg': '0.5rem',
                         'xl': '0.75rem',
                         '2xl': '1.25rem',
+                        '3xl': '1.5rem', // Added for search bar
                     },
                     aspectRatio: {
                         '3/2': '3 / 2',
@@ -142,18 +143,17 @@
         
         .other-zone-item {
             min-height: 250px;
-            /* Removed overflow:hidden here to allow dropdowns to pop out */
             transition: box-shadow 0.2s ease-in-out;
             position: relative; 
-            z-index: 1; /* Base z-index */
+            z-index: 1; 
         }
         .other-zone-item:hover {
             box-shadow: 0 8px 25px rgba(170, 170, 170, 0.2);
-            z-index: 10; /* Bring to front on hover so dropdowns aren't covered by next card */
+            z-index: 10; 
         }
         .other-zone-item .image-overlay {
             background: linear-gradient(90deg, rgba(7,7,7,0.85) 0%, rgba(7,7,7,0) 40%, rgba(7,7,7,0) 60%, rgba(7,7,7,0.85) 100%);
-            border-radius: 1.25rem; /* Match rounded-2xl */
+            border-radius: 1.25rem; 
         }
         .other-zone-item:hover .image-overlay {
             background: linear-gradient(90deg, rgba(7,7,7,0.7) 0%, rgba(7,7,7,0) 50%, rgba(7,7,7,0) 50%, rgba(7,7,7,0.7) 100%);
@@ -170,7 +170,7 @@
         }
 
         /* Search Bar & Results */
-        .search-results {
+        .search-results-container {
             max-height: 300px;
             overflow-y: auto;
             scrollbar-width: thin;
@@ -183,9 +183,8 @@
             color: #e5e7eb;
             text-decoration: none;
             padding: 10px 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            /* No borders between items for cleaner look in the new container */
         }
-        .search-item:last-child { border-bottom: none; }
         .search-item:hover { background-color: rgba(255, 255, 255, 0.05); }
 
         @media (max-width: 768px) {
@@ -243,25 +242,30 @@
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
-        /* --- Dropdown --- */
+        /* --- Dropdown (Modified to popup ABOVE) --- */
         .eagler-dropdown {
             display: none;
             position: absolute;
-            top: 100%; /* Make it drop DOWN by default */
+            bottom: 120%; /* Pops up above the button */
             right: 0;
-            margin-top: 5px;
+            margin-bottom: 5px;
             background-color: rgba(20, 20, 20, 0.98);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 0.75rem;
             padding: 0.5rem;
-            z-index: 1000; /* Very high z-index to break out */
+            z-index: 1000;
             min-width: 200px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            transform-origin: bottom right;
         }
-        .eagler-dropdown.show { display: block; animation: fadeIn 0.1s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .eagler-dropdown.show { display: block; animation: fadeInUp 0.15s ease-out; }
+        
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(10px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
 
         .eagler-dropdown-link {
             display: block;
@@ -320,14 +324,17 @@
         </div>
     </main>
 
-    <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
-        <div class="relative flex flex-col w-full">
-            <div class="search-results absolute bottom-full w-full mb-3 bg-card-dark/95 backdrop-blur-xl border border-brand-border rounded-xl shadow-2xl overflow-hidden" id="searchResults" style="display: none;">
-                </div>
-            <div class="flex items-center w-full">
-                <i class="fa-solid fa-magnifying-glass text-gray-400 ml-2"></i>
-                <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 pl-3 bg-transparent text-white placeholder-gray-500 focus:outline-none focus:ring-0" />
+    <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/80 backdrop-blur-xl rounded-3xl border border-brand-border shadow-2xl shadow-black/50 w-full max-w-md z-50 transition-all duration-300 flex flex-col">
+        <div id="searchResults" class="search-results-container w-full" style="display: none;">
             </div>
+        
+        <div id="searchDivider" class="w-full h-[1px] bg-white/10" style="display: none;"></div>
+
+        <div class="flex items-center w-full p-1">
+            <div class="pl-4 pr-2 text-gray-400">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full py-3 pr-4 bg-transparent text-white placeholder-gray-500 focus:outline-none focus:ring-0 text-base" />
         </div>
     </div>
     
@@ -404,6 +411,7 @@
         const favoritesGameList = document.getElementById("favoritesGameList");
         const searchInput = document.getElementById("searchInput");
         const searchResults = document.getElementById("searchResults");
+        const searchDivider = document.getElementById("searchDivider");
         const categorySlider = document.getElementById('category-slider');
         const prevCategoryBtn = document.getElementById('prev-category');
         const nextCategoryBtn = document.getElementById('next-category');
@@ -423,24 +431,20 @@
             entries.forEach(entry => {
                 const img = entry.target;
                 if (entry.isIntersecting) {
-                    // Load the image if available in dataset
                     if (img.dataset.src) {
                         img.src = img.dataset.src;
                     }
                 } else {
-                    // "Unload" the image to save GPU memory when offscreen
-                    // We store the current src in data-src if not already there
                     if(img.src && !img.src.includes('placehold.co') && !img.dataset.src) {
                          img.dataset.src = img.src;
                     }
                     if(img.dataset.src) {
-                        // Replace with a transparent pixel to keep layout (aspect ratio handled by CSS)
                         img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                     }
                 }
             });
         }, {
-            rootMargin: "300px 0px", // Preload/unload margin
+            rootMargin: "300px 0px", 
             threshold: 0.01
         });
 
@@ -501,42 +505,26 @@
             const isFavorited = favorites.includes(gameId);
 
             if (isFavorited) {
-                // Removing
                 favorites = favorites.filter(id => id !== gameId);
-                
-                // --- Animation Logic for Top Section ---
-                // Find the specific card in the Favorites Top Section
                 const favCard = document.querySelector(`#favoritesGameList .zone-item[data-game-id='${gameId}'], #favoritesGameList .other-zone-item[data-game-id='${gameId}']`);
-                
                 if (favCard) {
-                    // Add fade-out class
                     favCard.classList.add('fade-out');
-                    // Remove from DOM after animation completes
                     setTimeout(() => {
                         favCard.remove();
-                        // Hide header if empty
                         if (favoritesGameList.children.length === 0) {
                             favoritesHeader.style.display = 'none';
                             favoritesGameList.style.display = 'none';
                         }
-                    }, 300); // Match CSS animation duration
+                    }, 300); 
                 }
-
-                // Handle versioned favorites removal from the specific list if needed
-                // (Simple logic: if it's a version ID, the loop above works because the card has data-game-id)
-
             } else {
-                // Adding
                 favorites.push(gameId);
-                // We re-render to add the new card
                 renderFavorites();
             }
             
             saveFavorites(favorites);
 
-            // Update buttons everywhere (Main Grid, Search Results, etc)
             document.querySelectorAll(`.btn-card-action.fav-action`).forEach(btn => {
-                // Check if this button belongs to the toggled game
                 const card = btn.closest('.zone-item, .other-zone-item, .search-item');
                 if (card && card.dataset.gameId === gameId) {
                     btn.classList.toggle('favorited', !isFavorited);
@@ -544,7 +532,6 @@
                 }
             });
 
-            // Handle grouped games (Other category) star sync
             const gameIdParts = gameId.split('_');
             const baseGameId = gameIdParts[0];
             const baseGame = allGames.find(g => g.id === baseGameId);
@@ -658,7 +645,6 @@
             const isAnyFavorite = game.versions ? favorites.some(favId => game.versions.some(v => v.favoriteId === favId)) : favorites.includes(game.id);
 
             const card = document.createElement("div");
-            // IMPORTANT: Remove overflow-hidden from container so dropdowns aren't clipped
             card.className = 'other-zone-item bg-card-dark rounded-2xl border border-brand-border col-span-full shadow-lg'; 
             card.dataset.gameId = game.id;
 
@@ -787,7 +773,6 @@
                     toggleFavorite(game.id);
                 });
             }
-            // Start observing images for this card
             imageObserver.observe(card.querySelector('img'));
             return card;
         }
@@ -861,7 +846,6 @@
                 e.stopPropagation();
                 toggleFavorite(game.id);
             });
-            // Start observing images for this card
             imageObserver.observe(card.querySelector('img'));
             return card;
         }
@@ -957,7 +941,6 @@
             gamesToRender.forEach(game => fragment.appendChild(createGameCard(game, forceSmallCard)));
             targetElement.appendChild(fragment);
             
-            // Trigger load for currently visible images immediately
             observeImages(targetElement);
         }
 
@@ -991,8 +974,6 @@
                     }
                 });
                 favoriteGames.sort((a, b) => a.name.localeCompare(b.name));
-                // Only re-render if the list was actually empty or significantly changed structure to avoid killing animations
-                // But simplified here for safety:
                 if(favoritesGameList.childElementCount === 0 || favoriteGames.length > favoritesGameList.childElementCount) {
                      renderGames(favoriteGames, favoritesGameList, true);
                 }
@@ -1077,15 +1058,18 @@
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
             const filteredDropdown = text ? searchableGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
+            
             searchResults.innerHTML = "";
+            
             if (filteredDropdown.length === 0 || !text) {
                 searchResults.style.display = "none";
+                searchDivider.style.display = "none";
                 return;
             }
+            
             const favorites = getFavorites();
             filteredDropdown.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
-                const isOthers = game.category === 'Others';
                 let imgSrc;
                 if (isStrongdog) {
                     const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
@@ -1143,37 +1127,13 @@
                         openZone(game);
                     }
                     searchResults.style.display = "none";
+                    searchDivider.style.display = "none";
                 });
                 searchResults.appendChild(linkEl);
             });
             searchResults.style.display = "block";
+            searchDivider.style.display = "block";
         }, 250);
-
-        // --- Credits Modal Logic ---
-        function renderCreditsModal() {
-            creditsContent.innerHTML = '';
-            const fragment = document.createDocumentFragment();
-            categories.forEach(category => {
-                const data = CREDITS_DATA[category];
-                if (!data) return;
-                const categoryColorClass = categoryColors[category] || 'text-white';
-                const creditBlock = document.createElement('div');
-                creditBlock.className = 'p-4 rounded-lg border border-brand-border bg-black/20';
-                let content = `<h4 class="text-2xl font-bold mb-3 ${categoryColorClass}"><strong>${category}</strong></h4>`;
-                content += `<p class="text-gray-300 text-base mb-4">${data.credit}</p>`;
-                if (data.githubUrl) {
-                    content += `
-                        <a href="${data.githubUrl}" target="_blank" class="btn-toolbar-style">
-                            <i class="fa-brands fa-github mr-2"></i> Open on GitHub
-                        </a>
-                    `;
-                }
-                creditBlock.innerHTML = content;
-                fragment.appendChild(creditBlock);
-            });
-            creditsContent.appendChild(fragment);
-            creditsModal.style.display = 'flex'; 
-        }
 
         // --- Init ---
         async function initializeApp() {
@@ -1222,7 +1182,6 @@
             const preferredOrder = ['StrongdogXP', 'GN-Math', 'Gameboy Games', 'Others'];
             categories = preferredOrder.filter(cat => categories.includes(cat));
 
-            // --- Deep Linking Logic ---
             const { category: urlCategory, gameId: urlGameId } = parseURL();
             
             if (urlCategory) {
@@ -1237,7 +1196,6 @@
             setupCategorySlider();
             updateArrowVisibility();
             renderGamesForCurrentCategory();
-            // IMPORTANT: Render favorites initially to populate the list
             renderFavorites();
             setupInstructionOverlay();
 
@@ -1301,6 +1259,7 @@
             document.addEventListener("click", ev => {
                 if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
                     searchResults.style.display = "none";
+                    searchDivider.style.display = "none";
                 }
                 if (!ev.target.closest('.version-btn') && !ev.target.closest('.version-favorite-btn') && !ev.target.closest('.eagler-dropdown')) {
                     document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
