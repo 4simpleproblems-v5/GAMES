@@ -34,8 +34,8 @@
                         'brand-border': '#252525',
                         'strongdog-orange': '#FFA500',
                         'gn-math': '#FB2651',
-                        'gameboy': '#9A2257', // New category color
-                        'other-grey': '#AAAAAA', // New color for the 'Others' category
+                        'gameboy': '#9A2257', 
+                        'other-grey': '#AAAAAA', 
                     },
                     fontFamily: {
                         sans: ['Geist', 'sans-serif'],
@@ -44,6 +44,7 @@
                         'md': '0.375rem',
                         'lg': '0.5rem',
                         'xl': '1rem',
+                        '2xl': '1.25rem', // Added for extra rounded cards
                     },
                     aspectRatio: {
                         '3/2': '3 / 2',
@@ -56,11 +57,13 @@
     <style>
         /* Base styles */
         :root {
-            /* Styles ported from Messenger for buttons */
             --menu-bg: #000000;
             --menu-border: #333;
             --menu-text: #d1d5db;
             --tab-hover-text: #ffffff;
+            --tab-active-bg: rgba(79, 70, 229, 0.1);
+            --tab-active-text: #4f46e5;
+            --tab-active-border: #4f46e5;
         }
 
         body {
@@ -74,7 +77,7 @@
             font-weight: 400 !important;
         }
 
-        /* --- Button Style (Matching Messenger Copy/Add) --- */
+        /* --- Toolbar Button Style (Global) --- */
         .btn-toolbar-style {
             background: var(--menu-bg);
             border: 1px solid var(--menu-border);
@@ -88,14 +91,57 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            text-decoration: none; /* Important for <a> tags */
+            text-decoration: none;
             font-size: 1rem;
         }
         .btn-toolbar-style:hover {
             background-color: var(--menu-bg);
-            border-color: #fff; /* Force white border on hover */
+            border-color: #fff;
             color: var(--tab-hover-text);
         }
+
+        /* --- New Card Action Button Style (Matches Notes Toolbar) --- */
+        .btn-card-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem; /* 36px */
+            height: 2.25rem; /* 36px */
+            border-radius: 0.5rem; /* Matches notes.html rounded corners */
+            background-color: transparent;
+            border: 1px solid transparent;
+            color: #9ca3af; /* var(--tab-text) */
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+        .btn-card-action:hover {
+            background-color: var(--tab-active-bg);
+            color: var(--tab-active-text);
+            border-color: var(--tab-active-border);
+        }
+        
+        /* Play Button Icon Toggling */
+        .btn-card-action.play-action .fa-solid-play { display: inline-block; }
+        .btn-card-action.play-action .fa-regular-play { display: none; }
+        .btn-card-action.play-action:hover .fa-solid-play { display: none; }
+        .btn-card-action.play-action:hover .fa-regular-play { display: inline-block; }
+
+        /* Favorite Button Icon Toggling */
+        .btn-card-action.fav-action .fa-solid-star { display: inline-block; }
+        .btn-card-action.fav-action .fa-regular-star { display: none; }
+        
+        /* Not Favorited State */
+        .btn-card-action.fav-action:not(.favorited) .fa-solid-star { display: none; }
+        .btn-card-action.fav-action:not(.favorited) .fa-regular-star { display: inline-block; }
+        
+        /* Favorited State */
+        .btn-card-action.fav-action.favorited .fa-solid-star { display: inline-block; color: #facc15; }
+        .btn-card-action.fav-action.favorited .fa-regular-star { display: none; }
+        
+        /* Hover on Not Favorited */
+        .btn-card-action.fav-action:not(.favorited):hover .fa-regular-star { color: var(--tab-active-text); }
+        
         
         .zone-item {
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -105,13 +151,13 @@
             box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
         }
         
-        /* New styling for the full-width card in the 'Others' category */
+        /* Other Zone Item styling */
         .other-zone-item {
-            min-height: 250px; /* Enforce height */
+            min-height: 250px;
             transition: box-shadow 0.2s ease-in-out;
         }
         .other-zone-item:hover {
-            box-shadow: 0 8px 25px rgba(170, 170, 170, 0.2); /* Accent box shadow */
+            box-shadow: 0 8px 25px rgba(170, 170, 170, 0.2);
         }
         .other-zone-item .image-overlay {
             background: linear-gradient(90deg, rgba(7,7,7,0.85) 0%, rgba(7,7,7,0) 40%, rgba(7,7,7,0) 60%, rgba(7,7,7,0.85) 100%);
@@ -120,22 +166,6 @@
             background: linear-gradient(90deg, rgba(7,7,7,0.7) 0%, rgba(7,7,7,0) 50%, rgba(7,7,7,0) 50%, rgba(7,7,7,0.7) 100%);
         }
 
-        /* --- Play Button Hover CSS --- */
-        .play-btn .fa-solid-play { display: inline-block; }
-        .play-btn .fa-regular-play { display: none; }
-        .play-btn:hover .fa-solid-play { display: none; }
-        .play-btn:hover .fa-regular-play { display: inline-block; }
-
-        /* --- Favorite Star Hover CSS --- */
-        .favorite-btn .fa-solid-star { display: inline-block; }
-        .favorite-btn .fa-regular-star { display: none; }
-        .favorite-btn:not(.favorited):hover .fa-solid-star { display: none; }
-        .favorite-btn:not(.favorited):hover .fa-regular-star { display: inline-block; color: white; }
-        .favorite-btn.favorited .fa-solid-star { display: inline-block; color: #facc15; }
-        .favorite-btn.favorited .fa-regular-star { display: none; }
-        .favorite-btn.favorited:hover .fa-solid-star { display: none; }
-        .favorite-btn.favorited:hover .fa-regular-star { display: inline-block; color: #facc15; }
-        
         /* Search Bar Results Styling */
         .search-results {
             max-height: 250px;
@@ -147,26 +177,9 @@
             transition: background-color 0.2s;
             color: white;
             text-decoration: none;
-            padding: 8px 15px; /* Re-added padding for items */
+            padding: 8px 15px;
         }
-        .search-item:hover { background-color: rgba(255, 255, 255, 0.1); } /* Lighter hover for blur */
-
-        /* --- Hover styles for search result buttons --- */
-        .search-item .play-btn-search .fa-solid-play { display: inline-block; }
-        .search-item .play-btn-search .fa-regular-play { display: none; }
-        .search-item:hover .play-btn-search .fa-solid-play { display: none; }
-        .search-item:hover .play-btn-search .fa-regular-play { display: inline-block; }
-
-        .search-item .favorite-btn-search .fa-solid-star { display: inline-block; }
-        .search-item .favorite-btn-search .fa-regular-star { display: none; }
-        .search-item:hover .favorite-btn-search:not(.favorited) .fa-solid-star { display: none; }
-        .search-item:hover .favorite-btn-search:not(.favorited) .fa-regular-star { display: inline-block; color: white; }
-        .search-item .favorite-btn-search.favorited .fa-solid-star { display: inline-block; color: #facc15; }
-        .search-item .favorite-btn-search.favorited .fa-regular-star { display: none; }
-        .search-item:hover .favorite-btn-search.favorited .fa-solid-star { display: none; }
-        .search-item:hover .favorite-btn-search.favorited .fa-regular-star { display: inline-block; color: #facc15; }
-        /* --- END: Added search button styles --- */
-
+        .search-item:hover { background-color: rgba(255, 255, 255, 0.1); }
 
         @media (max-width: 768px) {
             #bottom-fixed-bar {
@@ -202,7 +215,6 @@
             display: flex;
             align-items: center;
         }
-        /* Added 'a' to the selectors to style the new download button */
         #zoneViewer .zone-header .zone-controls button,
         #zoneViewer .zone-header .zone-controls a {
             margin-left: 8px;
@@ -210,17 +222,17 @@
             height: 40px;
             background-color: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px); /* Safari support */
+            -webkit-backdrop-filter: blur(5px);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 0.5rem; /* squircle */
+            border-radius: 0.5rem;
             cursor: pointer;
             font-size: 1em;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background-color 0.2s ease-in-out;
-            text-decoration: none; /* For 'a' tag */
+            text-decoration: none;
         }
         #zoneViewer .zone-header .zone-controls button:hover,
         #zoneViewer .zone-header .zone-controls a:hover {
@@ -229,40 +241,35 @@
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
-        /* --- Generic version dropdown --- */
+        /* --- Dropdown --- */
         .eagler-dropdown {
             display: none;
             position: absolute;
-            bottom: 120%; /* Position above the button */
+            bottom: 120%;
             right: 0;
-            background-color: rgba(30, 30, 30, 0.7); /* Glass texture */
+            background-color: rgba(30, 30, 30, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 0.75rem; /* 12px */
-            padding: 0.5rem; /* 8px */
+            border-radius: 0.75rem;
+            padding: 0.5rem;
             z-index: 10;
             min-width: 200px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .eagler-dropdown.show {
-            display: block;
-        }
+        .eagler-dropdown.show { display: block; }
         .eagler-dropdown-link {
             display: block;
             padding: 0.5rem 0.75rem;
             color: white;
             text-decoration: none;
-            border-radius: 0.375rem; /* 6px */
+            border-radius: 0.375rem;
             transition: background-color 0.2s;
-            font-weight: 400; /* Medium */
+            font-weight: 400;
             white-space: nowrap;
         }
-        .eagler-dropdown-link:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-        }
+        .eagler-dropdown-link:hover { background-color: rgba(255, 255, 255, 0.15); }
 
-        /* --- Credits Modal CSS --- */
         #creditsModal { display: none; }
     </style>
 </head>
@@ -347,7 +354,7 @@
                 <div class="flex-1 min-w-0">
                     <h3 class="text-xl font-normal mb-1">How to Navigate</h3>
                     <p class="text-sm text-gray-300 mb-2 font-light">
-                        To explore more games, use the <strong>arrows</strong> next to the category title (currently "StrongdogXP") to switch between <strong>GN-Math</strong>, <strong>Gameboy Games</strong>, and the <strong>Others</strong> section featuring personally selected titles.
+                        To explore more games, use the <strong>arrows</strong> next to the category title (currently "<strong>GN-Math</strong>") to switch between <strong>StrongdogXP</strong>, <strong>GN-Math</strong>, and the <strong>Others</strong> section featuring personally selected titles.
                     </p>
                 </div>
                 <div class="flex-shrink-0 w-full md:w-auto">
@@ -358,7 +365,6 @@
     </div>
 
     <script type="module">
-        
         import games from "./cards-data.js";
         import { siteMapping } from "./site-mapping.js";
 
@@ -379,7 +385,6 @@
             'Others': 'text-other-grey', 
         };
         
-        // ADDED: Credits Data and Hex Map for GitHub button
         const CATEGORY_HEX_COLORS = {
             'StrongdogXP': '#FFA500',
             'GN-Math': '#FB2651',
@@ -415,24 +420,48 @@
         const categoryCycleBtn = document.getElementById('category-cycle-btn');
         const gamesGridContainer = document.getElementById('games-grid-container');
         
-        // ADDED: Credit Modal DOM Elements
         const creditsModal = document.getElementById('creditsModal');
         const creditsContent = document.getElementById('creditsContent');
         const creditsBtn = document.getElementById('creditsBtn');
         const closeCreditsBtn = document.getElementById('closeCreditsBtn');
 
-        // ADDED: Instruction Overlay Logic
         const INSTRUCTION_KEY = '4sp-games-instruction-seen';
         const instructionOverlay = document.getElementById('instruction-overlay');
         const instructionInput = document.getElementById('instruction-input');
 
+        // --- URL Management ---
+        function updateURL(category, gameId = null) {
+            let hash = `#${encodeURIComponent(category.replace(/\s+/g, '-'))}`;
+            if (gameId) {
+                hash += `?id=${gameId}`;
+            }
+            history.replaceState(null, null, hash);
+        }
+
+        function parseURL() {
+            // Parses format: #CategoryName?id=123
+            const hash = window.location.hash.substring(1); // remove #
+            if (!hash) return { category: null, gameId: null };
+
+            const parts = hash.split('?');
+            let rawCategory = parts[0];
+            // Decode and revert hyphens to spaces approximately for matching
+            // (Strict matching handled in initialization)
+            let category = decodeURIComponent(rawCategory).replace(/-/g, ' '); 
+            
+            let gameId = null;
+            if (parts[1]) {
+                const params = new URLSearchParams(parts[1]);
+                gameId = params.get('id');
+            }
+            return { category: rawCategory, gameId }; // Return raw category for cleaner comparisons later if needed
+        }
+
         function setupInstructionOverlay() {
             if (localStorage.getItem(INSTRUCTION_KEY) !== 'seen') {
-                // Show the overlay
                 instructionOverlay.style.display = 'block';
-                document.body.style.overflow = 'hidden'; // Prevent scrolling
+                document.body.style.overflow = 'hidden'; 
                 
-                // Fade in
                 setTimeout(() => {
                     instructionOverlay.classList.remove('opacity-0');
                     instructionOverlay.classList.add('opacity-100');
@@ -440,7 +469,6 @@
 
                 instructionInput.addEventListener('input', (e) => {
                     if (e.target.value.trim().toLowerCase() === 'i understand') {
-                        // Fade out
                         instructionOverlay.classList.remove('opacity-100');
                         instructionOverlay.classList.add('opacity-0');
                         
@@ -469,21 +497,21 @@
             }
             saveFavorites(favorites);
 
-            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .favorite-btn, .other-zone-item[data-game-id='${gameId}'] .favorite-btn, .search-item[data-game-id='${gameId}'] .favorite-btn-search`).forEach(btn => {
+            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .btn-card-action.fav-action, .other-zone-item[data-game-id='${gameId}'] .btn-card-action.fav-action, .search-item[data-game-id='${gameId}'] .btn-card-action.fav-action`).forEach(btn => {
                 btn.classList.toggle('favorited', !isFavorited);
                 btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
             });
 
+            // Handle grouped games (Other category)
             const gameIdParts = gameId.split('_');
             const baseGameId = gameIdParts[0];
-            
             const baseGame = allGames.find(g => g.id === baseGameId);
             
             if (baseGame && baseGame.versions) {
                 const isAnyVersionFavorited = getFavorites().some(favId => favId.startsWith(baseGameId + '_'));
                 const mainCard = document.querySelector(`.other-zone-item[data-game-id='${baseGameId}']`);
                 if (mainCard) {
-                    const favBtn = mainCard.querySelector('.favorite-btn');
+                    const favBtn = mainCard.querySelector('.btn-card-action.fav-action');
                     if (favBtn) {
                         favBtn.classList.toggle('favorited', isAnyVersionFavorited);
                     }
@@ -492,7 +520,7 @@
             renderFavorites();
         }
 
-        // --- URL and Path Helpers (No changes needed here) ---
+        // --- URL Helpers (Strongdog) ---
         function getAdjustedUrls(imgSrc, page) {
             if (page && page > 1) {
                 return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
@@ -500,11 +528,7 @@
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
         
-        // --- Strongdog Game Path Logic (No changes needed here) ---
-
-        function sd_getCurrentKeyHostOnly() {
-            return window.location.host;
-        }
+        function sd_getCurrentKeyHostOnly() { return window.location.host; }
 
         function sd_getBaseURLForPage(page) {
             const currentHost = sd_getCurrentKeyHostOnly();
@@ -518,51 +542,31 @@
                 if (page === 5) return "/strongdog5/";
                 return "/STRONGDOG/";
             }
-            
             const explicitMappings = {
-                "jman1593.github.io": {
-                    2: "./strongdog2/",
-                },
-                "v5-4simpleproblems.github.io": {
-                    2: "../strongdog2/",
-                    3: "../strongdog3/",
-                    4: "../strongdog4/",
-                    5: "../strongdog5/",
-                }
+                "jman1593.github.io": { 2: "./strongdog2/" },
+                "v5-4simpleproblems.github.io": { 2: "../strongdog2/", 3: "../strongdog3/", 4: "../strongdog4/", 5: "../strongdog5/" }
             };
             if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
                 return explicitMappings[currentHost][page];
             }
-            
             if (!page || page === 1) return "./";
             
             const arr = siteMapping[currentHost];
             if (typeof siteMapping === 'undefined' || !siteMapping[currentHost]) {
-                console.warn("siteMapping not found or host not in map. Using default paths.");
                 if (page === 2) return "../strongdog2/";
                 if (page === 3) return "../strongdog3/";
                 if (page === 4) return "../strongdog4/";
                 if (page === 5) return "../strongdog5/";
                 return "./";
             }
-
             const index = page - 2;
             if (arr[index]) {
                 let path = arr[index];
-                
-                if (path === './') {
-                    return './';
-                }
-                
-                if (path.startsWith('../../')) {
-                    return path.replace('../../', '../');
-                }
-                if (path.startsWith('../')) {
-                    return path.replace('../', './');
-                }
+                if (path === './') return './';
+                if (path.startsWith('../../')) return path.replace('../../', '../');
+                if (path.startsWith('../')) return path.replace('../', './');
                 return path;
             }
-
             if (page === 2) return "../strongdog2/";
             if (page === 3) return "../strongdog3/";
             if (page === 4) return "../strongdog4/";
@@ -575,9 +579,7 @@
             if (!cleanHref.endsWith("/")) cleanHref += "/";
             const pathsToTry = [cleanHref + "game/index.html", cleanHref + "game/base.html", cleanHref + "gamereal/index.html", cleanHref + "gamereal/base.html", cleanHref + "index.html", cleanHref + "base.html", ];
             try {
-                const response = await fetch(adjustedHref, {
-                    method: "GET"
-                });
+                const response = await fetch(adjustedHref, { method: "GET" });
                 if (response.ok) {
                     const text = await response.text();
                     const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/);
@@ -587,9 +589,7 @@
                         if (await sd_fileExists(resolvedPath)) return resolvedPath;
                     }
                 }
-            } catch (error) {
-                console.warn("Failed to parse embed path from cards-data.js", error);
-            }
+            } catch (error) {}
             for (const path of pathsToTry) {
                 if (await sd_fileExists(path)) return path;
             }
@@ -610,30 +610,12 @@
 
         async function sd_fileExists(url) {
             try {
-                const response = await fetch(url, {
-                    method: "HEAD"
-                });
+                const response = await fetch(url, { method: "HEAD" });
                 return response.ok;
-            } catch {
-                return false;
-            }
+            } catch { return false; }
         }
-        // --- [END] Strongdog Game Path Logic ---
 
-
-        // --- REMOVED: WebAssembly Support Check (as requested by user) ---
-
-        // --- Game Card Rendering (No functional changes here) ---
-        
-        const superMarioGame = {
-            id: "other-sm64",
-            name: "Super Mario 64",
-            imgSrc: "./images/sm64.png",
-            description: "The iconic 3D platformer that revolutionized gaming. Run, jump, and triple-jump your way through vast worlds to collect stars and save the princess.",
-            category: "Others",
-            url: "../GAMES/sm64/index.html"
-        };
-        
+        // --- Game Data (Others) ---
         const othersGames = [
             {
                 id: "other-eaglercraft",
@@ -676,8 +658,17 @@
                 category: "Others",
                 url: "../DOOM/index.html"
             },
-            // superMarioGame // <-- REMOVED AS REQUESTED
+             {
+                id: "other-sm64",
+                name: "Super Mario 64",
+                imgSrc: "./images/sm64.png",
+                description: "The iconic 3D platformer that revolutionized gaming. Run, jump, and triple-jump your way through vast worlds to collect stars and save the princess.",
+                category: "Others",
+                url: "../GAMES/sm64/index.html"
+            }
         ];
+
+        // --- Card Creation ---
 
         function createOthersGameCard(game) {
             const favorites = getFavorites();
@@ -686,29 +677,28 @@
                 favorites.includes(game.id);
 
             const card = document.createElement("div");
-            card.className = 'other-zone-item bg-card-dark rounded-xl border border-brand-border col-span-full shadow-lg';
+            card.className = 'other-zone-item bg-card-dark rounded-2xl border border-brand-border col-span-full shadow-lg overflow-hidden'; // UPDATED: rounded-2xl
             card.dataset.gameId = game.id;
 
             let gameButtonsHtml = '';
             let favoriteButtonHtml = '';
             
-            // FIX 1: Removed supportsWasm check. All versions are now explicitly available.
             if (game.versions && game.versions.length > 0) {
                 const availableVersions = game.versions; 
 
                 if (availableVersions.length === 1) {
                     const version = availableVersions[0];
                     gameButtonsHtml = `
-                        <button class="play-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" data-url="${version.url}" data-version-name="${version.name}" title="Play Game">
-                            <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
-                            <i class="fa-regular fa-circle-play fa-regular-play text-other-grey transition-colors"></i>
+                        <button class="btn-card-action play-action" data-url="${version.url}" data-version-name="${version.name}" title="Play Game">
+                            <i class="fa-solid fa-play fa-solid-play transition-colors"></i>
+                            <i class="fa-regular fa-circle-play fa-regular-play transition-colors"></i>
                         </button>
                     `;
                 } else {
                     gameButtonsHtml = `
                         <div class="relative">
-                            <button class="version-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" title="Select Version">
-                                <i class="fa-solid fa-chevron-up text-other-grey transition-colors"></i>
+                            <button class="btn-card-action version-btn" title="Select Version">
+                                <i class="fa-solid fa-chevron-up transition-colors"></i>
                             </button>
                             <div class="eagler-dropdown">
                                 ${availableVersions.map(v => `<a href="#" class="eagler-dropdown-link" data-url="${v.url}" data-version-name="${v.name}">${v.name}</a>`).join('')}
@@ -719,9 +709,9 @@
 
                 favoriteButtonHtml = `
                     <div class="relative">
-                        <button class="favorite-btn version-favorite-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none ${isAnyFavorite ? 'favorited' : ''}" title="Favorite a version">
-                            <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
-                            <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                        <button class="btn-card-action fav-action version-favorite-btn ${isAnyFavorite ? 'favorited' : ''}" title="Favorite a version">
+                            <i class="fa-solid fa-star fa-solid-star transition-colors"></i>
+                            <i class="fa-regular fa-star fa-regular-star transition-colors"></i>
                         </button>
                         <div class="eagler-dropdown">
                             ${game.versions.map(v => `<a href="#" class="eagler-dropdown-link favorite-link" data-favorite-id="${v.favoriteId}">${v.name}</a>`).join('')}
@@ -730,30 +720,28 @@
                 `;
 
             } else {
-                // This is a simple card (DOOM, SM64)
                 gameButtonsHtml = `
-                    <button class="play-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none" data-url="${game.url}" title="Play Game">
-                        <i class="fa-solid fa-circle-play fa-solid-play text-other-grey transition-colors"></i>
-                        <i class="fa-regular fa-circle-play fa-regular-play text-other-grey transition-colors"></i>
+                    <button class="btn-card-action play-action" data-url="${game.url}" title="Play Game">
+                        <i class="fa-solid fa-play fa-solid-play transition-colors"></i>
+                        <i class="fa-regular fa-circle-play fa-regular-play transition-colors"></i>
                     </button>
                 `;
                 favoriteButtonHtml = `
-                    <button class="favorite-btn rounded-full text-white text-3xl transition duration-200 focus:outline-none ${isAnyFavorite ? 'favorited' : ''}" title="${isAnyFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
-                        <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
-                        <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                    <button class="btn-card-action fav-action ${isAnyFavorite ? 'favorited' : ''}" title="${isAnyFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                        <i class="fa-solid fa-star fa-solid-star transition-colors"></i>
+                        <i class="fa-regular fa-star fa-regular-star transition-colors"></i>
                     </button>
                 `;
             }
 
             card.innerHTML = `
                 <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
-                    <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=4SP+Featured'" class="w-full h-full object-cover absolute inset-0 rounded-xl">
+                    <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=4SP+Featured'" class="w-full h-full object-cover absolute inset-0">
                     <div class="image-overlay absolute inset-0 transition-colors duration-200"></div>
                     <div class="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between">
                         <div class="flex items-start justify-between w-full">
                             <h3 class="text-4xl font-bold text-white truncate drop-shadow-lg" style="max-width: 80%;" title="${game.name}">${game.name}</h3>
-                            <div class="flex items-center space-x-3">
-                                ${gameButtonsHtml}
+                            <div class="flex items-center space-x-3 bg-black/80 backdrop-blur-md rounded-xl px-2 py-1"> ${gameButtonsHtml}
                                 ${favoriteButtonHtml}
                             </div>
                         </div>
@@ -761,15 +749,15 @@
                     </div>
                 </div>
             `;
-
+            
+            // Event Listeners for buttons
             if (!game.versions) {
                 card.querySelector('.group').addEventListener('click', (e) => {
                     e.stopPropagation();
                     openZone(game);
                 });
             }
-
-            card.querySelectorAll('.play-btn').forEach(btn => {
+            card.querySelectorAll('.play-action').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const versionName = btn.dataset.versionName;
@@ -777,7 +765,6 @@
                     openZone({ ...game, name: title, url: btn.dataset.url });
                 });
             });
-
             const versionBtn = card.querySelector('.version-btn');
             if (versionBtn) {
                 versionBtn.addEventListener('click', (e) => {
@@ -785,16 +772,12 @@
                     const dropdown = versionBtn.nextElementSibling;
                     const isShown = dropdown.classList.contains('show');
                     document.querySelectorAll('.eagler-dropdown.show').forEach(d => d.classList.remove('show'));
-                    if (!isShown) {
-                        dropdown.classList.add('show');
-                    }
+                    if (!isShown) dropdown.classList.add('show');
                 });
             }
-
             card.querySelectorAll('.eagler-dropdown-link:not(.favorite-link)').forEach(link => {
                 link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault(); e.stopPropagation();
                     const newUrl = link.dataset.url;
                     const versionName = link.dataset.versionName;
                     const title = versionName ? `${game.name} - ${versionName}` : game.name;
@@ -803,22 +786,18 @@
                 });
             });
 
-            const favBtn = card.querySelector('.favorite-btn');
+            const favBtn = card.querySelector('.btn-card-action.fav-action');
             if (favBtn.classList.contains('version-favorite-btn')) {
                 favBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const dropdown = favBtn.nextElementSibling;
                     const isShown = dropdown.classList.contains('show');
                     document.querySelectorAll('.eagler-dropdown.show').forEach(d => d.classList.remove('show'));
-                    if (!isShown) {
-                        dropdown.classList.add('show');
-                    }
+                    if (!isShown) dropdown.classList.add('show');
                 });
-
                 card.querySelectorAll('.favorite-link').forEach(link => {
                     link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
+                        e.preventDefault(); e.stopPropagation();
                         toggleFavorite(link.dataset.favoriteId);
                         link.closest('.eagler-dropdown').classList.remove('show');
                     });
@@ -833,14 +812,12 @@
             return card;
         }
 
-
         function createGameCard(game, forceSmallCard = false) {
             if (game.category === 'Others' && !forceSmallCard) {
                 return createOthersGameCard(game);
             }
             
             const isStrongdog = game.category === 'StrongdogXP';
-            
             let imgSrc;
             if (isStrongdog) {
                 const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
@@ -857,23 +834,25 @@
             }
 
             const card = document.createElement("div");
-            card.className = 'zone-item bg-card-dark rounded-lg border border-brand-border overflow-hidden';
+            // UPDATED: rounded-2xl
+            card.className = 'zone-item bg-card-dark rounded-2xl border border-brand-border overflow-hidden';
             card.dataset.gameId = game.id;
 
+            // UPDATED BUTTONS: Using .btn-card-action, less rounded pill (rounded-xl), Play/Star logic
             card.innerHTML = `
                 <div class="relative w-full cursor-pointer group">
                     <div class="aspect-w-3 aspect-h-2">
-                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
+                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
                     </div>
                     <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${game.name}">${game.name}</h3>
-                    <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
-                        <button class="play-btn rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
-                            <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
-                            <i class="fa-regular fa-circle-play fa-regular-play text-accent-indigo transition-colors"></i>
+                    <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md rounded-xl px-2 py-1 flex items-center space-x-2 shadow-lg">
+                        <button class="btn-card-action play-action" title="Play Game">
+                            <i class="fa-solid fa-play fa-solid-play transition-colors"></i>
+                            <i class="fa-regular fa-circle-play fa-regular-play transition-colors"></i>
                         </button>
-                        <button class="favorite-btn rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
-                            <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
-                            <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                        <button class="btn-card-action fav-action ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                            <i class="fa-solid fa-star fa-solid-star transition-colors"></i>
+                            <i class="fa-regular fa-star fa-regular-star transition-colors"></i>
                         </button>
                     </div>
                 </div>
@@ -888,30 +867,21 @@
                         const baseURL = sd_getBaseURLForPage(page);
                         let adjustedHref = originalHref.replace(/^\.\//, "");
                         adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
-                        
                         const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
-                        
-                        const strongdogGameData = {
-                            name: game.name,
-                            url: embedPath,
-                            category: game.category
-                        };
+                        const strongdogGameData = { name: game.name, url: embedPath, category: game.category, id: game.id };
                         openZone(strongdogGameData);
-
                     } catch (error) {
                         console.error(`Failed to get embed path for ${game.name}:`, error);
                         alert(`Could not load game: ${game.name}. See console for details.`);
                     }
-                } else if (game.category === 'Others') {
-                    openZone(game);
                 } else {
                     openZone(game);
                 }
             };
 
             card.querySelector('.group').addEventListener('click', handlePlay);
-            card.querySelector('.play-btn').addEventListener('click', handlePlay);
-            card.querySelector('.favorite-btn').addEventListener('click', (e) => {
+            card.querySelector('.play-action').addEventListener('click', handlePlay);
+            card.querySelector('.fav-action').addEventListener('click', (e) => {
                 e.stopPropagation();
                 toggleFavorite(game.id);
             });
@@ -926,11 +896,10 @@
                 return;
             }
 
-            const categoryHash = encodeURIComponent(game.category.replace(/\s+/g, '-'));
-            window.location.hash = categoryHash;
+            // UPDATED: Update URL with query param
+            updateURL(categories[currentCategoryIndex], game.id || null);
 
             const downloadBtn = document.getElementById('downloadBtnZone');
-            
             const baseId = game.baseGameId || game.id; 
             
             if (baseId === 'other-eaglercraft') {
@@ -994,7 +963,8 @@
         }
 
         function closeZoneViewer() {
-            window.history.pushState("", document.title, window.location.pathname + window.location.search);
+            // UPDATED: Revert URL to just category hash
+            updateURL(categories[currentCategoryIndex]);
 
             document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
                 if (img.dataset.originalSrc && img.src !== img.dataset.originalSrc) {
@@ -1017,9 +987,7 @@
             }
         }
 
-
-        // --- Game List Rendering ---
-        
+        // --- Render Lists ---
         function renderGames(gamesToRender, targetElement, forceSmallCard = false) {
             targetElement.innerHTML = '';
             const categoryName = categories[currentCategoryIndex];
@@ -1043,7 +1011,6 @@
                 favoritesGameList.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4';
 
                 const favoriteGames = [];
-                
                 allGames.forEach(game => {
                     if (favoriteIds.includes(game.id) && !game.versions) {
                         if (!favoriteGames.some(g => g.id === game.id)) {
@@ -1065,18 +1032,15 @@
                         });
                     }
                 });
-                
                 favoriteGames.sort((a, b) => a.name.localeCompare(b.name));
-                
                 renderGames(favoriteGames, favoritesGameList, true);
             } else {
                 favoritesHeader.style.display = "none";
                 favoritesGameList.style.display = "none";
             }
         }
-        
-        // --- Category Navigation & Display (No changes needed here) ---
 
+        // --- Category Nav ---
         function updateArrowVisibility() {
             prevCategoryBtn.disabled = currentCategoryIndex === 0;
             prevCategoryBtn.classList.toggle('text-gray-700', currentCategoryIndex === 0);
@@ -1116,11 +1080,12 @@
             updateSliderPosition();
             renderGamesForCurrentCategory();
             updateArrowVisibility();
+            // UPDATED: Update URL when switching
+            updateURL(categories[currentCategoryIndex]);
         }
         
         async function renderGamesForCurrentCategory(searchTerm = '') {
             const categoryName = categories[currentCategoryIndex];
-            
             gamesGridContainer.classList.add('opacity-0');
             await new Promise(resolve => setTimeout(resolve, 150));
 
@@ -1135,9 +1100,7 @@
                 gamesGridContainer.className = 'games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out';
                 return;
             }
-
             renderGames(gamesToRender, gamesGridContainer, false);
-            
             gamesGridContainer.classList.remove('opacity-0');
         }
 
@@ -1152,23 +1115,16 @@
 
         const handleSearch = debounce(() => {
             const text = searchInput.value.toLowerCase().trim();
-            
-            // [MODIFIED] Removed filtering of the main game grid.
-            // renderGamesForCurrentCategory(text); 
-
             const filteredDropdown = text ? searchableGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
             searchResults.innerHTML = "";
             if (filteredDropdown.length === 0 || !text) {
                 searchResults.style.display = "none";
                 return;
             }
-            
             const favorites = getFavorites();
-
             filteredDropdown.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
                 const isOthers = game.category === 'Others';
-                
                 let imgSrc;
                 if (isStrongdog) {
                     const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
@@ -1176,39 +1132,35 @@
                 } else {
                     imgSrc = game.imgSrc;
                 }
-                
-                const href = '#';
-                
                 const linkEl = document.createElement("a");
-                linkEl.href = href;
+                linkEl.href = '#';
                 linkEl.className = 'search-item flex justify-between items-center';
                 linkEl.dataset.gameId = game.id;
-
                 let isFavorite = favorites.includes(game.id);
 
+                // UPDATED: Search Item styling using new button classes
                 linkEl.innerHTML = `
                     <div class="flex items-center truncate min-w-0">
-                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
                         <span class="ml-3 font-medium truncate" title="${game.name}">${game.name}</span>
                     </div>
                     <div class="flex items-center flex-shrink-0">
-                        <div class="bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-3 shadow-lg">
-                            <button class="play-btn-search rounded-full text-white text-xl transition duration-200 focus:outline-none" title="Play Game">
-                                <i class="fa-solid fa-circle-play fa-solid-play text-accent-indigo transition-colors"></i>
-                                <i class="fa-regular fa-circle-play fa-regular-play text-accent-indigo transition-colors"></i>
+                        <div class="bg-black/80 backdrop-blur-md rounded-xl px-2 py-1 flex items-center space-x-2 shadow-lg">
+                            <button class="btn-card-action play-action" title="Play Game">
+                                <i class="fa-solid fa-play fa-solid-play transition-colors"></i>
+                                <i class="fa-regular fa-circle-play fa-regular-play transition-colors"></i>
                             </button>
-                            <button class="favorite-btn-search rounded-full text-white text-xl transition duration-200 focus:outline-none ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
-                                <i class="fa-solid fa-star fa-solid-star text-gray-500 transition-colors"></i>
-                                <i class="fa-regular fa-star fa-regular-star text-gray-500 transition-colors"></i>
+                            <button class="btn-card-action fav-action ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                                <i class="fa-solid fa-star fa-solid-star transition-colors"></i>
+                                <i class="fa-regular fa-star fa-regular-star transition-colors"></i>
                             </button>
                         </div>
                     </div>
                 `;
                 
-                const favBtn = linkEl.querySelector('.favorite-btn-search');
+                const favBtn = linkEl.querySelector('.fav-action');
                 favBtn.addEventListener('click', (e) => {
-                    e.preventDefault(); 
-                    e.stopPropagation(); 
+                    e.preventDefault(); e.stopPropagation(); 
                     toggleFavorite(game.id);
                 });
 
@@ -1221,23 +1173,13 @@
                             const baseURL = sd_getBaseURLForPage(page);
                             let adjustedHref = originalHref.replace(/^\.\//, "");
                             adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
-                            
                             const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
-                            
-                            const strongdogGameData = {
-                                name: game.name,
-                                url: embedPath,
-                                category: game.category
-                            };
+                            const strongdogGameData = { name: game.name, url: embedPath, category: game.category, id: game.id };
                             openZone(strongdogGameData);
                         } catch (error) {
                             console.error(`Failed to get embed path for ${game.name}:`, error);
                             alert(`Could not load game: ${game.name}. See console for details.`);
                         }
-                    } 
-                    // FIX 1: Removed WASM check for 'Others' games
-                    else if (isOthers) {
-                        openZone(game);
                     } else {
                         openZone(game);
                     }
@@ -1249,44 +1191,32 @@
         }, 250);
 
         // --- Credits Modal Logic ---
-
         function renderCreditsModal() {
             creditsContent.innerHTML = '';
             const fragment = document.createDocumentFragment();
-
             categories.forEach(category => {
                 const data = CREDITS_DATA[category];
                 if (!data) return;
-
                 const categoryColorClass = categoryColors[category] || 'text-white';
-                const categoryHex = CATEGORY_HEX_COLORS[category] || '#4f46e5';
-
                 const creditBlock = document.createElement('div');
                 creditBlock.className = 'p-4 rounded-lg border border-brand-border bg-black/20';
-                
                 let content = `<h4 class="text-2xl font-bold mb-3 ${categoryColorClass}"><strong>${category}</strong></h4>`;
-                
                 content += `<p class="text-gray-300 text-base mb-4">${data.credit}</p>`;
-                
                 if (data.githubUrl) {
-                    // Updated to use btn-toolbar-style logic
                     content += `
                         <a href="${data.githubUrl}" target="_blank" class="btn-toolbar-style">
                             <i class="fa-brands fa-github mr-2"></i> Open on GitHub
                         </a>
                     `;
                 }
-
                 creditBlock.innerHTML = content;
                 fragment.appendChild(creditBlock);
             });
-
             creditsContent.appendChild(fragment);
-            creditsModal.style.display = 'flex'; // Show modal
+            creditsModal.style.display = 'flex'; 
         }
 
-
-        // --- Data Loading and Initialization ---
+        // --- Init ---
         async function initializeApp() {
             
             const strongdogGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
@@ -1308,8 +1238,6 @@
                 allGames = [...strongdogGames, ...othersGames];
             }
 
-            // [MODIFIED] Filter out any game with "bitlife" in the name, case-insensitive.
-            // This applies to ALL games in ALL categories.
             allGames = allGames.filter(g => !g.name.toLowerCase().includes('bitlife'));
 
             searchableGames = [];
@@ -1332,30 +1260,68 @@
             });
 
             categories = [...new Set(allGames.map(g => g.category))];
-            
             const preferredOrder = ['StrongdogXP', 'GN-Math', 'Gameboy Games', 'Others'];
             categories = preferredOrder.filter(cat => categories.includes(cat));
+
+            // --- Deep Linking Logic ---
+            const { category: urlCategory, gameId: urlGameId } = parseURL();
+            
+            // Set initial category based on URL
+            if (urlCategory) {
+                // Find matching category (clean spaces/hyphens comparison)
+                const matchedIndex = categories.findIndex(c => c.replace(/\s+/g, '-').toLowerCase() === urlCategory.toLowerCase());
+                if (matchedIndex !== -1) {
+                    currentCategoryIndex = matchedIndex;
+                }
+            } else {
+                updateURL(categories[currentCategoryIndex]); // Set default URL if none exists
+            }
 
             setupCategorySlider();
             updateArrowVisibility();
             renderGamesForCurrentCategory();
             renderFavorites();
-
-            // Setup the instruction overlay
             setupInstructionOverlay();
+
+            // If ID present in URL, try to open the game
+            if (urlGameId) {
+                // Look in allGames first, then searchableGames (for versions)
+                let gameToOpen = allGames.find(g => String(g.id) === String(urlGameId));
+                if (!gameToOpen) {
+                    gameToOpen = searchableGames.find(g => String(g.id) === String(urlGameId));
+                }
+
+                if (gameToOpen) {
+                    // Slight delay to ensure DOM is ready and transitions don't clash
+                    setTimeout(async () => {
+                         if (gameToOpen.category === 'StrongdogXP') {
+                             try {
+                                const page = gameToOpen.page;
+                                const originalHref = gameToOpen.href;
+                                const baseURL = sd_getBaseURLForPage(page);
+                                let adjustedHref = originalHref.replace(/^\.\//, "");
+                                adjustedHref = baseURL.endsWith("/") ? baseURL + adjustedHref : baseURL + "/" + adjustedHref;
+                                const embedPath = await sd_getEmbedPath(adjustedHref, originalHref, page);
+                                const strongdogGameData = { name: gameToOpen.name, url: embedPath, category: gameToOpen.category, id: gameToOpen.id };
+                                openZone(strongdogGameData);
+                             } catch(e) { console.error(e); }
+                         } else {
+                             openZone(gameToOpen);
+                         }
+                    }, 500);
+                }
+            }
 
             searchInput.placeholder = `Search all games...`;
             searchInput.addEventListener("input", handleSearch);
             searchInput.addEventListener("focus", handleSearch);
             
-            // --- General Event Listeners ---
             const cycle = (direction) => {
                  let newIndex = currentCategoryIndex + direction;
                  if (newIndex >= 0 && newIndex < categories.length) {
                      switchCategory(newIndex);
                  }
             };
-
             prevCategoryBtn.addEventListener('click', () => cycle(-1));
             nextCategoryBtn.addEventListener('click', () => cycle(1));
             categoryCycleBtn.addEventListener('click', () => {
@@ -1364,56 +1330,29 @@
                  switchCategory(newIndex);
             });
 
-            // ==========================================================
-            // === THIS IS THE MODIFIED BLOCK FOR THE KEYBOARD FIX ===
-            // ==========================================================
             document.addEventListener('keydown', (e) => {
                 const isGameOpen = document.getElementById('zoneViewer').style.display === "flex";
-
-                // First, check if the game modal is open.
                 if (isGameOpen) {
-                    
-                    // Keep the original 'Enter' key fix
                     if (e.key === 'Enter') {
-                        e.preventDefault();
-                        e.stopImmediatePropagation(); 
+                        e.preventDefault(); e.stopImmediatePropagation(); 
                         return;
                     }
-
-                    // [REMOVED] 'Escape' key handler removed as requested.
-
-                    // For all other keys (Arrows, WASD, etc.),
-                    // do nothing and let the event go to the iframe.
                     return;
                 }
-
-                // --- If we are here, the game is NOT open ---
-
-                // Don't interfere if the user is typing in the search bar or instruction input
                 if (document.activeElement === searchInput || document.activeElement === instructionInput) return;
-
-                // Handle category navigation with arrow keys
                 if (e.key === 'ArrowLeft') {
                     e.preventDefault();
-                    if (currentCategoryIndex > 0) {
-                        cycle(-1);
-                    }
+                    if (currentCategoryIndex > 0) cycle(-1);
                 } else if (e.key === 'ArrowRight') {
                     e.preventDefault();
-                    if (currentCategoryIndex < categories.length - 1) {
-                        cycle(1);
-                    }
+                    if (currentCategoryIndex < categories.length - 1) cycle(1);
                 }
             });
-            // ==========================================================
-            // === END OF MODIFIED BLOCK ===
-            // ==========================================================
 
             document.addEventListener("click", ev => {
                 if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
                     searchResults.style.display = "none";
                 }
-                
                 if (!ev.target.closest('.version-btn') && !ev.target.closest('.version-favorite-btn') && !ev.target.closest('.eagler-dropdown')) {
                     document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
                         d.classList.remove('show');
@@ -1427,17 +1366,9 @@
             });
             document.getElementById('closeBtnZone')?.addEventListener('click', closeZoneViewer);
 
-            // ADDED: Credits Modal Listeners
             creditsBtn.addEventListener('click', renderCreditsModal);
-            closeCreditsBtn.addEventListener('click', () => {
-                creditsModal.style.display = 'none';
-            });
-            // Close modal when clicking on the dark backdrop
-            creditsModal.addEventListener('click', (e) => {
-                if (e.target === creditsModal) {
-                    creditsModal.style.display = 'none';
-                }
-            });
+            closeCreditsBtn.addEventListener('click', () => { creditsModal.style.display = 'none'; });
+            creditsModal.addEventListener('click', (e) => { if (e.target === creditsModal) creditsModal.style.display = 'none'; });
         }
 
         document.addEventListener('DOMContentLoaded', initializeApp);
