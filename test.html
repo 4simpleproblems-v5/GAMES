@@ -30,7 +30,7 @@
                     colors: {
                         'deep-black': '#040404',
                         'card-dark': '#111111',
-                        'accent-indigo': '#4f46e5', // Unified accent color
+                        'accent-indigo': '#4f46e5',
                         'brand-border': '#252525',
                         'strongdog-orange': '#FFA500',
                         'gn-math': '#FB2651',
@@ -43,8 +43,8 @@
                     borderRadius: {
                         'md': '0.375rem',
                         'lg': '0.5rem',
-                        'xl': '1rem',
-                        '2xl': '1.25rem', // Added for extra rounded cards
+                        'xl': '0.75rem',
+                        '2xl': '1.25rem',
                     },
                     aspectRatio: {
                         '3/2': '3 / 2',
@@ -70,7 +70,7 @@
             font-family: 'Geist', 'sans-serif';
             font-weight: 300;
             background-color: #040404;
-            padding-bottom: 100px; /* Space for the fixed search bar */
+            padding-bottom: 100px;
         }
         
         h1, h2, h3, .font-bold, .font-semibold, strong {
@@ -100,20 +100,20 @@
             color: var(--tab-hover-text);
         }
 
-        /* --- New Card Action Button Style (Matches Notes Toolbar) --- */
+        /* --- Card Action Buttons --- */
         .btn-card-action {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 2.25rem; /* 36px */
-            height: 2.25rem; /* 36px */
-            border-radius: 0.5rem; /* Matches notes.html rounded corners */
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.5rem;
             background-color: transparent;
             border: 1px solid transparent;
-            color: #9ca3af; /* var(--tab-text) */
+            color: #9ca3af;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         .btn-card-action:hover {
             background-color: var(--tab-active-bg);
@@ -121,65 +121,72 @@
             border-color: var(--tab-active-border);
         }
         
-        /* Play Button Icon Toggling */
-        .btn-card-action.play-action .fa-solid-play { display: inline-block; }
-        .btn-card-action.play-action .fa-regular-play { display: none; }
-        .btn-card-action.play-action:hover .fa-solid-play { display: none; }
-        .btn-card-action.play-action:hover .fa-regular-play { display: inline-block; }
-
-        /* Favorite Button Icon Toggling */
-        .btn-card-action.fav-action .fa-solid-star { display: inline-block; }
-        .btn-card-action.fav-action .fa-regular-star { display: none; }
+        /* Favorite Button Logic */
+        .btn-card-action.fav-action .fa-solid-star { display: none; }
+        .btn-card-action.fav-action .fa-regular-star { display: inline-block; }
         
-        /* Not Favorited State */
-        .btn-card-action.fav-action:not(.favorited) .fa-solid-star { display: none; }
-        .btn-card-action.fav-action:not(.favorited) .fa-regular-star { display: inline-block; }
-        
-        /* Favorited State */
         .btn-card-action.fav-action.favorited .fa-solid-star { display: inline-block; color: #facc15; }
         .btn-card-action.fav-action.favorited .fa-regular-star { display: none; }
         
-        /* Hover on Not Favorited */
         .btn-card-action.fav-action:not(.favorited):hover .fa-regular-star { color: var(--tab-active-text); }
         
-        
+        /* Card Hover Effects */
         .zone-item {
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            will-change: transform;
         }
         .zone-item:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
         }
         
-        /* Other Zone Item styling */
         .other-zone-item {
             min-height: 250px;
+            /* Removed overflow:hidden here to allow dropdowns to pop out */
             transition: box-shadow 0.2s ease-in-out;
+            position: relative; 
+            z-index: 1; /* Base z-index */
         }
         .other-zone-item:hover {
             box-shadow: 0 8px 25px rgba(170, 170, 170, 0.2);
+            z-index: 10; /* Bring to front on hover so dropdowns aren't covered by next card */
         }
         .other-zone-item .image-overlay {
             background: linear-gradient(90deg, rgba(7,7,7,0.85) 0%, rgba(7,7,7,0) 40%, rgba(7,7,7,0) 60%, rgba(7,7,7,0.85) 100%);
+            border-radius: 1.25rem; /* Match rounded-2xl */
         }
         .other-zone-item:hover .image-overlay {
             background: linear-gradient(90deg, rgba(7,7,7,0.7) 0%, rgba(7,7,7,0) 50%, rgba(7,7,7,0) 50%, rgba(7,7,7,0.7) 100%);
         }
 
-        /* Search Bar Results Styling */
+        /* --- Animations --- */
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+        .fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+            pointer-events: none;
+        }
+
+        /* Search Bar & Results */
         .search-results {
-            max-height: 250px;
+            max-height: 300px;
             overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #333 transparent;
         }
         .search-item {
             display: flex;
             cursor: pointer;
             transition: background-color 0.2s;
-            color: white;
+            color: #e5e7eb;
             text-decoration: none;
-            padding: 8px 15px;
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .search-item:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .search-item:last-child { border-bottom: none; }
+        .search-item:hover { background-color: rgba(255, 255, 255, 0.05); }
 
         @media (max-width: 768px) {
             #bottom-fixed-bar {
@@ -211,10 +218,7 @@
             color: #ffffff;
             font-family: 'Geist', sans-serif;
         }
-        #zoneViewer .zone-header .zone-controls {
-            display: flex;
-            align-items: center;
-        }
+        #zoneViewer .zone-header .zone-controls { display: flex; align-items: center; }
         #zoneViewer .zone-header .zone-controls button,
         #zoneViewer .zone-header .zone-controls a {
             margin-left: 8px;
@@ -235,9 +239,7 @@
             text-decoration: none;
         }
         #zoneViewer .zone-header .zone-controls button:hover,
-        #zoneViewer .zone-header .zone-controls a:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
+        #zoneViewer .zone-header .zone-controls a:hover { background-color: rgba(255, 255, 255, 0.2); }
         #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
         .hidden { display: none !important; }
 
@@ -245,30 +247,34 @@
         .eagler-dropdown {
             display: none;
             position: absolute;
-            bottom: 120%;
+            top: 100%; /* Make it drop DOWN by default */
             right: 0;
-            background-color: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 5px;
+            background-color: rgba(20, 20, 20, 0.98);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 0.75rem;
             padding: 0.5rem;
-            z-index: 10;
+            z-index: 1000; /* Very high z-index to break out */
             min-width: 200px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
         }
-        .eagler-dropdown.show { display: block; }
+        .eagler-dropdown.show { display: block; animation: fadeIn 0.1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
         .eagler-dropdown-link {
             display: block;
-            padding: 0.5rem 0.75rem;
-            color: white;
+            padding: 0.6rem 0.8rem;
+            color: #d1d5db;
             text-decoration: none;
-            border-radius: 0.375rem;
-            transition: background-color 0.2s;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
             font-weight: 400;
             white-space: nowrap;
+            font-size: 0.9rem;
         }
-        .eagler-dropdown-link:hover { background-color: rgba(255, 255, 255, 0.15); }
+        .eagler-dropdown-link:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
 
         #creditsModal { display: none; }
     </style>
@@ -288,10 +294,12 @@
             </p>
         </div>
         
-        <h2 id="favoritesHeader" class="text-center text-3xl font-bold mt-12 mb-6 text-white" style="display: none;">
-            <strong>Favorites</strong>
-        </h2>
-        <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
+        <div id="favoritesSection">
+            <h2 id="favoritesHeader" class="text-center text-3xl font-bold mt-12 mb-6 text-white" style="display: none;">
+                <strong>Favorites</strong>
+            </h2>
+            <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
+        </div>
 
         <div id="category-viewer" class="w-full mt-12">
             <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
@@ -313,12 +321,12 @@
     </main>
 
     <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/70 backdrop-blur-lg rounded-xl border border-brand-border shadow-2xl shadow-black/50 p-3 w-full max-w-md z-50">
-        <div class="relative flex items-center w-full">
-            <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 border-b border-accent-indigo" />
-            <button id="category-cycle-btn" title="Next Category" class="ml-2 text-gray-400 hover:text-white transition-colors text-xl">
-                <i class="fa-solid fa-layer-group"></i>
-            </button>
-            <div class="search-results absolute bottom-full w-full mb-2 bg-black/70 backdrop-blur-lg border border-brand-border rounded-xl shadow-xl max-h-60 overflow-y-auto" id="searchResults" style="display: none;">
+        <div class="relative flex flex-col w-full">
+            <div class="search-results absolute bottom-full w-full mb-3 bg-card-dark/95 backdrop-blur-xl border border-brand-border rounded-xl shadow-2xl overflow-hidden" id="searchResults" style="display: none;">
+                </div>
+            <div class="flex items-center w-full">
+                <i class="fa-solid fa-magnifying-glass text-gray-400 ml-2"></i>
+                <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full p-2 pl-3 bg-transparent text-white placeholder-gray-500 focus:outline-none focus:ring-0" />
             </div>
         </div>
     </div>
@@ -385,31 +393,13 @@
             'Others': 'text-other-grey', 
         };
         
-        const CATEGORY_HEX_COLORS = {
-            'StrongdogXP': '#FFA500',
-            'GN-Math': '#FB2651',
-            'Gameboy Games': '#9A2257',
-            'Others': '#AAAAAA'
-        };
-
         const CREDITS_DATA = {
-            'StrongdogXP': {
-                credit: "Core game collection provided by Josh P.",
-                githubUrl: "https://github.com/jman1593/"
-            },
-            'GN-Math': {
-                credit: "Primary game source and infrastructure provided by the GN-Math Community.",
-                githubUrl: "https://github.com/gn-math/"
-            },
-            'Gameboy Games': {
-                credit: "Emulator and ROM files from various public sources."
-            },
-            'Others': {
-                credit: "Various community developers and open-source projects (e.g., DOOM, Eaglercraft, Carnage3D, JS-DOS)."
-            }
+            'StrongdogXP': { credit: "Core game collection provided by Josh P.", githubUrl: "https://github.com/jman1593/" },
+            'GN-Math': { credit: "Primary game source and infrastructure provided by the GN-Math Community.", githubUrl: "https://github.com/gn-math/" },
+            'Gameboy Games': { credit: "Emulator and ROM files from various public sources." },
+            'Others': { credit: "Various community developers and open-source projects (e.g., DOOM, Eaglercraft, Carnage3D, JS-DOS)." }
         };
 
-        // --- DOM Elements ---
         const favoritesHeader = document.getElementById("favoritesHeader");
         const favoritesGameList = document.getElementById("favoritesGameList");
         const searchInput = document.getElementById("searchInput");
@@ -417,7 +407,6 @@
         const categorySlider = document.getElementById('category-slider');
         const prevCategoryBtn = document.getElementById('prev-category');
         const nextCategoryBtn = document.getElementById('next-category');
-        const categoryCycleBtn = document.getElementById('category-cycle-btn');
         const gamesGridContainer = document.getElementById('games-grid-container');
         
         const creditsModal = document.getElementById('creditsModal');
@@ -429,49 +418,70 @@
         const instructionOverlay = document.getElementById('instruction-overlay');
         const instructionInput = document.getElementById('instruction-input');
 
+        // --- Intersection Observer for Image Virtualization ---
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                const img = entry.target;
+                if (entry.isIntersecting) {
+                    // Load the image if available in dataset
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                    }
+                } else {
+                    // "Unload" the image to save GPU memory when offscreen
+                    // We store the current src in data-src if not already there
+                    if(img.src && !img.src.includes('placehold.co') && !img.dataset.src) {
+                         img.dataset.src = img.src;
+                    }
+                    if(img.dataset.src) {
+                        // Replace with a transparent pixel to keep layout (aspect ratio handled by CSS)
+                        img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+                    }
+                }
+            });
+        }, {
+            rootMargin: "300px 0px", // Preload/unload margin
+            threshold: 0.01
+        });
+
+        function observeImages(container) {
+            const images = container.querySelectorAll('img[data-src]');
+            images.forEach(img => imageObserver.observe(img));
+        }
+
         // --- URL Management ---
         function updateURL(category, gameId = null) {
             let hash = `#${encodeURIComponent(category.replace(/\s+/g, '-'))}`;
-            if (gameId) {
-                hash += `?id=${gameId}`;
-            }
+            if (gameId) hash += `?id=${gameId}`;
             history.replaceState(null, null, hash);
         }
 
         function parseURL() {
-            // Parses format: #CategoryName?id=123
-            const hash = window.location.hash.substring(1); // remove #
+            const hash = window.location.hash.substring(1);
             if (!hash) return { category: null, gameId: null };
-
             const parts = hash.split('?');
             let rawCategory = parts[0];
-            // Decode and revert hyphens to spaces approximately for matching
-            // (Strict matching handled in initialization)
             let category = decodeURIComponent(rawCategory).replace(/-/g, ' '); 
-            
             let gameId = null;
             if (parts[1]) {
                 const params = new URLSearchParams(parts[1]);
                 gameId = params.get('id');
             }
-            return { category: rawCategory, gameId }; // Return raw category for cleaner comparisons later if needed
+            return { category: rawCategory, gameId };
         }
 
         function setupInstructionOverlay() {
             if (localStorage.getItem(INSTRUCTION_KEY) !== 'seen') {
                 instructionOverlay.style.display = 'block';
                 document.body.style.overflow = 'hidden'; 
-                
                 setTimeout(() => {
                     instructionOverlay.classList.remove('opacity-0');
                     instructionOverlay.classList.add('opacity-100');
                 }, 10);
-
                 instructionInput.addEventListener('input', (e) => {
                     if (e.target.value.trim().toLowerCase() === 'i understand') {
                         instructionOverlay.classList.remove('opacity-100');
                         instructionOverlay.classList.add('opacity-0');
-                        
                         setTimeout(() => {
                             instructionOverlay.style.display = 'none';
                             document.body.style.overflow = '';
@@ -491,18 +501,50 @@
             const isFavorited = favorites.includes(gameId);
 
             if (isFavorited) {
+                // Removing
                 favorites = favorites.filter(id => id !== gameId);
+                
+                // --- Animation Logic for Top Section ---
+                // Find the specific card in the Favorites Top Section
+                const favCard = document.querySelector(`#favoritesGameList .zone-item[data-game-id='${gameId}'], #favoritesGameList .other-zone-item[data-game-id='${gameId}']`);
+                
+                if (favCard) {
+                    // Add fade-out class
+                    favCard.classList.add('fade-out');
+                    // Remove from DOM after animation completes
+                    setTimeout(() => {
+                        favCard.remove();
+                        // Hide header if empty
+                        if (favoritesGameList.children.length === 0) {
+                            favoritesHeader.style.display = 'none';
+                            favoritesGameList.style.display = 'none';
+                        }
+                    }, 300); // Match CSS animation duration
+                }
+
+                // Handle versioned favorites removal from the specific list if needed
+                // (Simple logic: if it's a version ID, the loop above works because the card has data-game-id)
+
             } else {
+                // Adding
                 favorites.push(gameId);
+                // We re-render to add the new card
+                renderFavorites();
             }
+            
             saveFavorites(favorites);
 
-            document.querySelectorAll(`.zone-item[data-game-id='${gameId}'] .btn-card-action.fav-action, .other-zone-item[data-game-id='${gameId}'] .btn-card-action.fav-action, .search-item[data-game-id='${gameId}'] .btn-card-action.fav-action`).forEach(btn => {
-                btn.classList.toggle('favorited', !isFavorited);
-                btn.title = !isFavorited ? 'Add to Favorites' : 'Remove from Favorites';
+            // Update buttons everywhere (Main Grid, Search Results, etc)
+            document.querySelectorAll(`.btn-card-action.fav-action`).forEach(btn => {
+                // Check if this button belongs to the toggled game
+                const card = btn.closest('.zone-item, .other-zone-item, .search-item');
+                if (card && card.dataset.gameId === gameId) {
+                    btn.classList.toggle('favorited', !isFavorited);
+                    btn.title = !isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
+                }
             });
 
-            // Handle grouped games (Other category)
+            // Handle grouped games (Other category) star sync
             const gameIdParts = gameId.split('_');
             const baseGameId = gameIdParts[0];
             const baseGame = allGames.find(g => g.id === baseGameId);
@@ -517,23 +559,17 @@
                     }
                 }
             }
-            renderFavorites();
         }
 
         // --- URL Helpers (Strongdog) ---
         function getAdjustedUrls(imgSrc, page) {
-            if (page && page > 1) {
-                return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
-            }
+            if (page && page > 1) return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
             return { adjustedImgSrc: `./img/${imgSrc}` };
         }
-        
         function sd_getCurrentKeyHostOnly() { return window.location.host; }
-
         function sd_getBaseURLForPage(page) {
             const currentHost = sd_getCurrentKeyHostOnly();
             const currentPath = window.location.pathname;
-
             if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
                 if (!page || page === 1) return "/STRONGDOG/";
                 if (page === 2) return "/strongdog2/";
@@ -546,11 +582,8 @@
                 "jman1593.github.io": { 2: "./strongdog2/" },
                 "v5-4simpleproblems.github.io": { 2: "../strongdog2/", 3: "../strongdog3/", 4: "../strongdog4/", 5: "../strongdog5/" }
             };
-            if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) {
-                return explicitMappings[currentHost][page];
-            }
+            if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) return explicitMappings[currentHost][page];
             if (!page || page === 1) return "./";
-            
             const arr = siteMapping[currentHost];
             if (typeof siteMapping === 'undefined' || !siteMapping[currentHost]) {
                 if (page === 2) return "../strongdog2/";
@@ -573,7 +606,6 @@
             if (page === 5) return "../strongdog5/";
             return "../";
         }
-
         async function sd_getEmbedPath(adjustedHref, originalHref, page) {
             let cleanHref = adjustedHref.replace(/index\.html$/, "").replace(/base\.html$/, "").replace(/\.html$/, "");
             if (!cleanHref.endsWith("/")) cleanHref += "/";
@@ -595,7 +627,6 @@
             }
             return sd_adjustHrefPath(originalHref, page);
         }
-
         function sd_adjustHrefPath(path, page) {
             path = path.replace(/^\.\//, "").replace(/^\//, "");
             const baseURL = sd_getBaseURLForPage(page);
@@ -607,77 +638,28 @@
             }
             return finalPath;
         }
-
         async function sd_fileExists(url) {
-            try {
-                const response = await fetch(url, { method: "HEAD" });
-                return response.ok;
-            } catch { return false; }
+            try { const response = await fetch(url, { method: "HEAD" }); return response.ok; } catch { return false; }
         }
 
         // --- Game Data (Others) ---
         const othersGames = [
-            {
-                id: "other-eaglercraft",
-                name: "Eaglercraft",
-                imgSrc: "./images/eaglercraft.png",
-                description: "The classic survival and building game with authentic block-based physics and multiplayer support, accessible directly in the browser.",
-                category: "Others",
-                versions: [
-                    { name: "Release 1.12.2", url: "../EAGLERCRAFT/eaglercraft-1.12.2.html", favoriteId: "other-eaglercraft_1.12.2" },
-                    { name: "Release 1.12.2 WASM", url: "../EAGLERCRAFT/eaglercraft-1.12.2-wasm.html", favoriteId: "other-eaglercraft_wasm", wasm: true }
-                ]
-            },
-            {
-                id: "other-gta",
-                name: "Grand Theft Auto",
-                imgSrc: "./images/gta.png",
-                description: "The original top-down classic. Cause chaos, complete missions, or just go for a drive in three iconic cities.",
-                category: "Others",
-                versions: [
-                    { name: "Carnage3D", url: "../CARNAGE3D/web/carnage3D.html", favoriteId: "other-gta_carnage3d" },
-                    { name: "Grand Theft Auto (JS-DOS)", url: "../GTA-JSDOS/index.html", favoriteId: "other-gta_jsdos" }
-                ]
-            },
-            {
-                id: "other-simcity",
-                name: "Sim City",
-                imgSrc: "./images/simcity2000.png",
-                description: "The original city-building classics. Design, build, and manage the city of your dreams in either the original Sim City or the detailed Sim City 2000.",
-                category: "Others",
-                versions: [
-                    { name: "Sim City", url: "../SIM-CITY/index.html", favoriteId: "other-simcity_1" },
-                    { name: "Sim City 2000", url: "../SIM-CITY-2/index.html", favoriteId: "other-simcity_2000" }
-                ]
-            },
-            {
-                id: "other-doom",
-                name: "DOOM",
-                imgSrc: "./images/doom.png",
-                description: "The legendary first-person shooter that pioneered the genre, focusing on blasting through hordes of demons in a timeless, adrenaline-fueled classic.",
-                category: "Others",
-                url: "../DOOM/index.html"
-            },
-             {
-                id: "other-sm64",
-                name: "Super Mario 64",
-                imgSrc: "./images/sm64.png",
-                description: "The iconic 3D platformer that revolutionized gaming. Run, jump, and triple-jump your way through vast worlds to collect stars and save the princess.",
-                category: "Others",
-                url: "../GAMES/sm64/index.html"
-            }
+            { id: "other-eaglercraft", name: "Eaglercraft", imgSrc: "./images/eaglercraft.png", description: "The classic survival and building game with authentic block-based physics and multiplayer support, accessible directly in the browser.", category: "Others", versions: [ { name: "Release 1.12.2", url: "../EAGLERCRAFT/eaglercraft-1.12.2.html", favoriteId: "other-eaglercraft_1.12.2" }, { name: "Release 1.12.2 WASM", url: "../EAGLERCRAFT/eaglercraft-1.12.2-wasm.html", favoriteId: "other-eaglercraft_wasm", wasm: true } ] },
+            { id: "other-gta", name: "Grand Theft Auto", imgSrc: "./images/gta.png", description: "The original top-down classic. Cause chaos, complete missions, or just go for a drive in three iconic cities.", category: "Others", versions: [ { name: "Carnage3D", url: "../CARNAGE3D/web/carnage3D.html", favoriteId: "other-gta_carnage3d" }, { name: "Grand Theft Auto (JS-DOS)", url: "../GTA-JSDOS/index.html", favoriteId: "other-gta_jsdos" } ] },
+            { id: "other-simcity", name: "Sim City", imgSrc: "./images/simcity2000.png", description: "The original city-building classics. Design, build, and manage the city of your dreams in either the original Sim City or the detailed Sim City 2000.", category: "Others", versions: [ { name: "Sim City", url: "../SIM-CITY/index.html", favoriteId: "other-simcity_1" }, { name: "Sim City 2000", url: "../SIM-CITY-2/index.html", favoriteId: "other-simcity_2000" } ] },
+            { id: "other-doom", name: "DOOM", imgSrc: "./images/doom.png", description: "The legendary first-person shooter that pioneered the genre, focusing on blasting through hordes of demons in a timeless, adrenaline-fueled classic.", category: "Others", url: "../DOOM/index.html" },
+            { id: "other-sm64", name: "Super Mario 64", imgSrc: "./images/sm64.png", description: "The iconic 3D platformer that revolutionized gaming. Run, jump, and triple-jump your way through vast worlds to collect stars and save the princess.", category: "Others", url: "../GAMES/sm64/index.html" }
         ];
 
         // --- Card Creation ---
 
         function createOthersGameCard(game) {
             const favorites = getFavorites();
-            const isAnyFavorite = game.versions ?
-                favorites.some(favId => game.versions.some(v => v.favoriteId === favId)) :
-                favorites.includes(game.id);
+            const isAnyFavorite = game.versions ? favorites.some(favId => game.versions.some(v => v.favoriteId === favId)) : favorites.includes(game.id);
 
             const card = document.createElement("div");
-            card.className = 'other-zone-item bg-card-dark rounded-2xl border border-brand-border col-span-full shadow-lg overflow-hidden'; // UPDATED: rounded-2xl
+            // IMPORTANT: Remove overflow-hidden from container so dropdowns aren't clipped
+            card.className = 'other-zone-item bg-card-dark rounded-2xl border border-brand-border col-span-full shadow-lg'; 
             card.dataset.gameId = game.id;
 
             let gameButtonsHtml = '';
@@ -685,13 +667,11 @@
             
             if (game.versions && game.versions.length > 0) {
                 const availableVersions = game.versions; 
-
                 if (availableVersions.length === 1) {
                     const version = availableVersions[0];
                     gameButtonsHtml = `
                         <button class="btn-card-action play-action" data-url="${version.url}" data-version-name="${version.name}" title="Play Game">
-                            <i class="fa-solid fa-play fa-solid-play transition-colors"></i>
-                            <i class="fa-regular fa-circle-play fa-regular-play transition-colors"></i>
+                            <i class="fa-solid fa-play transition-colors"></i>
                         </button>
                     `;
                 } else {
@@ -722,8 +702,7 @@
             } else {
                 gameButtonsHtml = `
                     <button class="btn-card-action play-action" data-url="${game.url}" title="Play Game">
-                        <i class="fa-solid fa-play fa-solid-play transition-colors"></i>
-                        <i class="fa-regular fa-circle-play fa-regular-play transition-colors"></i>
+                        <i class="fa-solid fa-play transition-colors"></i>
                     </button>
                 `;
                 favoriteButtonHtml = `
@@ -736,12 +715,13 @@
 
             card.innerHTML = `
                 <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
-                    <img src="${game.imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=4SP+Featured'" class="w-full h-full object-cover absolute inset-0">
+                    <img data-src="${game.imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/1920x250/111111/888888?text=4SP+Featured'" class="w-full h-full object-cover absolute inset-0 rounded-2xl">
                     <div class="image-overlay absolute inset-0 transition-colors duration-200"></div>
-                    <div class="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between">
+                    <div class="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between rounded-2xl">
                         <div class="flex items-start justify-between w-full">
                             <h3 class="text-4xl font-bold text-white truncate drop-shadow-lg" style="max-width: 80%;" title="${game.name}">${game.name}</h3>
-                            <div class="flex items-center space-x-3 bg-black/80 backdrop-blur-md rounded-xl px-2 py-1"> ${gameButtonsHtml}
+                            <div class="flex items-center space-x-3 bg-black/80 backdrop-blur-md rounded-xl px-2 py-1">
+                                ${gameButtonsHtml}
                                 ${favoriteButtonHtml}
                             </div>
                         </div>
@@ -750,7 +730,6 @@
                 </div>
             `;
             
-            // Event Listeners for buttons
             if (!game.versions) {
                 card.querySelector('.group').addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -808,7 +787,8 @@
                     toggleFavorite(game.id);
                 });
             }
-
+            // Start observing images for this card
+            imageObserver.observe(card.querySelector('img'));
             return card;
         }
 
@@ -816,7 +796,6 @@
             if (game.category === 'Others' && !forceSmallCard) {
                 return createOthersGameCard(game);
             }
-            
             const isStrongdog = game.category === 'StrongdogXP';
             let imgSrc;
             if (isStrongdog) {
@@ -834,21 +813,18 @@
             }
 
             const card = document.createElement("div");
-            // UPDATED: rounded-2xl
             card.className = 'zone-item bg-card-dark rounded-2xl border border-brand-border overflow-hidden';
             card.dataset.gameId = game.id;
 
-            // UPDATED BUTTONS: Using .btn-card-action, less rounded pill (rounded-xl), Play/Star logic
             card.innerHTML = `
                 <div class="relative w-full cursor-pointer group">
                     <div class="aspect-w-3 aspect-h-2">
-                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
+                        <img data-src="${imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
                     </div>
                     <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${game.name}">${game.name}</h3>
                     <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md rounded-xl px-2 py-1 flex items-center space-x-2 shadow-lg">
                         <button class="btn-card-action play-action" title="Play Game">
-                            <i class="fa-solid fa-play fa-solid-play transition-colors"></i>
-                            <i class="fa-regular fa-circle-play fa-regular-play transition-colors"></i>
+                            <i class="fa-solid fa-play transition-colors"></i>
                         </button>
                         <button class="btn-card-action fav-action ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
                             <i class="fa-solid fa-star fa-solid-star transition-colors"></i>
@@ -885,7 +861,8 @@
                 e.stopPropagation();
                 toggleFavorite(game.id);
             });
-
+            // Start observing images for this card
+            imageObserver.observe(card.querySelector('img'));
             return card;
         }
 
@@ -895,13 +872,9 @@
                 console.error("Could not load game: Invalid game data.");
                 return;
             }
-
-            // UPDATED: Update URL with query param
             updateURL(categories[currentCategoryIndex], game.id || null);
-
             const downloadBtn = document.getElementById('downloadBtnZone');
             const baseId = game.baseGameId || game.id; 
-            
             if (baseId === 'other-eaglercraft') {
                 downloadBtn.href = game.url;
                 downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
@@ -913,15 +886,6 @@
                 downloadBtn.removeAttribute('download');
                 downloadBtn.removeAttribute('target');
             }
-
-            document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
-                if (img.src && !img.dataset.originalSrc) {
-                    img.dataset.originalSrc = img.src;
-                }
-                if (img.src) {
-                    img.src = '';
-                }
-            });
 
             const gameUrl = game.url;
             const zoneViewer = document.getElementById('zoneViewer');
@@ -963,21 +927,12 @@
         }
 
         function closeZoneViewer() {
-            // UPDATED: Revert URL to just category hash
             updateURL(categories[currentCategoryIndex]);
-
-            document.querySelectorAll('.zone-item img, .other-zone-item img').forEach(img => {
-                if (img.dataset.originalSrc && img.src !== img.dataset.originalSrc) {
-                    img.src = img.dataset.originalSrc;
-                }
-            });
-
             const downloadBtn = document.getElementById('downloadBtnZone');
             downloadBtn.classList.add('hidden');
             downloadBtn.href = '#';
             downloadBtn.removeAttribute('download');
             downloadBtn.removeAttribute('target');
-
             const zoneViewer = document.getElementById('zoneViewer');
             const zoneFrame = document.getElementById('zoneFrame');
             zoneViewer.style.display = "none";
@@ -1001,6 +956,9 @@
             const fragment = document.createDocumentFragment();
             gamesToRender.forEach(game => fragment.appendChild(createGameCard(game, forceSmallCard)));
             targetElement.appendChild(fragment);
+            
+            // Trigger load for currently visible images immediately
+            observeImages(targetElement);
         }
 
         function renderFavorites() {
@@ -1033,7 +991,11 @@
                     }
                 });
                 favoriteGames.sort((a, b) => a.name.localeCompare(b.name));
-                renderGames(favoriteGames, favoritesGameList, true);
+                // Only re-render if the list was actually empty or significantly changed structure to avoid killing animations
+                // But simplified here for safety:
+                if(favoritesGameList.childElementCount === 0 || favoriteGames.length > favoritesGameList.childElementCount) {
+                     renderGames(favoriteGames, favoritesGameList, true);
+                }
             } else {
                 favoritesHeader.style.display = "none";
                 favoritesGameList.style.display = "none";
@@ -1080,7 +1042,6 @@
             updateSliderPosition();
             renderGamesForCurrentCategory();
             updateArrowVisibility();
-            // UPDATED: Update URL when switching
             updateURL(categories[currentCategoryIndex]);
         }
         
@@ -1138,17 +1099,15 @@
                 linkEl.dataset.gameId = game.id;
                 let isFavorite = favorites.includes(game.id);
 
-                // UPDATED: Search Item styling using new button classes
                 linkEl.innerHTML = `
                     <div class="flex items-center truncate min-w-0">
-                        <img src="${imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/80x80/111111/888888?text=4SP'" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
-                        <span class="ml-3 font-medium truncate" title="${game.name}">${game.name}</span>
+                        <img src="${imgSrc}" alt="${game.name}" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                        <span class="ml-3 font-medium truncate text-gray-200" title="${game.name}">${game.name}</span>
                     </div>
                     <div class="flex items-center flex-shrink-0">
-                        <div class="bg-black/80 backdrop-blur-md rounded-xl px-2 py-1 flex items-center space-x-2 shadow-lg">
+                        <div class="bg-black/80 backdrop-blur-md rounded-xl px-2 py-1 flex items-center space-x-2">
                             <button class="btn-card-action play-action" title="Play Game">
-                                <i class="fa-solid fa-play fa-solid-play transition-colors"></i>
-                                <i class="fa-regular fa-circle-play fa-regular-play transition-colors"></i>
+                                <i class="fa-solid fa-play transition-colors"></i>
                             </button>
                             <button class="btn-card-action fav-action ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
                                 <i class="fa-solid fa-star fa-solid-star transition-colors"></i>
@@ -1266,33 +1225,28 @@
             // --- Deep Linking Logic ---
             const { category: urlCategory, gameId: urlGameId } = parseURL();
             
-            // Set initial category based on URL
             if (urlCategory) {
-                // Find matching category (clean spaces/hyphens comparison)
                 const matchedIndex = categories.findIndex(c => c.replace(/\s+/g, '-').toLowerCase() === urlCategory.toLowerCase());
                 if (matchedIndex !== -1) {
                     currentCategoryIndex = matchedIndex;
                 }
             } else {
-                updateURL(categories[currentCategoryIndex]); // Set default URL if none exists
+                updateURL(categories[currentCategoryIndex]); 
             }
 
             setupCategorySlider();
             updateArrowVisibility();
             renderGamesForCurrentCategory();
+            // IMPORTANT: Render favorites initially to populate the list
             renderFavorites();
             setupInstructionOverlay();
 
-            // If ID present in URL, try to open the game
             if (urlGameId) {
-                // Look in allGames first, then searchableGames (for versions)
                 let gameToOpen = allGames.find(g => String(g.id) === String(urlGameId));
                 if (!gameToOpen) {
                     gameToOpen = searchableGames.find(g => String(g.id) === String(urlGameId));
                 }
-
                 if (gameToOpen) {
-                    // Slight delay to ensure DOM is ready and transitions don't clash
                     setTimeout(async () => {
                          if (gameToOpen.category === 'StrongdogXP') {
                              try {
@@ -1324,11 +1278,6 @@
             };
             prevCategoryBtn.addEventListener('click', () => cycle(-1));
             nextCategoryBtn.addEventListener('click', () => cycle(1));
-            categoryCycleBtn.addEventListener('click', () => {
-                 let newIndex = currentCategoryIndex + 1;
-                 if (newIndex >= categories.length) newIndex = 0;
-                 switchCategory(newIndex);
-            });
 
             document.addEventListener('keydown', (e) => {
                 const isGameOpen = document.getElementById('zoneViewer').style.display === "flex";
