@@ -501,12 +501,13 @@
         const saveFavorites = (favs) => localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
         
         function toggleFavorite(gameId) {
-            let favorites = getFavorites();
-            const isFavorited = favorites.includes(gameId);
+            const strGameId = String(gameId);
+            let favorites = getFavorites().map(String);
+            const isFavorited = favorites.includes(strGameId);
 
             if (isFavorited) {
-                favorites = favorites.filter(id => id !== gameId);
-                const favCard = document.querySelector(`#favoritesGameList .zone-item[data-game-id='${gameId}'], #favoritesGameList .other-zone-item[data-game-id='${gameId}']`);
+                favorites = favorites.filter(id => id !== strGameId);
+                const favCard = document.querySelector(`#favoritesGameList .zone-item[data-game-id='${strGameId}'], #favoritesGameList .other-zone-item[data-game-id='${strGameId}']`);
                 if (favCard) {
                     favCard.classList.add('fade-out');
                     setTimeout(() => {
@@ -518,7 +519,7 @@
                     }, 300); 
                 }
             } else {
-                favorites.push(gameId);
+                favorites.push(strGameId);
                 renderFavorites();
             }
             
@@ -526,18 +527,18 @@
 
             document.querySelectorAll(`.btn-card-action.fav-action`).forEach(btn => {
                 const card = btn.closest('.zone-item, .other-zone-item, .search-item');
-                if (card && card.dataset.gameId === gameId) {
+                if (card && String(card.dataset.gameId) === strGameId) {
                     btn.classList.toggle('favorited', !isFavorited);
                     btn.title = !isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
                 }
             });
 
-            const gameIdParts = gameId.split('_');
+            const gameIdParts = strGameId.split('_');
             const baseGameId = gameIdParts[0];
-            const baseGame = allGames.find(g => g.id === baseGameId);
+            const baseGame = allGames.find(g => String(g.id) === baseGameId);
             
             if (baseGame && baseGame.versions) {
-                const isAnyVersionFavorited = getFavorites().some(favId => favId.startsWith(baseGameId + '_'));
+                const isAnyVersionFavorited = favorites.some(favId => favId.startsWith(baseGameId + '_'));
                 const mainCard = document.querySelector(`.other-zone-item[data-game-id='${baseGameId}']`);
                 if (mainCard) {
                     const favBtn = mainCard.querySelector('.btn-card-action.fav-action');
@@ -641,8 +642,8 @@
         // --- Card Creation ---
 
         function createOthersGameCard(game) {
-            const favorites = getFavorites();
-            const isAnyFavorite = game.versions ? favorites.some(favId => game.versions.some(v => v.favoriteId === favId)) : favorites.includes(game.id);
+            const favorites = getFavorites().map(String);
+            const isAnyFavorite = game.versions ? favorites.some(favId => game.versions.some(v => String(v.favoriteId) === favId)) : favorites.includes(String(game.id));
 
             const card = document.createElement("div");
             card.className = 'other-zone-item bg-card-dark rounded-2xl border border-brand-border col-span-full shadow-lg'; 
@@ -791,10 +792,11 @@
             }
             
             let isFavorite;
+            const favs = getFavorites().map(String);
             if (game.versions) {
-                 isFavorite = getFavorites().includes(game.id);
+                 isFavorite = favs.includes(String(game.id));
             } else {
-                isFavorite = getFavorites().includes(game.id);
+                isFavorite = favs.includes(String(game.id));
             }
 
             const card = document.createElement("div");
@@ -945,7 +947,7 @@
         }
 
         function renderFavorites() {
-            const favoriteIds = getFavorites();
+            const favoriteIds = getFavorites().map(String);
             if (favoriteIds.length > 0) {
                 favoritesHeader.style.display = "block";
                 favoritesGameList.style.display = "grid"; 
@@ -953,14 +955,15 @@
 
                 const favoriteGames = [];
                 allGames.forEach(game => {
-                    if (favoriteIds.includes(game.id) && !game.versions) {
-                        if (!favoriteGames.some(g => g.id === game.id)) {
+                    const strId = String(game.id);
+                    if (favoriteIds.includes(strId) && !game.versions) {
+                        if (!favoriteGames.some(g => String(g.id) === strId)) {
                             favoriteGames.push(game);
                         }
                     } else if (game.versions) {
                         game.versions.forEach(version => {
-                            if (favoriteIds.includes(version.favoriteId)) {
-                                if (!favoriteGames.some(g => g.id === version.favoriteId)) {
+                            if (favoriteIds.includes(String(version.favoriteId))) {
+                                if (!favoriteGames.some(g => String(g.id) === String(version.favoriteId))) {
                                     favoriteGames.push({
                                         ...game,
                                         id: version.favoriteId,
@@ -1067,7 +1070,7 @@
                 return;
             }
             
-            const favorites = getFavorites();
+            const favorites = getFavorites().map(String);
             filteredDropdown.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
                 let imgSrc;
@@ -1081,7 +1084,7 @@
                 linkEl.href = '#';
                 linkEl.className = 'search-item flex justify-between items-center';
                 linkEl.dataset.gameId = game.id;
-                let isFavorite = favorites.includes(game.id);
+                let isFavorite = favorites.includes(String(game.id));
 
                 linkEl.innerHTML = `
                     <div class="flex items-center truncate min-w-0">
