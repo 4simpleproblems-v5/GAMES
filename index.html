@@ -45,7 +45,7 @@
                         'lg': '0.5rem',
                         'xl': '0.75rem',
                         '2xl': '1.25rem',
-                        '3xl': '1.5rem', // Added for search bar
+                        '3xl': '1.5rem', 
                     },
                     aspectRatio: {
                         '3/2': '3 / 2',
@@ -183,7 +183,6 @@
             color: #e5e7eb;
             text-decoration: none;
             padding: 10px 15px;
-            /* No borders between items for cleaner look in the new container */
         }
         .search-item:hover { background-color: rgba(255, 255, 255, 0.05); }
 
@@ -305,6 +304,13 @@
             <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
         </div>
 
+        <div id="top20Section" style="display: none;">
+            <h2 id="top20Header" class="text-center text-3xl font-bold mt-12 mb-6 text-white">
+                <strong>Top 20</strong>
+            </h2>
+            <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="top20GameList"></div>
+        </div>
+
         <div id="category-viewer" class="w-full mt-12">
             <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
                 <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
@@ -384,6 +390,13 @@
         import { siteMapping } from "./site-mapping.js";
 
         // --- Configuration & Globals ---
+        
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // TODO: Replace this URL with the actual 'targetUrl' from your 'appscript.js' file.
+        // It likely looks like "https://script.google.com/macros/s/.../exec"
+        const TOP_GAMES_URL = "https://script.google.com/macros/s/AKfycbx1xYwL2QqkOQHyeCWIVSMVLP_XXts5zpb0M-vbvlRl1MpRYYcv4NI-i8OaGc0YP0wpsg/exec?action=getTop10"; 
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
         const GN_COVER_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
         const GN_HTML_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
@@ -409,6 +422,8 @@
 
         const favoritesHeader = document.getElementById("favoritesHeader");
         const favoritesGameList = document.getElementById("favoritesGameList");
+        const top20Section = document.getElementById("top20Section");
+        const top20GameList = document.getElementById("top20GameList");
         const searchInput = document.getElementById("searchInput");
         const searchResults = document.getElementById("searchResults");
         const searchDivider = document.getElementById("searchDivider");
@@ -496,7 +511,7 @@
             }
         }
 
-        // --- Favorites Management ---
+        // --- Favorites Management (Live Updates) ---
         const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
         const saveFavorites = (favs) => localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
         
@@ -506,12 +521,20 @@
             const isFavorited = favorites.includes(strGameId);
 
             if (isFavorited) {
+                // Remove from storage
                 favorites = favorites.filter(id => id !== strGameId);
-                const favCard = document.querySelector(`#favoritesGameList .zone-item[data-game-id='${strGameId}'], #favoritesGameList .other-zone-item[data-game-id='${strGameId}']`);
+                saveFavorites(favorites);
+                
+                // Update buttons immediately (in Top 20, All Games, Search)
+                updateAllFavoriteButtons();
+
+                // Live Update: Find card in favorites section and remove it with animation
+                const favCard = favoritesGameList.querySelector(`.zone-item[data-game-id='${strGameId}'], .other-zone-item[data-game-id='${strGameId}']`);
                 if (favCard) {
                     favCard.classList.add('fade-out');
                     setTimeout(() => {
                         favCard.remove();
+                        // Hide header if list is now empty
                         if (favoritesGameList.children.length === 0) {
                             favoritesHeader.style.display = 'none';
                             favoritesGameList.style.display = 'none';
@@ -519,33 +542,127 @@
                     }, 300); 
                 }
             } else {
+                // Add to storage
                 favorites.push(strGameId);
-                renderFavorites();
-            }
-            
-            saveFavorites(favorites);
+                saveFavorites(favorites);
+                
+                // Update buttons immediately
+                updateAllFavoriteButtons();
 
-            document.querySelectorAll(`.btn-card-action.fav-action`).forEach(btn => {
+                // Live Update: Create card and append to favorites list immediately
+                let gameData = allGames.find(g => String(g.id) === strGameId);
+                
+                // If not found in main list, check versions (for specialized favorites)
+                if (!gameData) {
+                    allGames.some(g => {
+                        if (g.versions) {
+                            const ver = g.versions.find(v => String(v.favoriteId) === strGameId);
+                            if (ver) {
+                                gameData = {
+                                    ...g,
+                                    id: ver.favoriteId,
+                                    name: `${g.name} - ${ver.name}`,
+                                    url: ver.url,
+                                    versions: undefined 
+                                };
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
+                }
+
+                if (gameData) {
+                    // Force display of container
+                    favoritesHeader.style.display = "block";
+                    favoritesGameList.style.display = "grid";
+                    favoritesGameList.classList.add('grid', 'grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-5', 'lg:grid-cols-7', 'gap-4');
+                    
+                    // Create new card and append
+                    const newCard = createGameCard(gameData, true); // forceSmallCard = true for uniformity
+                    favoritesGameList.appendChild(newCard);
+                }
+            }
+        }
+
+        function updateAllFavoriteButtons() {
+            const favorites = getFavorites().map(String);
+            
+            document.querySelectorAll('.btn-card-action.fav-action').forEach(btn => {
                 const card = btn.closest('.zone-item, .other-zone-item, .search-item');
-                if (card && String(card.dataset.gameId) === strGameId) {
-                    btn.classList.toggle('favorited', !isFavorited);
-                    btn.title = !isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
+                if (!card) return;
+                
+                const cardGameId = String(card.dataset.gameId);
+                
+                // Check if this is a versioned button (aggregate check)
+                if (btn.classList.contains('version-favorite-btn')) {
+                    const isAnyVersionFavorited = favorites.some(favId => favId.startsWith(cardGameId + '_'));
+                    btn.classList.toggle('favorited', isAnyVersionFavorited);
+                } else {
+                    // Standard button (direct match)
+                    const isFavorited = favorites.includes(cardGameId);
+                    btn.classList.toggle('favorited', isFavorited);
+                    btn.title = isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
                 }
             });
+        }
 
-            const gameIdParts = strGameId.split('_');
-            const baseGameId = gameIdParts[0];
-            const baseGame = allGames.find(g => String(g.id) === baseGameId);
-            
-            if (baseGame && baseGame.versions) {
-                const isAnyVersionFavorited = favorites.some(favId => favId.startsWith(baseGameId + '_'));
-                const mainCard = document.querySelector(`.other-zone-item[data-game-id='${baseGameId}']`);
-                if (mainCard) {
-                    const favBtn = mainCard.querySelector('.btn-card-action.fav-action');
-                    if (favBtn) {
-                        favBtn.classList.toggle('favorited', isAnyVersionFavorited);
-                    }
+        // --- Top 20 Management ---
+        function normalizeGameName(name) {
+            return name.toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9]/g, "");
+        }
+
+        async function fetchTopGames() {
+            try {
+                if(TOP_GAMES_URL === "YOUR_APPSCRIPT_URL_HERE") {
+                    console.warn("Please update the TOP_GAMES_URL constant in the script with your AppScript URL.");
+                    return;
                 }
+                const response = await fetch(TOP_GAMES_URL);
+                if (!response.ok) throw new Error("Network error:" + response.statusText);
+                const data = await response.json();
+                
+                if (data && data.content) {
+                    const parsedData = JSON.parse(data.content);
+                    renderTopGames(parsedData);
+                }
+            } catch (e) {
+                console.error(`Error while fetching Top 20 games: ${e}`);
+                top20Section.style.display = 'none';
+            }
+        }
+
+        function renderTopGames(topData) {
+            top20GameList.innerHTML = "";
+            let foundCount = 0;
+            const numTopGames = 20;
+            const displayed = new Set();
+            
+            // Only look through Strongdog games for the Top 20 section
+            const strongdogGames = allGames.filter(g => g.category === 'StrongdogXP');
+
+            for (let i = 0; i < topData.length && foundCount < numTopGames; i++) {
+                const row = topData[i];
+                const gameName = row[0]; // Name from sheet
+                const normalizedName = normalizeGameName(gameName);
+
+                // Find matching game in our local data
+                const matchedGame = strongdogGames.find(g => normalizeGameName(g.name) === normalizedName);
+
+                if (matchedGame && !displayed.has(normalizedName)) {
+                    // Create card
+                    const card = createGameCard(matchedGame, true); // force small card
+                    top20GameList.appendChild(card);
+                    displayed.add(normalizedName);
+                    foundCount++;
+                }
+            }
+            
+            // Only show Top 20 if we are currently on Strongdog category
+            if (foundCount > 0 && categories[currentCategoryIndex] === 'StrongdogXP') {
+                top20Section.style.display = 'block';
+            } else {
+                top20Section.style.display = 'none';
             }
         }
 
@@ -1027,6 +1144,13 @@
             renderGamesForCurrentCategory();
             updateArrowVisibility();
             updateURL(categories[currentCategoryIndex]);
+            
+            // Re-check Top 20 visibility
+            if (categories[currentCategoryIndex] === 'StrongdogXP' && top20GameList.children.length > 0) {
+                 top20Section.style.display = 'block';
+            } else {
+                 top20Section.style.display = 'none';
+            }
         }
         
         async function renderGamesForCurrentCategory(searchTerm = '') {
@@ -1200,6 +1324,14 @@
             updateArrowVisibility();
             renderGamesForCurrentCategory();
             renderFavorites();
+            
+            // Initialize Top 20 Logic
+            await fetchTopGames();
+            // Ensure visibility matches initial category
+            if(categories[currentCategoryIndex] !== 'StrongdogXP') {
+                 top20Section.style.display = 'none';
+            }
+
             setupInstructionOverlay();
 
             if (urlGameId) {
