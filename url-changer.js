@@ -10,6 +10,7 @@ const urlChanger = {
     presets: [
         { id: 'hac', name: 'HAC', title: 'Login', favicon: '../favicons/hac.png', category: 'websites' },
         { id: 'gmm', name: 'GMM', title: 'Get More Math!', favicon: '../favicons/gmm.png', category: 'websites' },
+        { id: 'bim', name: 'Big Ideas Math', title: 'Big Ideas Math - Login', favicon: '../favicons/bim.png', category: 'websites' },
         { id: 'kahoot', name: 'Kahoot', title: 'Kahoot! | Learning games | Make learning awesome!', favicon: '../favicons/kahoot.png', category: 'websites' },
         { id: 'g_classroom', name: 'Google Classroom', title: 'Home', favicon: '../favicons/google-classroom.png', category: 'websites' },
         { id: 'g_docs', name: 'Google Docs', title: 'Google Docs', favicon: '../favicons/google-docs.png', category: 'websites' },
@@ -204,4 +205,3 @@ const urlChanger = {
 document.addEventListener('DOMContentLoaded', () => {
     urlChanger.init();
 });
-
