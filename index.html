@@ -280,6 +280,12 @@
         .eagler-dropdown-link:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
 
         #creditsModal { display: none; }
+        
+        /* Modal Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
 
@@ -292,7 +298,7 @@
         
         <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl relative">
             <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
-                <strong>Welcome to the 4SP Game Hub!</strong><br>
+                <strong>Welcome to 4SP Games!</strong><br>
                 This is a collection of games curated for the 4SP community. Use the search bar below to find your favorite.
             </p>
         </div>
@@ -369,18 +375,39 @@
         </div>
     </div>
 
-    <div id="instruction-overlay" class="fixed inset-0 bg-black/70 z-[8000] transition-opacity duration-300 opacity-0" style="display: none;">
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-7xl px-4">
-            <div class="bg-black/95 text-white p-4 sm:p-6 rounded-3xl border border-gray-700 shadow-2xl backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6">
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-xl font-normal mb-1">How to Navigate</h3>
-                    <p class="text-sm text-gray-300 mb-2 font-light">
-                        To explore more games, use the <strong>arrows</strong> next to the category title (currently "<strong>StrongdogXP</strong>") to switch between <strong>StrongdogXP</strong>, <strong>GN-Math</strong>, and the <strong>Others</strong> section featuring personally selected titles.
-                    </p>
-                </div>
-                <div class="flex-shrink-0 w-full md:w-auto">
-                    <input type="text" id="instruction-input" placeholder="Type 'I understand'" class="w-full md:w-auto px-6 py-3 border border-transparent text-base font-normal rounded-xl text-white bg-purple-500/10 ring-1 ring-purple-500/50 focus:ring-purple-500/80 focus:bg-purple-500/20 focus:outline-none placeholder-gray-400 transition-all duration-200">
-                </div>
+    <div id="instruction-overlay" class="fixed inset-0 bg-black/80 z-[8000] transition-opacity duration-300 opacity-0 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-card-dark text-white rounded-3xl border border-gray-700 shadow-2xl backdrop-blur-md w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar">
+                <h3 class="text-2xl font-bold mb-4 text-center">Welcome to 4SP Games</h3>
+                <p class="text-sm text-gray-400 mb-6 text-center">Please read the following information before playing.</p>
+                
+                <ul class="space-y-4 text-gray-300 text-sm sm:text-base leading-relaxed">
+                    <li class="flex items-start">
+                        <i class="fas fa-compass mt-1 mr-3 text-accent-indigo"></i>
+                        <span><strong>Navigation:</strong> Use the arrows next to the category title (currently "<strong>StrongdogXP</strong>") to switch between different game collections like <strong>GN-Math</strong> and <strong>Others</strong>.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-file-signature mt-1 mr-3 text-accent-indigo"></i>
+                        <span><strong>Rebranding:</strong> "4SP Game Hub" is now shortened to "<strong>4SP Games</strong>".</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-bug mt-1 mr-3 text-strongdog-orange"></i>
+                        <span><strong>Stability Disclaimer:</strong> Some games may be unstable, glitchy, or fail to load. This is often due to browser restrictions or the age of the game files.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-user-gear mt-1 mr-3 text-gn-math"></i>
+                        <span><strong>Management:</strong> I do not personally manage or host the files for these game collections. I cannot directly fix broken game files or save data issues.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-server mt-1 mr-3 text-gn-math"></i>
+                        <span><strong>GN-Math & CDN:</strong> The <strong>GN-Math</strong> category is particularly hard to modify because it uses a <em>CDN (Content Delivery Network)</em>. This means the game files are hosted on remote servers around the world to load faster, rather than being stored here. I cannot edit those files.</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="p-6 border-t border-gray-800 bg-black/20 rounded-b-3xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span class="text-xs text-gray-500">Type "I understand" to continue.</span>
+                <input type="text" id="instruction-input" placeholder="Type 'I understand'" class="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-normal rounded-xl text-white bg-purple-500/10 ring-1 ring-purple-500/50 focus:ring-purple-500/80 focus:bg-purple-500/20 focus:outline-none placeholder-gray-400 transition-all duration-200">
             </div>
         </div>
     </div>
@@ -491,7 +518,7 @@
 
         function setupInstructionOverlay() {
             if (localStorage.getItem(INSTRUCTION_KEY) !== 'seen') {
-                instructionOverlay.style.display = 'block';
+                instructionOverlay.style.display = 'flex';
                 document.body.style.overflow = 'hidden'; 
                 setTimeout(() => {
                     instructionOverlay.classList.remove('opacity-0');
@@ -1003,11 +1030,14 @@
 
             if (isURLBasedGame) {
                 zoneFrame.src = gameUrl;
+                // STRICT SECURITY: Explicitly exclude 'allow-top-navigation' to prevent redirects
                 zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
                 zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock');
                 zoneViewer.style.display = "flex";
             } else {
-                zoneFrame.removeAttribute('sandbox'); 
+                // For fetched content (GN-Math etc), we still want to apply the sandbox to prevent redirects from injected scripts
+                // We keep allow-same-origin so resources load, but block top-navigation
+                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
                 zoneFrame.removeAttribute('allow');
                 
                 fetch(`${gameUrl}?t=${Date.now()}`)
@@ -1284,7 +1314,7 @@
                 allGames = [...strongdogGames, ...othersGames];
             }
 
-            allGames = allGames.filter(g => !g.name.toLowerCase().includes('bitlife'));
+            allGames = allGames.filter(g => !g.name.toLowerCase().includes('bitlife', 'soundboard'));
 
             searchableGames = [];
             allGames.forEach(game => {
