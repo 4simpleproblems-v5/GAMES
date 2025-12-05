@@ -1,8 +1,9 @@
 /**
  * panic-key.js
  * This script provides a user-configurable panic key functionality for a website using IndexedDB.
- * When activated, it redirects the user to a pre-configured URL stored locally in the browser.
+ * When activated, it redirects the user to a pre-configured destination.
  * The user can configure up to 3 separate panic keys.
+ * The destination can be an external URL (e.g., https://google.com) or an internal page path (e.g., /dashboard/games.html).
  * The key press must be a single key without any modifiers (Shift, Ctrl, Alt, etc.).
  *
  * This version uses IndexedDB for local storage, ensuring privacy and instantaneous redirection.
@@ -59,7 +60,7 @@ function getSettings(db) {
 
 /**
  * Attaches the 'keydown' event listener to the document with the user's specific settings.
- * @param {Array<object>} settingsArray - An array of the user's panic key settings objects { id, key, url }.
+ * @param {Array<object>} settingsArray - An array of panic key settings objects { id, key, type, value }.
  */
 function addPanicKeyListener(settingsArray) {
     if (!settingsArray || settingsArray.length === 0) {
@@ -70,11 +71,18 @@ function addPanicKeyListener(settingsArray) {
     console.log("Debug: Attaching keydown listener to the document with these settings:", settingsArray);
 
     document.addEventListener('keydown', (event) => {
-        // This check prevents the panic key from firing while a user is typing in a form field.
-        const activeElement = document.activeElement.tagName.toLowerCase();
-        if (['input', 'select', 'textarea'].includes(activeElement)) {
-            return;
+        const activeElement = document.activeElement;
+
+        // --- MODIFICATION START ---
+        // This check prevents the panic key from firing while a user is typing in any form field or the AI chat box.
+        if (activeElement) {
+            // Check if the active element is an input field, a textarea, a select element, or contenteditable.
+            const tagName = activeElement.tagName.toLowerCase();
+            if (['input', 'select', 'textarea'].includes(tagName) || activeElement.isContentEditable) {
+                return;
+            }
         }
+        // --- MODIFICATION END ---
 
         const noModifiersPressed = !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey;
 
@@ -89,7 +97,7 @@ function addPanicKeyListener(settingsArray) {
                 // This prevents the browser from performing the default action for the key press.
                 event.preventDefault();
                 
-                // Navigate to the user's personally chosen panic URL for the matched key.
+                // The 'url' property holds the destination URL.
                 window.location.href = matchedSetting.url;
             }
         }
