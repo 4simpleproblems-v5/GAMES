@@ -365,7 +365,8 @@
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
-        <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
+        <!-- STRICT SECURITY: Added default sandbox here to prevent initial load leaks -->
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups"></iframe>
     </div>
 
     <div id="creditsModal" class="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-lg z-[6000] items-center justify-center p-4" style="display: none;">
@@ -1027,23 +1028,26 @@
             const zoneNameEl = document.getElementById('zoneNameEl');
             
             zoneNameEl.textContent = game.name;
+            
+            // STRICT SECURITY: Reset source and apply sandbox rules BEFORE loading any content
             zoneFrame.src = 'about:blank';
             zoneFrame.dataset.activeUrl = game.url;
+            
+            // Define strict sandbox rules - NO 'allow-top-navigation'
+            const sandboxRules = 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups';
+            zoneFrame.setAttribute('sandbox', sandboxRules);
+            
+            // Define Feature Policy
+            zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock; autoplay; clipboard-write');
             
             const isURLBasedGame = game.category === 'StrongdogXP' || game.category === 'Others'; 
 
             if (isURLBasedGame) {
+                // Now that sandbox is securely applied, we can load the URL
                 zoneFrame.src = gameUrl;
-                // STRICT SECURITY: Explicitly exclude 'allow-top-navigation' to prevent redirects
-                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
-                zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock');
                 zoneViewer.style.display = "flex";
             } else {
-                // For fetched content (GN-Math etc), we still want to apply the sandbox to prevent redirects from injected scripts
-                // We keep allow-same-origin so resources load, but block top-navigation
-                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
-                zoneFrame.removeAttribute('allow');
-                
+                // For fetched content (GN-Math etc), strict sandbox is already applied above
                 fetch(`${gameUrl}?t=${Date.now()}`)
                     .then(response => {
                         if (!response.ok) throw new Error(`HTTP error ${response.status}`);
