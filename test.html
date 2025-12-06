@@ -13,6 +13,10 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../navigation.js"></script>
+    <script src="../url-changer.js"></script>
+    <script src="../firebase-config.js"></script>
+
+
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-1D4F692C1Q"></script>
     <script>
@@ -22,6 +26,8 @@
 
       gtag('config', 'G-1D4F692C1Q');
     </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6659160370587814"
+          crossorigin="anonymous"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -45,7 +51,7 @@
                         'lg': '0.5rem',
                         'xl': '0.75rem',
                         '2xl': '1.25rem',
-                        '3xl': '1.5rem', // Added for search bar
+                        '3xl': '1.5rem', 
                     },
                     aspectRatio: {
                         '3/2': '3 / 2',
@@ -183,7 +189,6 @@
             color: #e5e7eb;
             text-decoration: none;
             padding: 10px 15px;
-            /* No borders between items for cleaner look in the new container */
         }
         .search-item:hover { background-color: rgba(255, 255, 255, 0.05); }
 
@@ -281,6 +286,12 @@
         .eagler-dropdown-link:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
 
         #creditsModal { display: none; }
+        
+        /* Modal Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
 
@@ -293,7 +304,7 @@
         
         <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl relative">
             <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
-                <strong>Welcome to the 4SP Game Hub!</strong><br>
+                <strong>Welcome to 4SP Games!</strong><br>
                 This is a collection of games curated for the 4SP community. Use the search bar below to find your favorite.
             </p>
         </div>
@@ -303,6 +314,13 @@
                 <strong>Favorites</strong>
             </h2>
             <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
+        </div>
+
+        <div id="top20Section" style="display: none;">
+            <h2 id="top20Header" class="text-center text-3xl font-bold mt-12 mb-6 text-white">
+                <strong>Top 20</strong>
+            </h2>
+            <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="top20GameList"></div>
         </div>
 
         <div id="category-viewer" class="w-full mt-12">
@@ -349,7 +367,7 @@
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
-        <iframe id="zoneFrame" title="Game Content" allowfullscreen></iframe>
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"></iframe>
     </div>
 
     <div id="creditsModal" class="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-lg z-[6000] items-center justify-center p-4" style="display: none;">
@@ -363,18 +381,39 @@
         </div>
     </div>
 
-    <div id="instruction-overlay" class="fixed inset-0 bg-black/70 z-[8000] transition-opacity duration-300 opacity-0" style="display: none;">
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-7xl px-4">
-            <div class="bg-black/95 text-white p-4 sm:p-6 rounded-3xl border border-gray-700 shadow-2xl backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6">
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-xl font-normal mb-1">How to Navigate</h3>
-                    <p class="text-sm text-gray-300 mb-2 font-light">
-                        To explore more games, use the <strong>arrows</strong> next to the category title (currently "<strong>GN-Math</strong>") to switch between <strong>StrongdogXP</strong>, <strong>GN-Math</strong>, and the <strong>Others</strong> section featuring personally selected titles.
-                    </p>
-                </div>
-                <div class="flex-shrink-0 w-full md:w-auto">
-                    <input type="text" id="instruction-input" placeholder="Type 'I understand'" class="w-full md:w-auto px-6 py-3 border border-transparent text-base font-normal rounded-xl text-white bg-purple-500/10 ring-1 ring-purple-500/50 focus:ring-purple-500/80 focus:bg-purple-500/20 focus:outline-none placeholder-gray-400 transition-all duration-200">
-                </div>
+    <div id="instruction-overlay" class="fixed inset-0 bg-black/80 z-[8000] transition-opacity duration-300 opacity-0 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-card-dark text-white rounded-3xl border border-gray-700 shadow-2xl backdrop-blur-md w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar">
+                <h3 class="text-2xl font-bold mb-4 text-center">Welcome to 4SP Games</h3>
+                <p class="text-sm text-gray-400 mb-6 text-center">Please read the following information before playing.</p>
+                
+                <ul class="space-y-4 text-gray-300 text-sm sm:text-base leading-relaxed">
+                    <li class="flex items-start">
+                        <i class="fas fa-compass mt-1 mr-3 text-accent-indigo"></i>
+                        <span><strong>Navigation:</strong> Use the arrows next to the category title (currently "<strong>StrongdogXP</strong>") to switch between different game collections like <strong>GN-Math</strong> and <strong>Others</strong>.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-file-signature mt-1 mr-3 text-accent-indigo"></i>
+                        <span><strong>Rebranding:</strong> "4SP Game Hub" is now shortened to "<strong>4SP Games</strong>".</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-bug mt-1 mr-3 text-strongdog-orange"></i>
+                        <span><strong>Stability Disclaimer:</strong> Some games may be unstable, glitchy, or fail to load. This is often due to browser restrictions or the age of the game files.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-user-gear mt-1 mr-3 text-gn-math"></i>
+                        <span><strong>Management:</strong> I do not personally manage or host the files for these game collections. I cannot directly fix broken game files or save data issues.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-server mt-1 mr-3 text-gn-math"></i>
+                        <span><strong>GN-Math & CDN:</strong> The <strong>GN-Math</strong> category is particularly hard to modify because it uses a <em>CDN (Content Delivery Network)</em>. This means the game files are hosted on remote servers around the world to load faster, rather than being stored here. I cannot edit those files.</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="p-6 border-t border-gray-800 bg-black/20 rounded-b-3xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span class="text-xs text-gray-500">Type "I understand" to continue.</span>
+                <input type="text" id="instruction-input" placeholder="Type 'I understand'" class="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-normal rounded-xl text-white bg-purple-500/10 ring-1 ring-purple-500/50 focus:ring-purple-500/80 focus:bg-purple-500/20 focus:outline-none placeholder-gray-400 transition-all duration-200">
             </div>
         </div>
     </div>
@@ -384,6 +423,13 @@
         import { siteMapping } from "./site-mapping.js";
 
         // --- Configuration & Globals ---
+        
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // TODO: Replace this URL with the actual 'targetUrl' from your 'appscript.js' file.
+        // It likely looks like "https://script.google.com/macros/s/.../exec"
+        const TOP_GAMES_URL = "https://script.google.com/macros/s/AKfycbx1xYwL2QqkOQHyeCWIVSMVLP_XXts5zpb0M-vbvlRl1MpRYYcv4NI-i8OaGc0YP0wpsg/exec?action=getTop10"; 
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
         const GN_COVER_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
         const GN_HTML_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
@@ -409,6 +455,8 @@
 
         const favoritesHeader = document.getElementById("favoritesHeader");
         const favoritesGameList = document.getElementById("favoritesGameList");
+        const top20Section = document.getElementById("top20Section");
+        const top20GameList = document.getElementById("top20GameList");
         const searchInput = document.getElementById("searchInput");
         const searchResults = document.getElementById("searchResults");
         const searchDivider = document.getElementById("searchDivider");
@@ -422,7 +470,7 @@
         const creditsBtn = document.getElementById('creditsBtn');
         const closeCreditsBtn = document.getElementById('closeCreditsBtn');
 
-        const INSTRUCTION_KEY = '4sp-games-instruction-seen';
+        const INSTRUCTION_KEY = '4sp-games-instruction-extended-seen';
         const instructionOverlay = document.getElementById('instruction-overlay');
         const instructionInput = document.getElementById('instruction-input');
 
@@ -476,7 +524,7 @@
 
         function setupInstructionOverlay() {
             if (localStorage.getItem(INSTRUCTION_KEY) !== 'seen') {
-                instructionOverlay.style.display = 'block';
+                instructionOverlay.style.display = 'flex';
                 document.body.style.overflow = 'hidden'; 
                 setTimeout(() => {
                     instructionOverlay.classList.remove('opacity-0');
@@ -496,21 +544,30 @@
             }
         }
 
-        // --- Favorites Management ---
+        // --- Favorites Management (Live Updates) ---
         const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
         const saveFavorites = (favs) => localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
         
         function toggleFavorite(gameId) {
-            let favorites = getFavorites();
-            const isFavorited = favorites.includes(gameId);
+            const strGameId = String(gameId);
+            let favorites = getFavorites().map(String);
+            const isFavorited = favorites.includes(strGameId);
 
             if (isFavorited) {
-                favorites = favorites.filter(id => id !== gameId);
-                const favCard = document.querySelector(`#favoritesGameList .zone-item[data-game-id='${gameId}'], #favoritesGameList .other-zone-item[data-game-id='${gameId}']`);
+                // Remove from storage
+                favorites = favorites.filter(id => id !== strGameId);
+                saveFavorites(favorites);
+                
+                // Update buttons immediately (in Top 20, All Games, Search)
+                updateAllFavoriteButtons();
+
+                // Live Update: Find card in favorites section and remove it with animation
+                const favCard = favoritesGameList.querySelector(`.zone-item[data-game-id='${strGameId}'], .other-zone-item[data-game-id='${strGameId}']`);
                 if (favCard) {
                     favCard.classList.add('fade-out');
                     setTimeout(() => {
                         favCard.remove();
+                        // Hide header if list is now empty
                         if (favoritesGameList.children.length === 0) {
                             favoritesHeader.style.display = 'none';
                             favoritesGameList.style.display = 'none';
@@ -518,33 +575,127 @@
                     }, 300); 
                 }
             } else {
-                favorites.push(gameId);
-                renderFavorites();
-            }
-            
-            saveFavorites(favorites);
+                // Add to storage
+                favorites.push(strGameId);
+                saveFavorites(favorites);
+                
+                // Update buttons immediately
+                updateAllFavoriteButtons();
 
-            document.querySelectorAll(`.btn-card-action.fav-action`).forEach(btn => {
+                // Live Update: Create card and append to favorites list immediately
+                let gameData = allGames.find(g => String(g.id) === strGameId);
+                
+                // If not found in main list, check versions (for specialized favorites)
+                if (!gameData) {
+                    allGames.some(g => {
+                        if (g.versions) {
+                            const ver = g.versions.find(v => String(v.favoriteId) === strGameId);
+                            if (ver) {
+                                gameData = {
+                                    ...g,
+                                    id: ver.favoriteId,
+                                    name: `${g.name} - ${ver.name}`,
+                                    url: ver.url,
+                                    versions: undefined 
+                                };
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
+                }
+
+                if (gameData) {
+                    // Force display of container
+                    favoritesHeader.style.display = "block";
+                    favoritesGameList.style.display = "grid";
+                    favoritesGameList.classList.add('grid', 'grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-5', 'lg:grid-cols-7', 'gap-4');
+                    
+                    // Create new card and append
+                    const newCard = createGameCard(gameData, true); // forceSmallCard = true for uniformity
+                    favoritesGameList.appendChild(newCard);
+                }
+            }
+        }
+
+        function updateAllFavoriteButtons() {
+            const favorites = getFavorites().map(String);
+            
+            document.querySelectorAll('.btn-card-action.fav-action').forEach(btn => {
                 const card = btn.closest('.zone-item, .other-zone-item, .search-item');
-                if (card && card.dataset.gameId === gameId) {
-                    btn.classList.toggle('favorited', !isFavorited);
-                    btn.title = !isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
+                if (!card) return;
+                
+                const cardGameId = String(card.dataset.gameId);
+                
+                // Check if this is a versioned button (aggregate check)
+                if (btn.classList.contains('version-favorite-btn')) {
+                    const isAnyVersionFavorited = favorites.some(favId => favId.startsWith(cardGameId + '_'));
+                    btn.classList.toggle('favorited', isAnyVersionFavorited);
+                } else {
+                    // Standard button (direct match)
+                    const isFavorited = favorites.includes(cardGameId);
+                    btn.classList.toggle('favorited', isFavorited);
+                    btn.title = isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
                 }
             });
+        }
 
-            const gameIdParts = gameId.split('_');
-            const baseGameId = gameIdParts[0];
-            const baseGame = allGames.find(g => g.id === baseGameId);
-            
-            if (baseGame && baseGame.versions) {
-                const isAnyVersionFavorited = getFavorites().some(favId => favId.startsWith(baseGameId + '_'));
-                const mainCard = document.querySelector(`.other-zone-item[data-game-id='${baseGameId}']`);
-                if (mainCard) {
-                    const favBtn = mainCard.querySelector('.btn-card-action.fav-action');
-                    if (favBtn) {
-                        favBtn.classList.toggle('favorited', isAnyVersionFavorited);
-                    }
+        // --- Top 20 Management ---
+        function normalizeGameName(name) {
+            return name.toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9]/g, "");
+        }
+
+        async function fetchTopGames() {
+            try {
+                if(TOP_GAMES_URL === "YOUR_APPSCRIPT_URL_HERE") {
+                    console.warn("Please update the TOP_GAMES_URL constant in the script with your AppScript URL.");
+                    return;
                 }
+                const response = await fetch(TOP_GAMES_URL);
+                if (!response.ok) throw new Error("Network error:" + response.statusText);
+                const data = await response.json();
+                
+                if (data && data.content) {
+                    const parsedData = JSON.parse(data.content);
+                    renderTopGames(parsedData);
+                }
+            } catch (e) {
+                console.error(`Error while fetching Top 20 games: ${e}`);
+                top20Section.style.display = 'none';
+            }
+        }
+
+        function renderTopGames(topData) {
+            top20GameList.innerHTML = "";
+            let foundCount = 0;
+            const numTopGames = 20;
+            const displayed = new Set();
+            
+            // Only look through Strongdog games for the Top 20 section
+            const strongdogGames = allGames.filter(g => g.category === 'StrongdogXP');
+
+            for (let i = 0; i < topData.length && foundCount < numTopGames; i++) {
+                const row = topData[i];
+                const gameName = row[0]; // Name from sheet
+                const normalizedName = normalizeGameName(gameName);
+
+                // Find matching game in our local data
+                const matchedGame = strongdogGames.find(g => normalizeGameName(g.name) === normalizedName);
+
+                if (matchedGame && !displayed.has(normalizedName)) {
+                    // Create card
+                    const card = createGameCard(matchedGame, true); // force small card
+                    top20GameList.appendChild(card);
+                    displayed.add(normalizedName);
+                    foundCount++;
+                }
+            }
+            
+            // Only show Top 20 if we are currently on Strongdog category
+            if (foundCount > 0 && categories[currentCategoryIndex] === 'StrongdogXP') {
+                top20Section.style.display = 'block';
+            } else {
+                top20Section.style.display = 'none';
             }
         }
 
@@ -638,11 +789,30 @@
             { id: "other-sm64", name: "Super Mario 64", imgSrc: "./images/sm64.png", description: "The iconic 3D platformer that revolutionized gaming. Run, jump, and triple-jump your way through vast worlds to collect stars and save the princess.", category: "Others", url: "../GAMES/sm64/index.html" }
         ];
 
+        // --- AdSense Integration Helper ---
+        function createAdUnit() {
+            const adContainer = document.createElement("div");
+            // Ensure the ad spans all columns (7 for small card view, 1 for large card view)
+            adContainer.className = 'col-span-full my-8 text-center'; 
+            adContainer.innerHTML = `
+                <ins class="adsbygoogle"
+                      style="display:block"
+                      data-ad-client="ca-pub-6659160370587814"
+                      data-ad-slot="4542253928"
+                      data-ad-format="auto"
+                      data-full-width-responsive="true"></ins>
+                <script>
+                      (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            `;
+            return adContainer;
+        }
+
         // --- Card Creation ---
 
         function createOthersGameCard(game) {
-            const favorites = getFavorites();
-            const isAnyFavorite = game.versions ? favorites.some(favId => game.versions.some(v => v.favoriteId === favId)) : favorites.includes(game.id);
+            const favorites = getFavorites().map(String);
+            const isAnyFavorite = game.versions ? favorites.some(favId => game.versions.some(v => String(v.favoriteId) === favId)) : favorites.includes(String(game.id));
 
             const card = document.createElement("div");
             card.className = 'other-zone-item bg-card-dark rounded-2xl border border-brand-border col-span-full shadow-lg'; 
@@ -791,10 +961,11 @@
             }
             
             let isFavorite;
+            const favs = getFavorites().map(String);
             if (game.versions) {
-                 isFavorite = getFavorites().includes(game.id);
+                 isFavorite = favs.includes(String(game.id));
             } else {
-                isFavorite = getFavorites().includes(game.id);
+                isFavorite = favs.includes(String(game.id));
             }
 
             const card = document.createElement("div");
@@ -806,7 +977,11 @@
                     <div class="aspect-w-3 aspect-h-2">
                         <img data-src="${imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
                     </div>
-                    <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${game.name}">${game.name}</h3>
+                    
+                    <h3 class="absolute top-2 right-2 z-10 max-w-[80%] group-hover:max-w-[calc(100%-1rem)] transition-all duration-700 ease-[cubic-bezier(0.45,0,0.55,1)] bg-black/60 backdrop-blur-md rounded-xl px-3 py-1.5 text-white truncate text-sm font-semibold shadow-lg" title="${game.name}">
+                        ${game.name}
+                    </h3>
+                    
                     <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md rounded-xl px-2 py-1 flex items-center space-x-2 shadow-lg">
                         <button class="btn-card-action play-action" title="Play Game">
                             <i class="fa-solid fa-play transition-colors"></i>
@@ -877,20 +1052,26 @@
             const zoneNameEl = document.getElementById('zoneNameEl');
             
             zoneNameEl.textContent = game.name;
+            
+            // STRICT SECURITY: Reset source and apply sandbox rules BEFORE loading any content
             zoneFrame.src = 'about:blank';
             zoneFrame.dataset.activeUrl = game.url;
+            
+            // Define strict sandbox rules - REMOVED allow-popups and allow-top-navigation
+            const sandboxRules = 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen';
+            zoneFrame.setAttribute('sandbox', sandboxRules);
+            
+            // Define Feature Policy
+            zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock; autoplay; clipboard-write');
             
             const isURLBasedGame = game.category === 'StrongdogXP' || game.category === 'Others'; 
 
             if (isURLBasedGame) {
+                // Now that sandbox is securely applied, we can load the URL
                 zoneFrame.src = gameUrl;
-                zoneFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups');
-                zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock');
                 zoneViewer.style.display = "flex";
             } else {
-                zoneFrame.removeAttribute('sandbox'); 
-                zoneFrame.removeAttribute('allow');
-                
+                // For fetched content (GN-Math etc), strict sandbox is already applied above
                 fetch(`${gameUrl}?t=${Date.now()}`)
                     .then(response => {
                         if (!response.ok) throw new Error(`HTTP error ${response.status}`);
@@ -931,6 +1112,7 @@
             targetElement.innerHTML = '';
             const categoryName = categories[currentCategoryIndex];
             
+            // Set appropriate class name for grid display
             if (categoryName === 'Others' && !forceSmallCard) {
                 targetElement.className = 'games-grid grid grid-cols-1 gap-6 mt-6 transition-opacity duration-300 ease-in-out';
             } else {
@@ -938,14 +1120,26 @@
             }
 
             const fragment = document.createDocumentFragment();
-            gamesToRender.forEach(game => fragment.appendChild(createGameCard(game, forceSmallCard)));
+            const adInsertionInterval = 25; // Insert an ad every 25 games (between 20-30 rows)
+
+            gamesToRender.forEach((game, index) => {
+                // Append the game card
+                fragment.appendChild(createGameCard(game, forceSmallCard));
+                
+                // Check if an ad should be inserted after this card, and it's not the last game
+                if ((index + 1) % adInsertionInterval === 0 && index < gamesToRender.length - 1) {
+                    // Append the AdSense unit
+                    fragment.appendChild(createAdUnit());
+                }
+            });
+            
             targetElement.appendChild(fragment);
             
             observeImages(targetElement);
         }
 
         function renderFavorites() {
-            const favoriteIds = getFavorites();
+            const favoriteIds = getFavorites().map(String);
             if (favoriteIds.length > 0) {
                 favoritesHeader.style.display = "block";
                 favoritesGameList.style.display = "grid"; 
@@ -953,14 +1147,15 @@
 
                 const favoriteGames = [];
                 allGames.forEach(game => {
-                    if (favoriteIds.includes(game.id) && !game.versions) {
-                        if (!favoriteGames.some(g => g.id === game.id)) {
+                    const strId = String(game.id);
+                    if (favoriteIds.includes(strId) && !game.versions) {
+                        if (!favoriteGames.some(g => String(g.id) === strId)) {
                             favoriteGames.push(game);
                         }
                     } else if (game.versions) {
                         game.versions.forEach(version => {
-                            if (favoriteIds.includes(version.favoriteId)) {
-                                if (!favoriteGames.some(g => g.id === version.favoriteId)) {
+                            if (favoriteIds.includes(String(version.favoriteId))) {
+                                if (!favoriteGames.some(g => String(g.id) === String(version.favoriteId))) {
                                     favoriteGames.push({
                                         ...game,
                                         id: version.favoriteId,
@@ -974,9 +1169,10 @@
                     }
                 });
                 favoriteGames.sort((a, b) => a.name.localeCompare(b.name));
-                if(favoritesGameList.childElementCount === 0 || favoriteGames.length > favoritesGameList.childElementCount) {
-                     renderGames(favoriteGames, favoritesGameList, true);
-                }
+                
+                // Always call renderGames to ensure correct ad rendering and card updates
+                renderGames(favoriteGames, favoritesGameList, true);
+                
             } else {
                 favoritesHeader.style.display = "none";
                 favoritesGameList.style.display = "none";
@@ -1024,6 +1220,13 @@
             renderGamesForCurrentCategory();
             updateArrowVisibility();
             updateURL(categories[currentCategoryIndex]);
+            
+            // Re-check Top 20 visibility
+            if (categories[currentCategoryIndex] === 'StrongdogXP' && top20GameList.children.length > 0) {
+                 top20Section.style.display = 'block';
+            } else {
+                 top20Section.style.display = 'none';
+            }
         }
         
         async function renderGamesForCurrentCategory(searchTerm = '') {
@@ -1067,7 +1270,7 @@
                 return;
             }
             
-            const favorites = getFavorites();
+            const favorites = getFavorites().map(String);
             filteredDropdown.forEach(game => {
                 const isStrongdog = game.category === 'StrongdogXP';
                 let imgSrc;
@@ -1081,7 +1284,7 @@
                 linkEl.href = '#';
                 linkEl.className = 'search-item flex justify-between items-center';
                 linkEl.dataset.gameId = game.id;
-                let isFavorite = favorites.includes(game.id);
+                let isFavorite = favorites.includes(String(game.id));
 
                 linkEl.innerHTML = `
                     <div class="flex items-center truncate min-w-0">
@@ -1157,7 +1360,12 @@
                 allGames = [...strongdogGames, ...othersGames];
             }
 
-            allGames = allGames.filter(g => !g.name.toLowerCase().includes('bitlife'));
+            // Updated Blacklist Filtering
+            const blacklistedTerms = ['bitlife', 'soundboard'];
+            allGames = allGames.filter(g => {
+                const lowerName = g.name.toLowerCase();
+                return !blacklistedTerms.some(term => lowerName.includes(term));
+            });
 
             searchableGames = [];
             allGames.forEach(game => {
@@ -1197,6 +1405,14 @@
             updateArrowVisibility();
             renderGamesForCurrentCategory();
             renderFavorites();
+            
+            // Initialize Top 20 Logic
+            await fetchTopGames();
+            // Ensure visibility matches initial category
+            if(categories[currentCategoryIndex] !== 'StrongdogXP') {
+                 top20Section.style.display = 'none';
+            }
+
             setupInstructionOverlay();
 
             if (urlGameId) {
