@@ -71,10 +71,6 @@
             --tab-active-border: #4f46e5;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
             font-family: 'Geist', 'sans-serif';
             font-weight: 300;
@@ -294,23 +290,6 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
-        
-        /* --- ARROW POSITIONING (Close to title) --- */
-        .category-arrow-left {
-            left: 50%;
-            /* Calculated offset from center to place the arrow next to the left edge of the w-64 block */
-            transform: translate(calc(-9.75rem), -50%); 
-        }
-        .category-arrow-right {
-            left: 50%;
-            /* Calculated offset from center to place the arrow next to the right edge of the w-64 block */
-            transform: translate(calc(8rem + 1.75rem), -50%); /* 8rem (w-32) + 1.75rem (margin/padding) */
-        }
-
-        /* --- STICKY BORDER CSS (Bottom White Outline) --- */
-        #category-slider-container.is-sticking {
-            border-bottom: 1px solid #ffffff; 
-        }
     </style>
 </head>
 
@@ -343,15 +322,15 @@
         </div>
 
         <div id="category-viewer" class="w-full mt-12">
-            <div id="category-slider-container" class="sticky top-16 z-40 flex items-center justify-center w-full h-16 bg-black mb-6 transition-all duration-200">
-                <button id="prev-category" class="absolute top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-3 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700 category-arrow-left">
+            <div id="category-slider-container" class="relative flex items-center justify-center max-w-3xl mx-auto h-12">
+                <button id="prev-category" class="absolute left-0 top-[4.5rem] text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="overflow-hidden w-64 text-center">
-                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out items-center h-full">
+                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
                         </div>
                 </div>
-                <button id="next-category" class="absolute top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-3 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700 category-arrow-right">
+                <button id="next-category" class="absolute right-0 top-[4.5rem] text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
@@ -386,7 +365,7 @@
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
-        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"></iframe>
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups"></iframe>
     </div>
 
     <div id="creditsModal" class="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-lg z-[6000] items-center justify-center p-4" style="display: none;">
