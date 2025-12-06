@@ -1,10 +1,10 @@
 export default [
-  { href: './html/Drive Mad 200 Levels/index.html', imgSrc: 'Drive Mad 200 Levels.jpeg', name: 'Drive Mad 200 Levels' , 'page': 5, 'id': 1166 },
+  { href: './html/Drive Mad 200 Levels/index.html', imgSrc: 'Drive Mad 200 Levels.jpeg', name: 'Drive Mad (200 Levels)' , 'page': 5, 'id': 1166 },
   { href: './html/City Car Driving Stunt Master/index.html', imgSrc: 'City Car Driving Stunt Master.jpeg', name: 'City Car Driving Stunt Master' , 'page': 5, 'id': 1165 },
   { href: './html/Last Breath/index.html', imgSrc: 'Last Breath.jpeg', name: 'Last Breath' , 'page': 5, 'id': 1164 },
   { href: './html/Grow a Garden/index.html', imgSrc: 'Grow a Garden.jpeg', name: 'Grow a Garden' , 'page': 5, 'id': 1163 },
   { href: './html/Steal a Brainrot/index.html', imgSrc: 'Steal a Brainrot.jpeg', name: 'Steal a Brainrot' , 'page': 5, 'id': 1162 },
-  { href: './html/clash royale/index.html', imgSrc: 'clash royale.jpeg', name: 'Clash Royale (ripoff)' , 'page': 5, 'id': 1161 },
+  { href: './html/clash royale/index.html', imgSrc: 'clash royale.jpeg', name: 'Clash Royale (Ripoff)' , 'page': 5, 'id': 1161 },
   { href: './html/Solar Smash/index.html', imgSrc: 'Solar Smash.jpeg', name: 'Solar Smash' , 'page': 5, 'id': 1160 },
   { href: './html/crazy-chicken-3d/index.html', imgSrc: 'cc3d.png', name: 'Crazy Chicken 3D' , 'id': 1154 },
   { href: './html/crazy cattle 3d/index.html', imgSrc: 'crazy cattle 3d.png', name: 'Crazy Cattle 3D' , 'page': 4, 'id': 1153 },
