@@ -294,6 +294,23 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        /* --- ARROW POSITIONING (Close to title) --- */
+        .category-arrow-left {
+            left: 50%;
+            /* Calculated offset from center to place the arrow next to the left edge of the w-64 block */
+            transform: translate(calc(-9.75rem), -50%); 
+        }
+        .category-arrow-right {
+            left: 50%;
+            /* Calculated offset from center to place the arrow next to the right edge of the w-64 block */
+            transform: translate(calc(8rem + 1.75rem), -50%); /* 8rem (w-32) + 1.75rem (margin/padding) */
+        }
+
+        /* --- STICKY BORDER CSS (Bottom White Outline) --- */
+        #category-slider-container.is-sticking {
+            border-bottom: 1px solid #ffffff; 
+        }
     </style>
 </head>
 
@@ -326,15 +343,15 @@
         </div>
 
         <div id="category-viewer" class="w-full mt-12">
-            <div id="category-slider-container" class="sticky top-20 z-40 flex items-center justify-center w-full h-16 bg-black/95 backdrop-blur-xl shadow-2xl mb-6 transition-all">
-                <button id="prev-category" class="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-3 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+            <div id="category-slider-container" class="sticky top-16 z-40 flex items-center justify-center w-full h-16 bg-black mb-6 transition-all duration-200">
+                <button id="prev-category" class="absolute top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-3 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700 category-arrow-left">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="overflow-hidden w-64 text-center">
                     <div id="category-slider" class="flex transition-transform duration-500 ease-in-out items-center h-full">
                         </div>
                 </div>
-                <button id="next-category" class="absolute right-4 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-3 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+                <button id="next-category" class="absolute top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-3 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700 category-arrow-right">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
@@ -466,6 +483,7 @@
         const prevCategoryBtn = document.getElementById('prev-category');
         const nextCategoryBtn = document.getElementById('next-category');
         const gamesGridContainer = document.getElementById('games-grid-container');
+        const categorySliderContainer = document.getElementById('category-slider-container');
         
         const creditsModal = document.getElementById('creditsModal');
         const creditsContent = document.getElementById('creditsContent');
@@ -497,6 +515,25 @@
             rootMargin: "300px 0px", 
             threshold: 0.01
         });
+        
+        // --- Sticky Border Observer Logic ---
+        const stickyOffset = 64; // top-16 is 64px (16 * 4)
+
+        const stickyObserver = new IntersectionObserver( 
+            ([entry]) => {
+                // When the element's top edge scrolls past the 64px line, isIntersecting becomes false.
+                // This reliably detects the sticking state for a sticky element with a positive top offset.
+                const isSticking = !entry.isIntersecting;
+                categorySliderContainer.classList.toggle('is-sticking', isSticking);
+            }, 
+            { 
+                // Set rootMargin equal to the negative sticky offset to fire the observer 
+                // exactly when the element becomes sticky.
+                rootMargin: `-${stickyOffset}px 0px 0px 0px`,
+                threshold: 0
+            }
+        );
+
 
         function observeImages(container) {
             const images = container.querySelectorAll('img[data-src]');
@@ -1411,6 +1448,14 @@
                     }, 500);
                 }
             }
+            
+            // Start observing the category container for sticking state
+            stickyObserver.observe(categorySliderContainer);
+            // Apply initial check for sticking state in case of page reload or initial scroll
+            if (window.scrollY > stickyOffset) {
+                 categorySliderContainer.classList.add('is-sticking');
+            }
+
 
             searchInput.placeholder = `Search all games...`;
             searchInput.addEventListener("input", handleSearch);
