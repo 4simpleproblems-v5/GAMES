@@ -365,8 +365,7 @@
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
-        <!-- STRICT SECURITY: Added default sandbox here to prevent initial load leaks -->
-        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups"></iframe>
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"></iframe>
     </div>
 
     <div id="creditsModal" class="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-lg z-[6000] items-center justify-center p-4" style="display: none;">
@@ -957,7 +956,11 @@
                     <div class="aspect-w-3 aspect-h-2">
                         <img data-src="${imgSrc}" alt="${game.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/111111/888888?text=4SP'" class="w-full h-full object-cover">
                     </div>
-                    <h3 class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1 text-white truncate text-sm font-semibold shadow-lg" style="max-width: 75%;" title="${game.name}">${game.name}</h3>
+                    
+                    <h3 class="absolute top-2 right-2 z-10 max-w-[80%] group-hover:max-w-[calc(100%-1rem)] transition-all duration-700 ease-[cubic-bezier(0.45,0,0.55,1)] bg-black/60 backdrop-blur-md rounded-xl px-3 py-1.5 text-white truncate text-sm font-semibold shadow-lg" title="${game.name}">
+                        ${game.name}
+                    </h3>
+                    
                     <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md rounded-xl px-2 py-1 flex items-center space-x-2 shadow-lg">
                         <button class="btn-card-action play-action" title="Play Game">
                             <i class="fa-solid fa-play transition-colors"></i>
@@ -1033,8 +1036,8 @@
             zoneFrame.src = 'about:blank';
             zoneFrame.dataset.activeUrl = game.url;
             
-            // Define strict sandbox rules - NO 'allow-top-navigation'
-            const sandboxRules = 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups';
+            // Define strict sandbox rules - REMOVED allow-popups and allow-top-navigation
+            const sandboxRules = 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen';
             zoneFrame.setAttribute('sandbox', sandboxRules);
             
             // Define Feature Policy
@@ -1322,7 +1325,12 @@
                 allGames = [...strongdogGames, ...othersGames];
             }
 
-            allGames = allGames.filter(g => !g.name.toLowerCase().includes('bitlife', 'soundboard'));
+            // Updated Blacklist Filtering
+            const blacklistedTerms = ['bitlife', 'soundboard'];
+            allGames = allGames.filter(g => {
+                const lowerName = g.name.toLowerCase();
+                return !blacklistedTerms.some(term => lowerName.includes(term));
+            });
 
             searchableGames = [];
             allGames.forEach(game => {
