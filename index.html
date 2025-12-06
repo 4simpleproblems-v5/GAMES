@@ -71,6 +71,10 @@
             --tab-active-border: #4f46e5;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Geist', 'sans-serif';
             font-weight: 300;
@@ -322,15 +326,15 @@
         </div>
 
         <div id="category-viewer" class="w-full mt-12">
-            <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
-                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+            <div id="category-slider-container" class="sticky top-4 z-40 flex items-center justify-center max-w-sm mx-auto h-16 bg-black/80 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl mb-6 transition-all">
+                <button id="prev-category" class="absolute left-1 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-3 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="overflow-hidden w-64 text-center">
-                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
+                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out items-center h-full">
                         </div>
                 </div>
-                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+                <button id="next-category" class="absolute right-1 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-3 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
@@ -784,7 +788,6 @@
             { id: "other-gta", name: "Grand Theft Auto", imgSrc: "./images/gta.png", description: "The original top-down classic. Cause chaos, complete missions, or just go for a drive in three iconic cities.", category: "Others", versions: [ { name: "Carnage3D", url: "../CARNAGE3D/web/carnage3D.html", favoriteId: "other-gta_carnage3d" }, { name: "Grand Theft Auto (JS-DOS)", url: "../GTA-JSDOS/index.html", favoriteId: "other-gta_jsdos" } ] },
             { id: "other-simcity", name: "Sim City", imgSrc: "./images/simcity2000.png", description: "The original city-building classics. Design, build, and manage the city of your dreams in either the original Sim City or the detailed Sim City 2000.", category: "Others", versions: [ { name: "Sim City", url: "../SIM-CITY/index.html", favoriteId: "other-simcity_1" }, { name: "Sim City 2000", url: "../SIM-CITY-2/index.html", favoriteId: "other-simcity_2000" } ] },
             { id: "other-doom", name: "DOOM", imgSrc: "./images/doom.png", description: "The legendary first-person shooter that pioneered the genre, focusing on blasting through hordes of demons in a timeless, adrenaline-fueled classic.", category: "Others", url: "../DOOM/index.html" },
-            { id: "other-sm64", name: "Super Mario 64", imgSrc: "./images/sm64.png", description: "The iconic 3D platformer that revolutionized gaming. Run, jump, and triple-jump your way through vast worlds to collect stars and save the princess.", category: "Others", url: "../GAMES/sm64/index.html" }
         ];
 
         // --- Card Creation ---
@@ -1186,6 +1189,9 @@
             updateArrowVisibility();
             updateURL(categories[currentCategoryIndex]);
             
+            // Scroll to top smoothly when switching
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
             // Re-check Top 20 visibility
             if (categories[currentCategoryIndex] === 'StrongdogXP' && top20GameList.children.length > 0) {
                  top20Section.style.display = 'block';
