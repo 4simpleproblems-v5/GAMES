@@ -322,15 +322,15 @@
         </div>
 
         <div id="category-viewer" class="w-full mt-12">
-            <div id="category-slider-container" class="relative flex items-center justify-center max-w-3xl mx-auto h-12">
-                <button id="prev-category" class="absolute left-0 top-[4.5rem] text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+            <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
+                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="overflow-hidden w-64 text-center">
                     <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
                         </div>
                 </div>
-                <button id="next-category" class="absolute right-0 top-[4.5rem] text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
@@ -365,7 +365,7 @@
                 <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
              </div>
         </div>
-        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen allow-popups"></iframe>
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"></iframe>
     </div>
 
     <div id="creditsModal" class="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-lg z-[6000] items-center justify-center p-4" style="display: none;">
@@ -462,7 +462,6 @@
         const prevCategoryBtn = document.getElementById('prev-category');
         const nextCategoryBtn = document.getElementById('next-category');
         const gamesGridContainer = document.getElementById('games-grid-container');
-        const categorySliderContainer = document.getElementById('category-slider-container');
         
         const creditsModal = document.getElementById('creditsModal');
         const creditsContent = document.getElementById('creditsContent');
@@ -494,25 +493,6 @@
             rootMargin: "300px 0px", 
             threshold: 0.01
         });
-        
-        // --- Sticky Border Observer Logic ---
-        const stickyOffset = 64; // top-16 is 64px (16 * 4)
-
-        const stickyObserver = new IntersectionObserver( 
-            ([entry]) => {
-                // When the element's top edge scrolls past the 64px line, isIntersecting becomes false.
-                // This reliably detects the sticking state for a sticky element with a positive top offset.
-                const isSticking = !entry.isIntersecting;
-                categorySliderContainer.classList.toggle('is-sticking', isSticking);
-            }, 
-            { 
-                // Set rootMargin equal to the negative sticky offset to fire the observer 
-                // exactly when the element becomes sticky.
-                rootMargin: `-${stickyOffset}px 0px 0px 0px`,
-                threshold: 0
-            }
-        );
-
 
         function observeImages(container) {
             const images = container.querySelectorAll('img[data-src]');
@@ -1206,9 +1186,6 @@
             updateArrowVisibility();
             updateURL(categories[currentCategoryIndex]);
             
-            // Scroll to top smoothly when switching
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
             // Re-check Top 20 visibility
             if (categories[currentCategoryIndex] === 'StrongdogXP' && top20GameList.children.length > 0) {
                  top20Section.style.display = 'block';
@@ -1427,14 +1404,6 @@
                     }, 500);
                 }
             }
-            
-            // Start observing the category container for sticking state
-            stickyObserver.observe(categorySliderContainer);
-            // Apply initial check for sticking state in case of page reload or initial scroll
-            if (window.scrollY > stickyOffset) {
-                 categorySliderContainer.classList.add('is-sticking');
-            }
-
 
             searchInput.placeholder = `Search all games...`;
             searchInput.addEventListener("input", handleSearch);
