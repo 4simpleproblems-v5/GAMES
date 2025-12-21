@@ -797,17 +797,77 @@
         function openZone(game) {
             if (!game || !game.url) return;
             updateURL(categories[currentCategoryIndex], game.id || null);
+            
             const zoneViewer = document.getElementById('zoneViewer');
             const zoneFrame = document.getElementById('zoneFrame');
-            document.getElementById('zoneNameEl').textContent = game.name;
-            zoneFrame.src = game.url;
-            zoneViewer.style.display = "flex";
+            const zoneNameEl = document.getElementById('zoneNameEl');
+            const downloadBtn = document.getElementById('downloadBtnZone');
+            
+            // Setup Download Button (Specific to Eaglercraft)
+            if (game.baseGameId === 'other-eaglercraft' || game.id === 'other-eaglercraft') {
+                downloadBtn.href = game.url;
+                downloadBtn.download = game.name.replace(/ /g, '_') + '.html';
+                downloadBtn.removeAttribute('target');
+                downloadBtn.classList.remove('hidden');
+            } else {
+                downloadBtn.classList.add('hidden');
+                downloadBtn.href = '#';
+                downloadBtn.removeAttribute('download');
+            }
+
+            zoneNameEl.textContent = game.name;
+            
+            // RESET FRAME BEFORE LOAD
+            zoneFrame.src = 'about:blank';
+            
+            // SECURITY: Set sandbox permissions
+            const sandboxRules = 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen';
+            zoneFrame.setAttribute('sandbox', sandboxRules);
+            zoneFrame.setAttribute('allow', 'fullscreen; pointer-lock; autoplay; clipboard-write');
+
+            const isURLBasedGame = game.category === 'StrongdogXP' || game.category === 'Others';
+
+            if (isURLBasedGame) {
+                // Load URL directly for standard games
+                zoneFrame.src = game.url;
+                zoneViewer.style.display = "flex";
+            } else {
+                // FETCH AND WRITE CONTENT (Fix for GN-Math / Code display issue)
+                // This prevents the browser from just displaying the source code if the CDN sends text/plain
+                fetch(`${game.url}?t=${Date.now()}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                        return response.text();
+                    })
+                    .then(html => {
+                        const doc = zoneFrame.contentWindow.document;
+                        doc.open();
+                        doc.write(html);
+                        doc.close();
+                        zoneViewer.style.display = "flex";
+                    })
+                    .catch(error => {
+                        console.error(`Failed to load game "${game.name}": ${error.message}`);
+                        // Fallback: try direct load if fetch fails
+                        zoneFrame.src = game.url;
+                        zoneViewer.style.display = "flex";
+                    });
+            }
         }
 
         function closeZoneViewer() {
             updateURL(categories[currentCategoryIndex]);
-            document.getElementById('zoneViewer').style.display = "none";
-            document.getElementById('zoneFrame').src = 'about:blank';
+            const downloadBtn = document.getElementById('downloadBtnZone');
+            downloadBtn.classList.add('hidden');
+            downloadBtn.href = '#';
+            downloadBtn.removeAttribute('download');
+            downloadBtn.removeAttribute('target');
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
+            zoneViewer.style.display = "none";
+            if (zoneFrame) {
+                zoneFrame.src = 'about:blank';
+            }
         }
 
         // --- Render Lists ---
@@ -1002,6 +1062,19 @@
             prevCategoryBtn.addEventListener('click', () => switchCategory(currentCategoryIndex - 1));
             nextCategoryBtn.addEventListener('click', () => switchCategory(currentCategoryIndex + 1));
             document.getElementById('closeBtnZone').addEventListener('click', closeZoneViewer);
+
+            // --- FULLSCREEN BUTTON LISTENER ---
+            document.getElementById('fullscreenBtnZone').addEventListener('click', () => {
+                const zoneFrame = document.getElementById('zoneFrame');
+                if (zoneFrame && zoneFrame.requestFullscreen) {
+                    zoneFrame.requestFullscreen();
+                } else if (zoneFrame && zoneFrame.webkitRequestFullscreen) {
+                    zoneFrame.webkitRequestFullscreen();
+                } else if (zoneFrame && zoneFrame.msRequestFullscreen) {
+                    zoneFrame.msRequestFullscreen();
+                }
+            });
+
             creditsBtn.addEventListener('click', () => { creditsModal.style.display = 'flex'; creditsContent.innerHTML = categories.map(cat => CREDITS_DATA[cat] ? `<div class="p-4 border border-brand-border rounded-lg"><h4 class="font-bold mb-1">${cat}</h4><p class="text-sm text-gray-400">${CREDITS_DATA[cat].credit}</p></div>` : '').join(''); });
             closeCreditsBtn.addEventListener('click', () => creditsModal.style.display = 'none');
         }
