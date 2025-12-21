@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <title>4SP - GAMES</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico" id="faviconLink" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../url-changer.js"></script>
+    <script src="../analytics.js"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1D4F692C1Q"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-1D4F692C1Q');
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-black': '#040404',
+                        'card-dark': '#111111',
+                        'accent-indigo': '#4f46e5',
+                        'brand-border': '#252525',
+                        'strongdog-orange': '#FFA500',
+                        'gn-math': '#FB2651',
+                        'gameboy': '#9A2257', 
+                        'other-grey': '#AAAAAA', 
+                    },
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'md': '0.375rem',
+                        'lg': '0.5rem',
+                        'xl': '0.75rem',
+                        '2xl': '1.25rem',
+                        '3xl': '1.5rem', 
+                    },
+                    aspectRatio: {
+                        '3/2': '3 / 2',
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Base styles */
+        :root {
+            --menu-bg: #000000;
+            --menu-border: #333;
+            --menu-text: #d1d5db;
+            --tab-hover-text: #ffffff;
+            --tab-active-bg: rgba(79, 70, 229, 0.1);
+            --tab-active-text: #4f46e5;
+            --tab-active-border: #4f46e5;
+        }
+
+        body {
+            font-family: 'Geist', 'sans-serif';
+            font-weight: 300;
+            background-color: #040404;
+            padding-bottom: 100px;
+        }
+        
+        h1, h2, h3, .font-bold, .font-semibold, strong {
+            font-weight: 400 !important;
+        }
+
+        /* --- Toolbar Button Style (Global) --- */
+        .btn-toolbar-style {
+            background: var(--menu-bg);
+            border: 1px solid var(--menu-border);
+            border-radius: 0.75rem; 
+            color: var(--menu-text);
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+        .btn-toolbar-style:hover {
+            background-color: var(--menu-bg);
+            border-color: #fff;
+            color: var(--tab-hover-text);
+        }
+
+        /* --- Card Action Buttons --- */
+        .btn-card-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.5rem;
+            background-color: transparent;
+            border: 1px solid transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .btn-card-action:hover {
+            background-color: var(--tab-active-bg);
+            color: var(--tab-active-text);
+            border-color: var(--tab-active-border);
+        }
+        
+        /* Favorite Button Logic */
+        .btn-card-action.fav-action .fa-solid-star { display: none; }
+        .btn-card-action.fav-action .fa-regular-star { display: inline-block; }
+        
+        .btn-card-action.fav-action.favorited .fa-solid-star { display: inline-block; color: #facc15; }
+        .btn-card-action.fav-action.favorited .fa-regular-star { display: none; }
+        
+        .btn-card-action.fav-action:not(.favorited):hover .fa-regular-star { color: var(--tab-active-text); }
+        
+        /* Card Hover Effects */
+        .zone-item {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            will-change: transform;
+        }
+        .zone-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
+        }
+        
+        .other-zone-item {
+            min-height: 250px;
+            transition: box-shadow 0.2s ease-in-out;
+            position: relative; 
+            z-index: 1; 
+        }
+        .other-zone-item:hover {
+            box-shadow: 0 8px 25px rgba(170, 170, 170, 0.2);
+            z-index: 10; 
+        }
+        .other-zone-item .image-overlay {
+            background: linear-gradient(90deg, rgba(7,7,7,0.85) 0%, rgba(7,7,7,0) 40%, rgba(7,7,7,0) 60%, rgba(7,7,7,0.85) 100%);
+            border-radius: 1.25rem; 
+        }
+        .other-zone-item:hover .image-overlay {
+            background: linear-gradient(90deg, rgba(7,7,7,0.7) 0%, rgba(7,7,7,0) 50%, rgba(7,7,7,0) 50%, rgba(7,7,7,0.7) 100%);
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+        .fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+            pointer-events: none;
+        }
+
+        /* Search Bar & Results */
+        .search-results-container {
+            max-height: 300px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #333 transparent;
+        }
+        .search-item {
+            display: flex;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: #e5e7eb;
+            text-decoration: none;
+            padding: 10px 15px;
+        }
+        .search-item:hover { background-color: rgba(255, 255, 255, 0.05); }
+
+        @media (max-width: 768px) {
+            #bottom-fixed-bar {
+                left: 10px !important; right: 10px !important;
+                bottom: 10px !important; width: auto !important;
+            }
+        }
+
+        /* Polyfill for aspect-ratio */
+        .aspect-w-3 { position: relative; padding-bottom: 66.666667%; }
+        .aspect-h-2 { }
+        .aspect-w-3 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
+        
+        /* --- Game Viewer Modal --- */
+        #zoneViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 5000; flex-direction: column; }
+        #zoneViewer .zone-header {
+            background-color: #111111;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #252525;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        #zoneViewer .zone-header .zone-title h2 {
+            margin: 0;
+            font-size: 1.3em;
+            color: #ffffff;
+            font-family: 'Geist', sans-serif;
+        }
+        #zoneViewer .zone-header .zone-controls { display: flex; align-items: center; }
+        #zoneViewer .zone-header .zone-controls button,
+        #zoneViewer .zone-header .zone-controls a {
+            margin-left: 8px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease-in-out;
+            text-decoration: none;
+        }
+        #zoneViewer .zone-header .zone-controls button:hover,
+        #zoneViewer .zone-header .zone-controls a:hover { background-color: rgba(255, 255, 255, 0.2); }
+        #zoneViewer iframe { flex-grow: 1; border: none; background-color: #000; }
+        .hidden { display: none !important; }
+
+        /* --- Dropdown (Modified to popup ABOVE) --- */
+        .eagler-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 120%; /* Pops up above the button */
+            right: 0;
+            margin-bottom: 5px;
+            background-color: rgba(20, 20, 20, 0.98);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            z-index: 1000;
+            min-width: 200px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            transform-origin: bottom right;
+        }
+        .eagler-dropdown.show { display: block; animation: fadeInUp 0.15s ease-out; }
+        
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(10px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+
+        .eagler-dropdown-link {
+            display: block;
+            padding: 0.6rem 0.8rem;
+            color: #d1d5db;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            font-weight: 400;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+        .eagler-dropdown-link:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
+
+        #creditsModal { display: none; }
+        
+        /* Modal Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+
+<body class="bg-deep-black text-white min-h-screen">
+
+    <main class="mx-auto my-5 w-full max-w-screen-2xl px-4 relative">
+        <button id="creditsBtn" class="absolute top-0 right-4 z-20 btn-toolbar-style">
+            <i class="fa-solid fa-users mr-2"></i>Credits
+        </button>
+        
+        <div class="mx-auto my-8 p-4 sm:p-6 w-full max-w-3xl relative">
+            <p class="bg-card-dark text-white p-5 rounded-xl shadow-lg border border-brand-border text-sm sm:text-base text-center">
+                <strong>Welcome to 4SP Games!</strong><br>
+                This is a collection of games curated for the 4SP community. Use the search bar below to find your favorite.
+            </p>
+        </div>
+        
+        <div id="favoritesSection">
+            <h2 id="favoritesHeader" class="text-center text-3xl font-bold mt-12 mb-6 text-white" style="display: none;">
+                <strong>Favorites</strong>
+            </h2>
+            <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="favoritesGameList" style="display: none;"></div>
+        </div>
+
+        <div id="top20Section" style="display: none;">
+            <h2 id="top20Header" class="text-center text-3xl font-bold mt-12 mb-6 text-white">
+                <strong>Top 20</strong>
+            </h2>
+            <div class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4" id="top20GameList"></div>
+        </div>
+
+        <div id="category-viewer" class="w-full mt-12">
+            <div id="category-slider-container" class="relative flex items-center justify-center max-w-sm mx-auto h-12">
+                <button id="prev-category" class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="overflow-hidden w-64 text-center">
+                    <div id="category-slider" class="flex transition-transform duration-500 ease-in-out">
+                        </div>
+                </div>
+                <button id="next-category" class="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-gray-500 hover:text-white transition-all p-2 z-10 disabled:opacity-30 disabled:text-gray-700 disabled:hover:text-gray-700">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <div id="games-grid-container" class="games-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6 transition-opacity duration-300 ease-in-out">
+                </div>
+        </div>
+    </main>
+
+    <div id="bottom-fixed-bar" class="fixed bottom-4 right-4 bg-black/80 backdrop-blur-xl rounded-3xl border border-brand-border shadow-2xl shadow-black/50 w-full max-w-md z-50 transition-all duration-300 flex flex-col">
+        <div id="searchResults" class="search-results-container w-full" style="display: none;">
+            </div>
+        
+        <div id="searchDivider" class="w-full h-[1px] bg-white/10" style="display: none;"></div>
+
+        <div class="flex items-center w-full p-1">
+            <div class="pl-4 pr-2 text-gray-400">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <input type="text" id="searchInput" placeholder="Search for games…" autocomplete="off" class="w-full py-3 pr-4 bg-transparent text-white placeholder-gray-500 focus:outline-none focus:ring-0 text-base" />
+        </div>
+    </div>
+    
+    <div id="zoneViewer" aria-modal="true" role="dialog">
+        <div class="zone-header">
+             <div class="zone-title">
+                <h2 id="zoneNameEl">Game Title</h2>
+             </div>
+             <div class="zone-controls">
+                <button id="fullscreenBtnZone" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                <a id="downloadBtnZone" title="Download" class="hidden" href="#"><i class="fas fa-download"></i></a>
+                <button id="closeBtnZone" title="Close"><i class="fas fa-times"></i></button>
+             </div>
+        </div>
+        <iframe id="zoneFrame" title="Game Content" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"></iframe>
+    </div>
+
+    <div id="creditsModal" class="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-lg z-[6000] items-center justify-center p-4" style="display: none;">
+        <div class="bg-card-dark rounded-xl border border-brand-border shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center p-4 border-b border-brand-border sticky top-0 bg-card-dark z-10">
+                <h3 class="text-xl font-bold">Project Credits</h3>
+                <button id="closeCreditsBtn" class="text-white hover:text-gray-400 p-2"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="creditsContent" class="p-6 space-y-6">
+                </div>
+        </div>
+    </div>
+
+    <div id="instruction-overlay" class="fixed inset-0 bg-black/80 z-[8000] transition-opacity duration-300 opacity-0 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-card-dark text-white rounded-3xl border border-gray-700 shadow-2xl backdrop-blur-md w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar">
+                <h3 class="text-2xl font-bold mb-4 text-center">Welcome to 4SP Games</h3>
+                <p class="text-sm text-gray-400 mb-6 text-center">Please read the following information before playing.</p>
+                
+                <ul class="space-y-4 text-gray-300 text-sm sm:text-base leading-relaxed">
+                    <li class="flex items-start">
+                        <i class="fas fa-compass mt-1 mr-3 text-accent-indigo"></i>
+                        <span><strong>Navigation:</strong> Use the arrows next to the category title (currently "<strong>StrongdogXP</strong>") to switch between different game collections like <strong>GN-Math</strong> and <strong>Others</strong>.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-file-signature mt-1 mr-3 text-accent-indigo"></i>
+                        <span><strong>Rebranding:</strong> "4SP Game Hub" is now shortened to "<strong>4SP Games</strong>".</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-bug mt-1 mr-3 text-strongdog-orange"></i>
+                        <span><strong>Stability Disclaimer:</strong> Some games may be unstable, glitchy, or fail to load. This is often due to browser restrictions or the age of the game files.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-user-gear mt-1 mr-3 text-gn-math"></i>
+                        <span><strong>Management:</strong> I do not personally manage or host the files for these game collections. I cannot directly fix broken game files or save data issues.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-server mt-1 mr-3 text-gn-math"></i>
+                        <span><strong>GN-Math & CDN:</strong> The <strong>GN-Math</strong> category is particularly hard to modify because it uses a <em>CDN (Content Delivery Network)</em>. This means the game files are hosted on remote servers around the world to load faster, rather than being stored here. I cannot edit those files.</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="p-6 border-t border-gray-800 bg-black/20 rounded-b-3xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span class="text-xs text-gray-500">Type "I understand" to continue.</span>
+                <input type="text" id="instruction-input" placeholder="Type 'I understand'" class="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-normal rounded-xl text-white bg-purple-500/10 ring-1 ring-purple-500/50 focus:ring-purple-500/80 focus:bg-purple-500/20 focus:outline-none placeholder-gray-400 transition-all duration-200">
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import games from "./cards-data.js";
+        import { siteMapping } from "./site-mapping.js";
+
+        // --- Configuration & Globals ---
+        
+        const TOP_GAMES_URL = "https://script.google.com/macros/s/AKfycbx1xYwL2QqkOQHyeCWIVSMVLP_XXts5zpb0M-vbvlRl1MpRYYcv4NI-i8OaGc0YP0wpsg/exec?action=getTop10"; 
+
+        const GN_ZONES_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
+        const GN_COVER_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
+        const GN_HTML_URL_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
+        const FAVORITES_KEY = 'gameHubFavorites_v3';
+
+        let allGames = [];
+        let searchableGames = [];
+        let categories = [];
+        let currentCategoryIndex = 0;
+        const categoryColors = {
+            'StrongdogXP': 'text-strongdog-orange',
+            'GN-Math': 'text-gn-math',
+            'Gameboy Games': 'text-gameboy',
+            'Others': 'text-other-grey', 
+        };
+        
+        const CREDITS_DATA = {
+            'StrongdogXP': { credit: "Core game collection provided by Josh P.", githubUrl: "https://github.com/jman1593/" },
+            'GN-Math': { credit: "Primary game source and infrastructure provided by the GN-Math Community.", githubUrl: "https://github.com/gn-math/" },
+            'Gameboy Games': { credit: "Emulator and ROM files from various public sources." },
+            'Others': { credit: "Various community developers and open-source projects (e.g., DOOM, Eaglercraft, Carnage3D, JS-DOS)." }
+        };
+
+        const favoritesHeader = document.getElementById("favoritesHeader");
+        const favoritesGameList = document.getElementById("favoritesGameList");
+        const top20Section = document.getElementById("top20Section");
+        const top20GameList = document.getElementById("top20GameList");
+        const searchInput = document.getElementById("searchInput");
+        const searchResults = document.getElementById("searchResults");
+        const searchDivider = document.getElementById("searchDivider");
+        const categorySlider = document.getElementById('category-slider');
+        const prevCategoryBtn = document.getElementById('prev-category');
+        const nextCategoryBtn = document.getElementById('next-category');
+        const gamesGridContainer = document.getElementById('games-grid-container');
+        
+        const creditsModal = document.getElementById('creditsModal');
+        const creditsContent = document.getElementById('creditsContent');
+        const creditsBtn = document.getElementById('creditsBtn');
+        const closeCreditsBtn = document.getElementById('closeCreditsBtn');
+
+        const INSTRUCTION_KEY = '4sp-games-instruction-extended-seen';
+        const instructionOverlay = document.getElementById('instruction-overlay');
+        const instructionInput = document.getElementById('instruction-input');
+
+        // --- Intersection Observer for Image Virtualization ---
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                const img = entry.target;
+                if (entry.isIntersecting) {
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                    }
+                } else {
+                    if(img.src && !img.src.includes('placehold.co') && !img.dataset.src) {
+                         img.dataset.src = img.src;
+                    }
+                    if(img.dataset.src) {
+                        img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+                    }
+                }
+            });
+        }, {
+            rootMargin: "300px 0px", 
+            threshold: 0.01
+        });
+
+        function observeImages(container) {
+            const images = container.querySelectorAll('img[data-src]');
+            images.forEach(img => imageObserver.observe(img));
+        }
+
+        // --- URL Management ---
+        function updateURL(category, gameId = null) {
+            let hash = `#${encodeURIComponent(category.replace(/\s+/g, '-'))}`;
+            if (gameId) hash += `?id=${gameId}`;
+            history.replaceState(null, null, hash);
+        }
+
+        function parseURL() {
+            const hash = window.location.hash.substring(1);
+            if (!hash) return { category: null, gameId: null };
+            const parts = hash.split('?');
+            let rawCategory = parts[0];
+            let category = decodeURIComponent(rawCategory).replace(/-/g, ' '); 
+            let gameId = null;
+            if (parts[1]) {
+                const params = new URLSearchParams(parts[1]);
+                gameId = params.get('id');
+            }
+            return { category: rawCategory, gameId };
+        }
+
+        function setupInstructionOverlay() {
+            if (localStorage.getItem(INSTRUCTION_KEY) !== 'seen') {
+                instructionOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; 
+                setTimeout(() => {
+                    instructionOverlay.classList.remove('opacity-0');
+                    instructionOverlay.classList.add('opacity-100');
+                }, 10);
+                instructionInput.addEventListener('input', (e) => {
+                    if (e.target.value.trim().toLowerCase() === 'i understand') {
+                        instructionOverlay.classList.remove('opacity-100');
+                        instructionOverlay.classList.add('opacity-0');
+                        setTimeout(() => {
+                            instructionOverlay.style.display = 'none';
+                            document.body.style.overflow = '';
+                            localStorage.setItem(INSTRUCTION_KEY, 'seen');
+                        }, 300);
+                    }
+                });
+            }
+        }
+
+        // --- Favorites Management (Live Updates) ---
+        const getFavorites = () => JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+        const saveFavorites = (favs) => localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+        
+        function toggleFavorite(gameId) {
+            const strGameId = String(gameId);
+            let favorites = getFavorites().map(String);
+            const isFavorited = favorites.includes(strGameId);
+
+            if (isFavorited) {
+                favorites = favorites.filter(id => id !== strGameId);
+                saveFavorites(favorites);
+                updateAllFavoriteButtons();
+                const favCard = favoritesGameList.querySelector(`.zone-item[data-game-id='${strGameId}'], .other-zone-item[data-game-id='${strGameId}']`);
+                if (favCard) {
+                    favCard.classList.add('fade-out');
+                    setTimeout(() => {
+                        favCard.remove();
+                        if (favoritesGameList.children.length === 0) {
+                            favoritesHeader.style.display = 'none';
+                            favoritesGameList.style.display = 'none';
+                        }
+                    }, 300); 
+                }
+            } else {
+                favorites.push(strGameId);
+                saveFavorites(favorites);
+                updateAllFavoriteButtons();
+                let gameData = allGames.find(g => String(g.id) === strGameId);
+                if (!gameData) {
+                    allGames.some(g => {
+                        if (g.versions) {
+                            const ver = g.versions.find(v => String(v.favoriteId) === strGameId);
+                            if (ver) {
+                                gameData = { ...g, id: ver.favoriteId, name: `${g.name} - ${ver.name}`, url: ver.url, versions: undefined };
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
+                }
+                if (gameData) {
+                    favoritesHeader.style.display = "block";
+                    favoritesGameList.style.display = "grid";
+                    favoritesGameList.classList.add('grid', 'grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-5', 'lg:grid-cols-7', 'gap-4');
+                    const newCard = createGameCard(gameData, true);
+                    favoritesGameList.appendChild(newCard);
+                }
+            }
+        }
+
+        function updateAllFavoriteButtons() {
+            const favorites = getFavorites().map(String);
+            document.querySelectorAll('.btn-card-action.fav-action').forEach(btn => {
+                const card = btn.closest('.zone-item, .other-zone-item, .search-item');
+                if (!card) return;
+                const cardGameId = String(card.dataset.gameId);
+                if (btn.classList.contains('version-favorite-btn')) {
+                    const isAnyVersionFavorited = favorites.some(favId => favId.startsWith(cardGameId + '_'));
+                    btn.classList.toggle('favorited', isAnyVersionFavorited);
+                } else {
+                    const isFavorited = favorites.includes(cardGameId);
+                    btn.classList.toggle('favorited', isFavorited);
+                    btn.title = isFavorited ? 'Remove from Favorites' : 'Add to Favorites';
+                }
+            });
+        }
+
+        // --- Top 20 Management ---
+        function normalizeGameName(name) {
+            return name.toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9]/g, "");
+        }
+
+        async function fetchTopGames() {
+            try {
+                const response = await fetch(TOP_GAMES_URL);
+                if (!response.ok) throw new Error("Network error:" + response.statusText);
+                const data = await response.json();
+                if (data && data.content) {
+                    const parsedData = JSON.parse(data.content);
+                    renderTopGames(parsedData);
+                }
+            } catch (e) {
+                console.error(`Error while fetching Top 20 games: ${e}`);
+                top20Section.style.display = 'none';
+            }
+        }
+
+        function renderTopGames(topData) {
+            top20GameList.innerHTML = "";
+            let foundCount = 0;
+            const displayed = new Set();
+            const strongdogGames = allGames.filter(g => g.category === 'StrongdogXP');
+
+            for (let i = 0; i < topData.length && foundCount < 20; i++) {
+                const gameName = topData[i][0];
+                const normalizedName = normalizeGameName(gameName);
+                const matchedGame = strongdogGames.find(g => normalizeGameName(g.name) === normalizedName);
+                if (matchedGame && !displayed.has(normalizedName)) {
+                    const card = createGameCard(matchedGame, true);
+                    top20GameList.appendChild(card);
+                    displayed.add(normalizedName);
+                    foundCount++;
+                }
+            }
+            if (foundCount > 0 && categories[currentCategoryIndex] === 'StrongdogXP') {
+                top20Section.style.display = 'block';
+            } else {
+                top20Section.style.display = 'none';
+            }
+        }
+
+        // --- URL Helpers (Strongdog) ---
+        function getAdjustedUrls(imgSrc, page) {
+            if (page && page > 1) return { adjustedImgSrc: `../strongdog${page}/img/${imgSrc}` };
+            return { adjustedImgSrc: `./img/${imgSrc}` };
+        }
+        function sd_getBaseURLForPage(page) {
+            const currentHost = window.location.host;
+            const currentPath = window.location.pathname;
+            if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
+                return page > 1 ? `/strongdog${page}/` : "/STRONGDOG/";
+            }
+            return page > 1 ? `../strongdog${page}/` : "./";
+        }
+        async function sd_getEmbedPath(adjustedHref, originalHref, page) {
+            let cleanHref = adjustedHref.replace(/index\.html$/, "").replace(/base\.html$/, "").replace(/\.html$/, "");
+            if (!cleanHref.endsWith("/")) cleanHref += "/";
+            const pathsToTry = [cleanHref + "game/index.html", cleanHref + "game/base.html", cleanHref + "gamereal/index.html", cleanHref + "gamereal/base.html", cleanHref + "index.html", cleanHref + "base.html", ];
+            try {
+                const response = await fetch(adjustedHref);
+                if (response.ok) {
+                    const text = await response.text();
+                    const match = text.match(/embedGame\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/);
+                    if (match) {
+                        const resolvedPath = new URL(match[2], adjustedHref).href;
+                        if (await sd_fileExists(resolvedPath)) return resolvedPath;
+                    }
+                }
+            } catch (error) {}
+            for (const path of pathsToTry) {
+                if (await sd_fileExists(path)) return path;
+            }
+            return adjustedHref;
+        }
+        async function sd_fileExists(url) {
+            try { const response = await fetch(url, { method: "HEAD" }); return response.ok; } catch { return false; }
+        }
+
+        // --- Game Data (Others) ---
+        const othersGames = [
+            { id: "other-eaglercraft", name: "Eaglercraft", imgSrc: "./images/eaglercraft.png", description: "The classic survival and building game.", category: "Others", versions: [ { name: "Release 1.12.2", url: "../EAGLERCRAFT/eaglercraft-1.12.2.html", favoriteId: "other-eaglercraft_1.12.2" }, { name: "Release 1.12.2 WASM", url: "../EAGLERCRAFT/eaglercraft-1.12.2-wasm.html", favoriteId: "other-eaglercraft_wasm", wasm: true } ] },
+            { id: "other-gta", name: "Grand Theft Auto", imgSrc: "./images/gta.png", description: "Original top-down classic.", category: "Others", versions: [ { name: "Carnage3D", url: "../CARNAGE3D/web/carnage3D.html", favoriteId: "other-gta_carnage3d" }, { name: "Grand Theft Auto (JS-DOS)", url: "../GTA-JSDOS/index.html", favoriteId: "other-gta_jsdos" } ] },
+            { id: "other-simcity", name: "Sim City", imgSrc: "./images/simcity2000.png", description: "City-building classics.", category: "Others", versions: [ { name: "Sim City", url: "../SIM-CITY/index.html", favoriteId: "other-simcity_1" }, { name: "Sim City 2000", url: "../SIM-CITY-2/index.html", favoriteId: "other-simcity_2000" } ] },
+            { id: "other-doom", name: "DOOM", imgSrc: "./images/doom.png", description: "The legendary FPS.", category: "Others", url: "../DOOM/index.html" },
+            { id: "other-sm64", name: "Super Mario 64", imgSrc: "./images/sm64.png", description: "Iconic 3D platformer.", category: "Others", url: "../GAMES/sm64/index.html" }
+        ];
+
+        // --- Card Creation ---
+
+        function createOthersGameCard(game) {
+            const favorites = getFavorites().map(String);
+            const isAnyFavorite = game.versions ? favorites.some(favId => game.versions.some(v => String(v.favoriteId) === favId)) : favorites.includes(String(game.id));
+            const card = document.createElement("div");
+            card.className = 'other-zone-item bg-card-dark rounded-2xl border border-brand-border col-span-full shadow-lg'; 
+            card.dataset.gameId = game.id;
+
+            let gameButtonsHtml = '';
+            let favoriteButtonHtml = '';
+            
+            if (game.versions && game.versions.length > 0) {
+                const availableVersions = game.versions; 
+                if (availableVersions.length === 1) {
+                    gameButtonsHtml = `<button class="btn-card-action play-action" data-url="${availableVersions[0].url}" data-version-name="${availableVersions[0].name}" title="Play Game"><i class="fa-solid fa-play transition-colors"></i></button>`;
+                } else {
+                    gameButtonsHtml = `<div class="relative"><button class="btn-card-action version-btn" title="Select Version"><i class="fa-solid fa-chevron-up transition-colors"></i></button><div class="eagler-dropdown">${availableVersions.map(v => `<a href="#" class="eagler-dropdown-link" data-url="${v.url}" data-version-name="${v.name}">${v.name}</a>`).join('')}</div></div>`;
+                }
+                favoriteButtonHtml = `<div class="relative"><button class="btn-card-action fav-action version-favorite-btn ${isAnyFavorite ? 'favorited' : ''}" title="Favorite a version"><i class="fa-solid fa-star fa-solid-star transition-colors"></i><i class="fa-regular fa-star fa-regular-star transition-colors"></i></button><div class="eagler-dropdown">${game.versions.map(v => `<a href="#" class="eagler-dropdown-link favorite-link" data-favorite-id="${v.favoriteId}">${v.name}</a>`).join('')}</div></div>`;
+            } else {
+                gameButtonsHtml = `<button class="btn-card-action play-action" data-url="${game.url}" title="Play Game"><i class="fa-solid fa-play transition-colors"></i></button>`;
+                favoriteButtonHtml = `<button class="btn-card-action fav-action ${isAnyFavorite ? 'favorited' : ''}" title="${isAnyFavorite ? 'Remove from Favorites' : 'Add to Favorites'}"><i class="fa-solid fa-star fa-solid-star transition-colors"></i><i class="fa-regular fa-star fa-regular-star transition-colors"></i></button>`;
+            }
+
+            card.innerHTML = `
+                <div class="relative w-full h-full cursor-pointer group" style="min-height: 250px;">
+                    <img data-src="${game.imgSrc}" alt="${game.name}" loading="lazy" decoding="async" class="w-full h-full object-cover absolute inset-0 rounded-2xl">
+                    <div class="image-overlay absolute inset-0 transition-colors duration-200"></div>
+                    <div class="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between rounded-2xl">
+                        <div class="flex items-start justify-between w-full">
+                            <h3 class="text-4xl font-bold text-white truncate drop-shadow-lg" style="max-width: 80%;" title="${game.name}">${game.name}</h3>
+                            <div class="flex items-center space-x-3 bg-black/80 backdrop-blur-md rounded-xl px-2 py-1">
+                                ${gameButtonsHtml}
+                                ${favoriteButtonHtml}
+                            </div>
+                        </div>
+                        <p class="text-lg text-white font-medium drop-shadow-lg" style="max-width: 50%;">${game.description}</p>
+                    </div>
+                </div>
+            `;
+            
+            if (!game.versions) { card.querySelector('.group').addEventListener('click', () => openZone(game)); }
+            card.querySelectorAll('.play-action').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openZone({ ...game, name: btn.dataset.versionName ? `${game.name} - ${btn.dataset.versionName}` : game.name, url: btn.dataset.url }); }));
+            
+            const versionBtn = card.querySelector('.version-btn');
+            if (versionBtn) { versionBtn.addEventListener('click', (e) => { e.stopPropagation(); document.querySelectorAll('.eagler-dropdown.show').forEach(d => d.classList.remove('show')); versionBtn.nextElementSibling.classList.toggle('show'); }); }
+            
+            card.querySelectorAll('.eagler-dropdown-link:not(.favorite-link)').forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openZone({ ...game, name: link.dataset.versionName ? `${game.name} - ${link.dataset.versionName}` : game.name, url: link.dataset.url }); link.closest('.eagler-dropdown').classList.remove('show'); }));
+
+            const favBtn = card.querySelector('.btn-card-action.fav-action');
+            if (favBtn.classList.contains('version-favorite-btn')) {
+                favBtn.addEventListener('click', (e) => { e.stopPropagation(); document.querySelectorAll('.eagler-dropdown.show').forEach(d => d.classList.remove('show')); favBtn.nextElementSibling.classList.toggle('show'); });
+                card.querySelectorAll('.favorite-link').forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(link.dataset.favoriteId); link.closest('.eagler-dropdown').classList.remove('show'); }));
+            } else {
+                favBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(game.id); });
+            }
+            imageObserver.observe(card.querySelector('img'));
+            return card;
+        }
+
+        function createGameCard(game, forceSmallCard = false) {
+            if (game.category === 'Others' && !forceSmallCard) return createOthersGameCard(game);
+            const isStrongdog = game.category === 'StrongdogXP';
+            let imgSrc = isStrongdog ? getAdjustedUrls(game.imgSrc, game.page).adjustedImgSrc : game.imgSrc;
+            const isFavorite = getFavorites().map(String).includes(String(game.id));
+
+            const card = document.createElement("div");
+            card.className = 'zone-item bg-card-dark rounded-2xl border border-brand-border overflow-hidden';
+            card.dataset.gameId = game.id;
+            card.innerHTML = `
+                <div class="relative w-full cursor-pointer group">
+                    <div class="aspect-w-3 aspect-h-2"><img data-src="${imgSrc}" alt="${game.name}" class="w-full h-full object-cover"></div>
+                    <h3 class="absolute top-2 right-2 z-10 max-w-[80%] bg-black/60 backdrop-blur-md rounded-xl px-3 py-1.5 text-white truncate text-sm font-semibold shadow-lg" title="${game.name}">${game.name}</h3>
+                    <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md rounded-xl px-2 py-1 flex items-center space-x-2 shadow-lg">
+                        <button class="btn-card-action play-action" title="Play Game"><i class="fa-solid fa-play transition-colors"></i></button>
+                        <button class="btn-card-action fav-action ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}"><i class="fa-solid fa-star fa-solid-star transition-colors"></i><i class="fa-regular fa-star fa-regular-star transition-colors"></i></button>
+                    </div>
+                </div>
+            `;
+            
+            const handlePlay = async (e) => {
+                e.stopPropagation();
+                if (isStrongdog) {
+                    const baseURL = sd_getBaseURLForPage(game.page);
+                    let adjustedHref = baseURL.endsWith("/") ? baseURL + game.href.replace(/^\.\//, "") : baseURL + "/" + game.href.replace(/^\.\//, "");
+                    const embedPath = await sd_getEmbedPath(adjustedHref, game.href, game.page);
+                    openZone({ name: game.name, url: embedPath, category: game.category, id: game.id });
+                } else {
+                    openZone(game);
+                }
+            };
+
+            card.querySelector('.group').addEventListener('click', handlePlay);
+            card.querySelector('.play-action').addEventListener('click', handlePlay);
+            card.querySelector('.fav-action').addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(game.id); });
+            imageObserver.observe(card.querySelector('img'));
+            return card;
+        }
+
+        // --- Game Viewer Logic ---
+        function openZone(game) {
+            if (!game || !game.url) return;
+            updateURL(categories[currentCategoryIndex], game.id || null);
+            const zoneViewer = document.getElementById('zoneViewer');
+            const zoneFrame = document.getElementById('zoneFrame');
+            document.getElementById('zoneNameEl').textContent = game.name;
+            zoneFrame.src = game.url;
+            zoneViewer.style.display = "flex";
+        }
+
+        function closeZoneViewer() {
+            updateURL(categories[currentCategoryIndex]);
+            document.getElementById('zoneViewer').style.display = "none";
+            document.getElementById('zoneFrame').src = 'about:blank';
+        }
+
+        // --- Render Lists ---
+        function renderGames(gamesToRender, targetElement, forceSmallCard = false) {
+            targetElement.innerHTML = '';
+            targetElement.className = (categories[currentCategoryIndex] === 'Others' && !forceSmallCard) ? 'grid grid-cols-1 gap-6 mt-6' : 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4 mt-6';
+            gamesToRender.forEach(game => targetElement.appendChild(createGameCard(game, forceSmallCard)));
+            observeImages(targetElement);
+        }
+
+        function renderFavorites() {
+            const favoriteIds = getFavorites().map(String);
+            if (favoriteIds.length > 0) {
+                favoritesHeader.style.display = "block";
+                favoritesGameList.style.display = "grid"; 
+                const favoriteGames = [];
+                allGames.forEach(game => {
+                    if (favoriteIds.includes(String(game.id)) && !game.versions) { favoriteGames.push(game); }
+                    else if (game.versions) { game.versions.forEach(v => { if (favoriteIds.includes(String(v.favoriteId))) favoriteGames.push({ ...game, id: v.favoriteId, name: `${game.name} - ${v.name}`, url: v.url, versions: undefined }); }); }
+                });
+                renderGames(favoriteGames.sort((a, b) => a.name.localeCompare(b.name)), favoritesGameList, true);
+            } else {
+                favoritesHeader.style.display = "none";
+                favoritesGameList.style.display = "none";
+            }
+        }
+
+        // --- Category Nav ---
+        function updateArrowVisibility() {
+            prevCategoryBtn.disabled = currentCategoryIndex === 0;
+            nextCategoryBtn.disabled = currentCategoryIndex === categories.length - 1;
+        }
+
+        function switchCategory(newIndex) {
+            currentCategoryIndex = newIndex;
+            categorySlider.style.transform = `translateX(-${currentCategoryIndex * (100 / categories.length)}%)`;
+            renderGamesForCurrentCategory();
+            updateArrowVisibility();
+            updateURL(categories[currentCategoryIndex]);
+            top20Section.style.display = (categories[currentCategoryIndex] === 'StrongdogXP') ? 'block' : 'none';
+        }
+        
+        async function renderGamesForCurrentCategory() {
+            const categoryName = categories[currentCategoryIndex];
+            gamesGridContainer.classList.add('opacity-0');
+            await new Promise(r => setTimeout(r, 150));
+            renderGames(allGames.filter(g => g.category === categoryName), gamesGridContainer, false);
+            gamesGridContainer.classList.remove('opacity-0');
+        }
+
+        // --- Init ---
+        async function initializeApp() {
+            const strongdogGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
+            try {
+                const res = await fetch(GN_ZONES_URL);
+                const gnMathRaw = await res.json();
+                const gnMathGames = gnMathRaw.map(g => ({ id: `gn-${g.id}`, name: g.name, imgSrc: g.cover.replace("{COVER_URL}", GN_COVER_URL_BASE), category: 'GN-Math', url: g.url.replace("{HTML_URL}", GN_HTML_URL_BASE) }));
+                allGames = [...strongdogGames, ...gnMathGames, ...othersGames];
+            } catch (error) { allGames = [...strongdogGames, ...othersGames]; }
+
+            allGames = allGames.filter(g => !['bitlife', 'soundboard'].some(term => g.name.toLowerCase().includes(term)));
+            categories = ['StrongdogXP', 'GN-Math', 'Gameboy Games', 'Others'].filter(cat => allGames.some(g => g.category === cat));
+
+            const { category: urlCat } = parseURL();
+            if (urlCat) currentCategoryIndex = Math.max(0, categories.findIndex(c => c.replace(/\s+/g, '-').toLowerCase() === urlCat.toLowerCase()));
+
+            categorySlider.style.width = `${categories.length * 100}%`;
+            categorySlider.innerHTML = categories.map(cat => `<div class="w-64 flex-shrink-0"><h2 class="text-3xl font-bold ${categoryColors[cat] || 'text-white'}"><strong>${cat}</strong></h2></div>`).join('');
+
+            switchCategory(currentCategoryIndex);
+            renderFavorites();
+            await fetchTopGames();
+            setupInstructionOverlay();
+
+            prevCategoryBtn.addEventListener('click', () => switchCategory(currentCategoryIndex - 1));
+            nextCategoryBtn.addEventListener('click', () => switchCategory(currentCategoryIndex + 1));
+            document.getElementById('closeBtnZone').addEventListener('click', closeZoneViewer);
+            creditsBtn.addEventListener('click', () => { creditsModal.style.display = 'flex'; creditsContent.innerHTML = categories.map(cat => CREDITS_DATA[cat] ? `<div class="p-4 border border-brand-border rounded-lg"><h4 class="font-bold mb-1">${cat}</h4><p class="text-sm text-gray-400">${CREDITS_DATA[cat].credit}</p></div>` : '').join(''); });
+            closeCreditsBtn.addEventListener('click', () => creditsModal.style.display = 'none');
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
