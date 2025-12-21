@@ -686,11 +686,11 @@
 
         // --- Game Data (Others) ---
         const othersGames = [
-            { id: "other-eaglercraft", name: "Eaglercraft", imgSrc: "./images/eaglercraft.png", description: "The classic survival and building game.", category: "Others", versions: [ { name: "Release 1.12.2", url: "../EAGLERCRAFT/eaglercraft-1.12.2.html", favoriteId: "other-eaglercraft_1.12.2" }, { name: "Release 1.12.2 WASM", url: "../EAGLERCRAFT/eaglercraft-1.12.2-wasm.html", favoriteId: "other-eaglercraft_wasm", wasm: true } ] },
-            { id: "other-gta", name: "Grand Theft Auto", imgSrc: "./images/gta.png", description: "Original top-down classic.", category: "Others", versions: [ { name: "Carnage3D", url: "../CARNAGE3D/web/carnage3D.html", favoriteId: "other-gta_carnage3d" }, { name: "Grand Theft Auto (JS-DOS)", url: "../GTA-JSDOS/index.html", favoriteId: "other-gta_jsdos" } ] },
-            { id: "other-simcity", name: "Sim City", imgSrc: "./images/simcity2000.png", description: "City-building classics.", category: "Others", versions: [ { name: "Sim City", url: "../SIM-CITY/index.html", favoriteId: "other-simcity_1" }, { name: "Sim City 2000", url: "../SIM-CITY-2/index.html", favoriteId: "other-simcity_2000" } ] },
-            { id: "other-doom", name: "DOOM", imgSrc: "./images/doom.png", description: "The legendary FPS.", category: "Others", url: "../DOOM/index.html" },
-            { id: "other-sm64", name: "Super Mario 64", imgSrc: "./images/sm64.png", description: "Iconic 3D platformer.", category: "Others", url: "../GAMES/sm64/index.html" }
+            { id: "other-eaglercraft", name: "Eaglercraft", imgSrc: "./images/eaglercraft.png", description: "The classic survival and building game with authentic block-based physics and multiplayer support, accessible directly in the browser.", category: "Others", versions: [ { name: "Release 1.12.2", url: "../EAGLERCRAFT/eaglercraft-1.12.2.html", favoriteId: "other-eaglercraft_1.12.2" }, { name: "Release 1.12.2 WASM", url: "../EAGLERCRAFT/eaglercraft-1.12.2-wasm.html", favoriteId: "other-eaglercraft_wasm", wasm: true } ] },
+            { id: "other-gta", name: "Grand Theft Auto", imgSrc: "./images/gta.png", description: "The original top-down classic. Cause chaos, complete missions, or just go for a drive in three iconic cities.", category: "Others", versions: [ { name: "Carnage3D", url: "../CARNAGE3D/web/carnage3D.html", favoriteId: "other-gta_carnage3d" }, { name: "Grand Theft Auto (JS-DOS)", url: "../GTA-JSDOS/index.html", favoriteId: "other-gta_jsdos" } ] },
+            { id: "other-simcity", name: "Sim City", imgSrc: "./images/simcity2000.png", description: "The original city-building classics. Design, build, and manage the city of your dreams in either the original Sim City or the detailed Sim City 2000.", category: "Others", versions: [ { name: "Sim City", url: "../SIM-CITY/index.html", favoriteId: "other-simcity_1" }, { name: "Sim City 2000", url: "../SIM-CITY-2/index.html", favoriteId: "other-simcity_2000" } ] },
+            { id: "other-doom", name: "DOOM", imgSrc: "./images/doom.png", description: "The legendary first-person shooter that pioneered the genre, focusing on blasting through hordes of demons in a timeless, adrenaline-fueled classic.", category: "Others", url: "../DOOM/index.html" },
+            { id: "other-sm64", name: "Super Mario 64", imgSrc: "./images/sm64.png", description: "The iconic 3D platformer that revolutionized gaming. Run, jump, and triple-jump your way through vast worlds to collect stars and save the princess.", category: "Others", url: "../GAMES/sm64/index.html" }
         ];
 
         // --- Card Creation ---
@@ -858,6 +858,87 @@
             gamesGridContainer.classList.remove('opacity-0');
         }
 
+        // --- Search ---
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        const handleSearch = debounce(() => {
+            const text = searchInput.value.toLowerCase().trim();
+            const filteredDropdown = text ? searchableGames.filter(g => g.name.toLowerCase().includes(text)).slice(0, 5) : [];
+            
+            searchResults.innerHTML = "";
+            
+            if (filteredDropdown.length === 0 || !text) {
+                searchResults.style.display = "none";
+                searchDivider.style.display = "none";
+                return;
+            }
+            
+            const favorites = getFavorites().map(String);
+            filteredDropdown.forEach(game => {
+                const isStrongdog = game.category === 'StrongdogXP';
+                let imgSrc;
+                if (isStrongdog) {
+                    const { adjustedImgSrc } = getAdjustedUrls(game.imgSrc, game.page);
+                    imgSrc = adjustedImgSrc;
+                } else {
+                    imgSrc = game.imgSrc;
+                }
+                const linkEl = document.createElement("a");
+                linkEl.href = '#';
+                linkEl.className = 'search-item flex justify-between items-center';
+                linkEl.dataset.gameId = game.id;
+                let isFavorite = favorites.includes(String(game.id));
+
+                linkEl.innerHTML = `
+                    <div class="flex items-center truncate min-w-0">
+                        <img src="${imgSrc}" alt="${game.name}" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                        <span class="ml-3 font-medium truncate text-gray-200" title="${game.name}">${game.name}</span>
+                    </div>
+                    <div class="flex items-center flex-shrink-0">
+                        <div class="bg-black/80 backdrop-blur-md rounded-xl px-2 py-1 flex items-center space-x-2">
+                            <button class="btn-card-action play-action" title="Play Game">
+                                <i class="fa-solid fa-play transition-colors"></i>
+                            </button>
+                            <button class="btn-card-action fav-action ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                                <i class="fa-solid fa-star fa-solid-star transition-colors"></i>
+                                <i class="fa-regular fa-star fa-regular-star transition-colors"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                const favBtn = linkEl.querySelector('.fav-action');
+                favBtn.addEventListener('click', (e) => {
+                    e.preventDefault(); e.stopPropagation(); 
+                    toggleFavorite(game.id);
+                });
+
+                linkEl.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    if (isStrongdog) {
+                        const baseURL = sd_getBaseURLForPage(game.page);
+                        let adjustedHref = baseURL.endsWith("/") ? baseURL + game.href.replace(/^\.\//, "") : baseURL + "/" + game.href.replace(/^\.\//, "");
+                        const embedPath = await sd_getEmbedPath(adjustedHref, game.href, game.page);
+                        const strongdogGameData = { name: game.name, url: embedPath, category: game.category, id: game.id };
+                        openZone(strongdogGameData);
+                    } else {
+                        openZone(game);
+                    }
+                    searchResults.style.display = "none";
+                    searchDivider.style.display = "none";
+                });
+                searchResults.appendChild(linkEl);
+            });
+            searchResults.style.display = "block";
+            searchDivider.style.display = "block";
+        }, 250);
+
         // --- Init ---
         async function initializeApp() {
             const strongdogGames = games.map(g => ({ ...g, category: 'StrongdogXP' }));
@@ -869,6 +950,26 @@
             } catch (error) { allGames = [...strongdogGames, ...othersGames]; }
 
             allGames = allGames.filter(g => !['bitlife', 'soundboard'].some(term => g.name.toLowerCase().includes(term)));
+            
+            searchableGames = [];
+            allGames.forEach(game => {
+                if (game.versions && game.versions.length > 0) {
+                    game.versions.forEach(version => {
+                        searchableGames.push({
+                            ...game,
+                            id: version.favoriteId,
+                            name: `${game.name} - ${version.name}`,
+                            url: version.url,
+                            wasm: version.wasm,
+                            versions: undefined,
+                            baseGameId: game.id
+                        });
+                    });
+                } else {
+                    searchableGames.push(game);
+                }
+            });
+
             categories = ['StrongdogXP', 'GN-Math', 'Gameboy Games', 'Others'].filter(cat => allGames.some(g => g.category === cat));
 
             const { category: urlCat } = parseURL();
@@ -881,6 +982,22 @@
             renderFavorites();
             await fetchTopGames();
             setupInstructionOverlay();
+            
+            searchInput.placeholder = `Search all games...`;
+            searchInput.addEventListener("input", handleSearch);
+            searchInput.addEventListener("focus", handleSearch);
+
+            document.addEventListener("click", ev => {
+                if (!document.getElementById('bottom-fixed-bar').contains(ev.target)) {
+                    searchResults.style.display = "none";
+                    searchDivider.style.display = "none";
+                }
+                if (!ev.target.closest('.version-btn') && !ev.target.closest('.version-favorite-btn') && !ev.target.closest('.eagler-dropdown')) {
+                    document.querySelectorAll('.eagler-dropdown.show').forEach(d => {
+                        d.classList.remove('show');
+                    });
+                }
+            });
 
             prevCategoryBtn.addEventListener('click', () => switchCategory(currentCategoryIndex - 1));
             nextCategoryBtn.addEventListener('click', () => switchCategory(currentCategoryIndex + 1));
