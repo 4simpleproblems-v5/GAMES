@@ -711,6 +711,7 @@
             const currentPath = window.location.pathname;
             if (currentHost === "forsimpleproblems.github.io" && currentPath.toLowerCase().startsWith('/strongdog/')) {
                 if (!page || page === 1) return "/STRONGDOG/";
+                if (page === 0) return "/strongdog0/";
                 if (page === 2) return "/strongdog2/";
                 if (page === 3) return "/strongdog3/";
                 if (page === 4) return "/strongdog4/";
@@ -718,13 +719,13 @@
                 return "/STRONGDOG/";
             }
             const explicitMappings = {
-                "jman1593.github.io": { 2: "./strongdog2/" },
-                "v5-4simpleproblems.github.io": { 2: "../strongdog2/", 3: "../strongdog3/", 4: "../strongdog4/", 5: "../strongdog5/" }
+                "v5-4simpleproblems.github.io": { 0: "../strongdog0/", 2: "../strongdog2/", 3: "../strongdog3/", 4: "../strongdog4/", 5: "../strongdog5/" }
             };
             if (explicitMappings[currentHost] && explicitMappings[currentHost][page]) return explicitMappings[currentHost][page];
             if (!page || page === 1) return "./";
             const arr = siteMapping[currentHost];
             if (typeof siteMapping === 'undefined' || !siteMapping[currentHost]) {
+                if (page === 0) return "../strongdog0/";
                 if (page === 2) return "../strongdog2/";
                 if (page === 3) return "../strongdog3/";
                 if (page === 4) return "../strongdog4/";
@@ -739,6 +740,7 @@
                 if (path.startsWith('../')) return path.replace('../', './');
                 return path;
             }
+            if (page === 0) return "../strongdog0/";
             if (page === 2) return "../strongdog2/";
             if (page === 3) return "../strongdog3/";
             if (page === 4) return "../strongdog4/";
